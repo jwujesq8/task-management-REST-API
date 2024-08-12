@@ -51,7 +51,7 @@ public class AuthService {
                 final User user = userService.getUserByLogin(login)
                         .orElseThrow(() -> new AuthException("User not found"));
 
-                String newAccessToken = jwtProvider.generateRefreshToken(user);
+                String newAccessToken = jwtProvider.generateAccessToken(user);
                 return new JwtResponse(newAccessToken, null);
             }
 
