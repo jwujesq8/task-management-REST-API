@@ -1,6 +1,12 @@
 package com.test.api.config;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.context.ApplicationContext;
@@ -9,6 +15,18 @@ import org.springframework.context.ConfigurableApplicationContext;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.annotation.PreDestroy;
+
+@Configuration
+@ConfigurationProperties(prefix = "test-app")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+class ShutdownTimeProperty {
+
+    private String shutdownTime;
+
+}
 
 @Component
 public class ShutdownScheduler {

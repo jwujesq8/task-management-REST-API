@@ -27,6 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     void deleteListOfUsersById(Long startId, Long endId);
 
     List<User> findByGender(Optional<Gender> gender);
+    Optional<User> findByLogin(String login);
 
     boolean existsByLoginAndPasswordIgnoreCase(String login, String password);
 

@@ -2,6 +2,7 @@ package com.test.api.service;
 
 import com.test.api.repository.UserRepository;
 import com.test.api.user.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
 
     @Autowired
@@ -102,5 +104,10 @@ public class UserServiceImpl implements UserService{
         else{
             return  "Id list of undeleted users:" + undeletedUsers;
         }
+    }
+
+    @Override
+    public Optional<User> getUserByLogin(String login) {
+        return userRepository.findByLogin(login);
     }
 }

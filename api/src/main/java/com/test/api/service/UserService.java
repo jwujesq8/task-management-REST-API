@@ -20,4 +20,6 @@ public interface UserService {
     Optional<User> getUserById(Long id);
 
     String deleteListOfUsersById(Long startId, Long endId);
+
+    Optional<User> getUserByLogin(String login);
 }
