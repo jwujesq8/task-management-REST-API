@@ -230,4 +230,5 @@ README.html
 .idea
 .exercism
 
+src/main/resources/application.properties
 application.properties

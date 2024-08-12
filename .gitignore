@@ -196,4 +196,5 @@ README.html
 .idea
 .exercism
 
+api/src/main/resources/application.properties
 application.properties
