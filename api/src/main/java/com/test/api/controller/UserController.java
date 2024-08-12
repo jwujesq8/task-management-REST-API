@@ -34,7 +34,7 @@ public class UserController {
 
 
     @GetMapping("/all")
-    //@PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public List<User> getAllUsers(){
 
         // TODO add webSocket message

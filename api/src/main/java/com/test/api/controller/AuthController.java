@@ -5,13 +5,15 @@ import com.test.api.JwtDomain.JwtResponse;
 import com.test.api.JwtDomain.RefreshJwtRequest;
 import com.test.api.service.AuthService;
 import jakarta.security.auth.message.AuthException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("user/auth")
@@ -35,6 +37,16 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<JwtResponse> refresh(@RequestBody RefreshJwtRequest refreshJwtRequest) throws AuthException {
         final JwtResponse jwtResponse = authService.refresh(refreshJwtRequest.getRefreshJwtRequest());
+        return ResponseEntity.ok(jwtResponse);
+    }
+
+    @DeleteMapping("/logout")
+    public ResponseEntity<JwtResponse> logout(@RequestBody RefreshJwtRequest refreshJwtRequest) throws AuthException{
+        final JwtResponse jwtResponse = authService.logout(refreshJwtRequest.getRefreshJwtRequest());
+
+        SecurityContextLogoutHandler ctxLogOut = new SecurityContextLogoutHandler();
+        ctxLogOut.logout((HttpServletRequest) refreshJwtRequest, (HttpServletResponse) jwtResponse, SecurityContextHolder.getContext().getAuthentication());
+
         return ResponseEntity.ok(jwtResponse);
     }
 

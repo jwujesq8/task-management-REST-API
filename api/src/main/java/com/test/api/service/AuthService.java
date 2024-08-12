@@ -3,16 +3,22 @@ package com.test.api.service;
 import com.test.api.JwtDomain.JwtAuthentication;
 import com.test.api.JwtDomain.JwtRequest;
 import com.test.api.JwtDomain.JwtResponse;
+import com.test.api.JwtDomain.RefreshJwtRequest;
 import com.test.api.user.User;
 import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
+import jakarta.servlet.ServletRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +38,7 @@ public class AuthService {
             final String accessToken = jwtProvider.generateAccessToken(user);
             final String refreshToken = jwtProvider.generateRefreshToken(user);
             refreshTokensStorage.put(user.getLogin(), refreshToken);
+
             return new JwtResponse(accessToken, refreshToken);
         }
         else {
@@ -80,6 +87,28 @@ public class AuthService {
         }
         throw new AuthException("Token is not valid");
     }
+
+    public JwtResponse logout(@NotNull String refreshToken) throws AuthException {
+        if (jwtProvider.validateRefreshToken(refreshToken)) {
+            final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
+            final String login = claims.getSubject();
+            final String refreshTokenDB = refreshTokensStorage.get(login);
+
+            if (refreshTokenDB != null && refreshTokenDB.equals(refreshToken)) {
+                final User user = userService.getUserByLogin(login)
+                        .orElseThrow(() -> new AuthException("User not found"));
+
+                refreshTokensStorage.remove(user.getLogin());
+
+                // dont work
+                SecurityContextHolder.clearContext();
+
+                return new JwtResponse(null, null);
+            }
+        }
+        throw new AuthException("Token is not valid");
+    }
+
 
     public JwtAuthentication getAuthInfo() {
         return (JwtAuthentication) SecurityContextHolder.getContext().getAuthentication();
