@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -44,22 +45,15 @@ public class UserController {
 
 
     @GetMapping("/all")
-    @PreAuthorize("isAuthenticated()")
-//    @MessageMapping("/getAllUsers")
+    //@PreAuthorize("isAuthenticated()")
     public List<User> getAllUsers(){
 
         // TODO add webSocket message
         UserActionMessage message = new UserActionMessage();
-//        message.setUser(SecurityContextHolder.getContext().getAuthentication() +
-//                " (" +
-//                SecurityContextHolder.getContext().getAuthentication().getPrincipal()
-//                + ")"
-//        );
         message.setUser((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         message.setAction("use request GET user/all");
         log.info("message: " + message.getUser() + ", action: " + message.getAction());
-        messagingTemplate.convertAndSend("/topic", message);
-
+        messagingTemplate.convertAndSend("/topic", "use request GET user/all");
         return userService.getAllUsers();
     }
 
