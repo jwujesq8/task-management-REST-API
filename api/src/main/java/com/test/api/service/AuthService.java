@@ -1,24 +1,18 @@
 package com.test.api.service;
 
-import com.test.api.JwtDomain.JwtAuthentication;
-import com.test.api.JwtDomain.JwtRequest;
-import com.test.api.JwtDomain.JwtResponse;
-import com.test.api.JwtDomain.RefreshJwtRequest;
+import com.test.api.entity.JwtAuthentication;
+import com.test.api.entity.JwtRequest;
+import com.test.api.entity.JwtResponse;
 import com.test.api.user.User;
 import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
-import jakarta.servlet.ServletRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor

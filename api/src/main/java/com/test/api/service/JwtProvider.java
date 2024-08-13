@@ -34,7 +34,7 @@ public class JwtProvider {
         accessSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessKey));
         refreshSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshKey));
 
-        log.info("accessToken: " + accessKey + ", refreshToken: " + refreshKey);
+//        log.info("accessToken: " + accessKey + ", refreshToken: " + refreshKey);
     }
 
     public String generateAccessToken(@NonNull User user) {
