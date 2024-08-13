@@ -49,7 +49,7 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public List<User> getAllUsers(){
 
-        // TODO add webSocket message
+        // webSocket message
         UserActionMessage message = new UserActionMessage();
         message.setUser((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         message.setAction("use request GET user/all");
@@ -62,18 +62,15 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public Optional<User> getUserById(@PathVariable("id") Long id){
 
-        log.info("(userController) is authenticated : " + SecurityContextHolder.getContext().getAuthentication().isAuthenticated());
+        //log.info("(userController) is authenticated : " + SecurityContextHolder.getContext().getAuthentication().isAuthenticated());
         return userService.getUserById(id);
 
-//        if(response.isEmpty()) throw new UserNotFoundException();
-//        else return response;
     }
 
     @PostMapping("")
     @PreAuthorize("isAuthenticated()")
     public String addUser(@Valid @RequestBody User user){
 
-        // TODO add user validation
         return userService.addUser(user);
     }
 
