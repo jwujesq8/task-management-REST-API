@@ -4,6 +4,7 @@ package com.test.api.user;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -46,10 +47,13 @@ public class User implements UserDetails {
     @NotBlank(message = "password needs to be filled")
     @NotEmpty(message = "password is empty!")
     @Size(
+            min = 7,
             max = 20,
             message = "Max size for password is 20"
     )
     @Column(unique = true)
+    //size = 20, должен обязательно содержать спец символ и 3 числа, минимальное кол-во символом 7
+    @Pattern(regexp = "^(?=.*\\d{3,})(?=.*[^A-Za-z0-9])[\\S]{7,20}$", message = "Non valid password")
     private String password;
 
     @NotBlank(message = "fullName needs to be filled")
