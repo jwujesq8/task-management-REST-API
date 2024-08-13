@@ -1,6 +1,7 @@
 package com.test.api.controller;
 
 import com.test.api.entity.UserActionMessage;
+import com.test.api.service.AuthService;
 import com.test.api.service.GenderService;
 import com.test.api.service.UserService;
 import com.test.api.user.User;
@@ -40,12 +41,12 @@ public class UserController {
     public String checkGenderTableAndWelcome(){
 
         genderService.checkGenderTable();
-        return "Hello! " ;
+        return "Hello!" ;
     }
 
 
     @GetMapping("/all")
-    //@PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public List<User> getAllUsers(){
 
         // TODO add webSocket message
@@ -61,6 +62,7 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public Optional<User> getUserById(@PathVariable("id") Long id){
 
+        log.info("(userController) is authenticated : " + SecurityContextHolder.getContext().getAuthentication().isAuthenticated());
         return userService.getUserById(id);
 
 //        if(response.isEmpty()) throw new UserNotFoundException();
