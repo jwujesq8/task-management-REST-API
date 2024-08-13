@@ -1,15 +1,13 @@
 package com.test.api.controller;
 
-import com.test.api.JwtDomain.JwtRequest;
-import com.test.api.JwtDomain.JwtResponse;
-import com.test.api.JwtDomain.RefreshJwtRequest;
+import com.test.api.entity.JwtRequest;
+import com.test.api.entity.JwtResponse;
+import com.test.api.entity.RefreshJwtRequest;
 import com.test.api.service.AuthService;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;

@@ -1,4 +1,4 @@
-package com.test.api.JwtDomain;
+package com.test.api.entity;
 
 import lombok.Getter;
 import lombok.Setter;

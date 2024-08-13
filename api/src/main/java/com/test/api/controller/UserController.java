@@ -1,13 +1,21 @@
 package com.test.api.controller;
 
+import com.test.api.entity.UserActionMessage;
 import com.test.api.service.GenderService;
 import com.test.api.service.UserService;
 import com.test.api.user.User;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -18,10 +26,13 @@ import java.util.Optional;
 @RequestMapping("/user")
 public class UserController {
 
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     @Autowired
     private UserService userService;
     @Autowired
     private GenderService genderService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
 
     @PreAuthorize("isAuthenticated()")
@@ -34,10 +45,15 @@ public class UserController {
 
 
     @GetMapping("/all")
-    @PreAuthorize("isAuthenticated()")
+    //@PreAuthorize("isAuthenticated()")
     public List<User> getAllUsers(){
 
         // TODO add webSocket message
+        UserActionMessage message = new UserActionMessage();
+        message.setUser((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        message.setAction("use request GET user/all");
+        log.info("message: " + message.getUser() + ", action: " + message.getAction());
+        messagingTemplate.convertAndSend("/topic", "use request GET user/all");
         return userService.getAllUsers();
     }
 
