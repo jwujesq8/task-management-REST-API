@@ -8,16 +8,19 @@ import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     private final UserService userService;
     private final Map<String, String> refreshTokensStorage = new HashMap<>();
     private final JwtProvider jwtProvider;
@@ -27,17 +30,23 @@ public class AuthService {
         final User user = userService.getUserByLogin(jwtRequest.getLogin())
                 .orElseThrow(() -> new AuthException("User not found"));
 
-        if(user.getPassword().equals(jwtRequest.getPassword())){
+        if(!refreshTokensStorage.containsKey(user.getLogin())){
 
-            final String accessToken = jwtProvider.generateAccessToken(user);
-            final String refreshToken = jwtProvider.generateRefreshToken(user);
-            refreshTokensStorage.put(user.getLogin(), refreshToken);
+            if(user.getPassword().equals(jwtRequest.getPassword())){
 
-            return new JwtResponse(accessToken, refreshToken);
+                final String accessToken = jwtProvider.generateAccessToken(user);
+                final String refreshToken = jwtProvider.generateRefreshToken(user);
+                refreshTokensStorage.put(user.getLogin(), refreshToken);
+                return new JwtResponse(accessToken, refreshToken);
+            }
+            else {
+                throw  new AuthException("Wrong password");
+            }
+        } else {
+            throw new AuthException("User is already logged in");
         }
-        else {
-            throw  new AuthException("Wrong password");
-        }
+
+
     }
 
     public JwtResponse getNewAccessToken(@NotNull String refreshToken) throws AuthException{
@@ -47,12 +56,14 @@ public class AuthService {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
             final String login = claims.getSubject();
             final String refreshTokenDB = refreshTokensStorage.get(login);
+
             if(refreshTokenDB!=null && refreshTokenDB.equals(refreshToken)){
 
                 final User user = userService.getUserByLogin(login)
                         .orElseThrow(() -> new AuthException("User not found"));
 
                 String newAccessToken = jwtProvider.generateAccessToken(user);
+                refreshTokensStorage.put(user.getLogin(), null);
                 return new JwtResponse(newAccessToken, null);
             }
 
@@ -61,6 +72,7 @@ public class AuthService {
     }
 
     public JwtResponse refresh(@NotNull String refreshToken) throws AuthException{
+
         if(jwtProvider.validateRefreshToken(refreshToken)){
 
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
@@ -83,6 +95,7 @@ public class AuthService {
     }
 
     public JwtResponse logout(@NotNull String refreshToken) throws AuthException {
+
         if (jwtProvider.validateRefreshToken(refreshToken)) {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
             final String login = claims.getSubject();
@@ -94,18 +107,15 @@ public class AuthService {
 
                 refreshTokensStorage.remove(user.getLogin());
 
-                // dont work
-                SecurityContextHolder.clearContext();
-
                 return new JwtResponse(null, null);
-            }
+            } else { throw new AuthException("user id already logged out");}
         }
         throw new AuthException("Token is not valid");
     }
 
-
-    public JwtAuthentication getAuthInfo() {
-        return (JwtAuthentication) SecurityContextHolder.getContext().getAuthentication();
+    public boolean isUserLoggedIn(String login){
+        return refreshTokensStorage.containsKey(login);
     }
+
 
 }

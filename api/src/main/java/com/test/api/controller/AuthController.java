@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
+    @PreAuthorize("!isAuthenticated()")
     public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest jwtRequest) throws AuthException {
         final JwtResponse jwtResponse = authService.login(jwtRequest);
         return ResponseEntity.ok(jwtResponse);
@@ -39,11 +41,9 @@ public class AuthController {
     }
 
     @DeleteMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<JwtResponse> logout(@RequestBody RefreshJwtRequest refreshJwtRequest) throws AuthException{
         final JwtResponse jwtResponse = authService.logout(refreshJwtRequest.getRefreshJwtRequest());
-
-        SecurityContextLogoutHandler ctxLogOut = new SecurityContextLogoutHandler();
-        ctxLogOut.logout((HttpServletRequest) refreshJwtRequest, (HttpServletResponse) jwtResponse, SecurityContextHolder.getContext().getAuthentication());
 
         return ResponseEntity.ok(jwtResponse);
     }
