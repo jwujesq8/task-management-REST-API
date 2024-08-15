@@ -5,6 +5,7 @@ import com.test.api.dto.response.MessageResponseDto;
 import com.test.api.dto.UserActionMessageDto;
 import com.test.api.modelMapper.UserRequestDtoToUserMapper;
 import com.test.api.modelMapper.UserToUserRequestDTOMapper;
+import com.test.api.modelMapper.User_UserResponseDTO_UserRequestDTO_Mapper;
 import com.test.api.service.GenderService;
 import com.test.api.service.UserService;
 import com.test.api.user.User;
@@ -36,14 +37,14 @@ public class UserController {
     private final UserService userService;
     private final GenderService genderService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final UserToUserRequestDTOMapper userToUserRequestDTOMapper;
+    private final User_UserResponseDTO_UserRequestDTO_Mapper userModelMapper;
 
 
     @PostMapping("")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MessageResponseDto> addUser(@Valid @RequestBody UserRequestDto userRequestDto) throws ValidationException {
         try {
-            User user = userToUserRequestDTOMapper
+            User user = userModelMapper.userRequestDtoToUserMapper.map();
             userService.addUser(user);
             return ResponseEntity
                     .status(HttpStatus.CREATED)

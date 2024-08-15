@@ -14,27 +14,27 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class User_UserResponseDTO_UserRequestDTO_Mapper {
 
-    private final ModelMapper userRequestDtoToUserMapper = new ModelMapper();
-    private final ModelMapper userToUserResponseDtoMapper = new ModelMapper();
-    private final ModelMapper userToUserRequestDtoMapper = new ModelMapper();
+    public final ModelMapper userRequestDtoToUserMapper = new ModelMapper();
+    public final ModelMapper userToUserResponseDtoMapper = new ModelMapper();
+    public final ModelMapper userToUserRequestDtoMapper = new ModelMapper();
 
-    public void setUserRequestDtoToUserMapper() {
-        userRequestDtoToUserMapper.getConfiguration().setMethodAccessLevel(Configuration.AccessLevel.PRIVATE);
-        userRequestDtoToUserMapper.getConfiguration().setSkipNullEnabled(true);
+    public User_UserResponseDTO_UserRequestDTO_Mapper(ModelMapper userRequestDtoToUserMapper,
+                                                      ModelMapper userToUserResponseDtoMapper,
+                                                      ModelMapper userToUserRequestDtoMapper) {
 
-    }
+        this.userRequestDtoToUserMapper.getConfiguration().setMethodAccessLevel(Configuration.AccessLevel.PRIVATE);
+        this.userRequestDtoToUserMapper.getConfiguration().setSkipNullEnabled(true);
 
-    public void setUserToUserResponseDtoMapper(){
         this.userToUserResponseDtoMapper.getConfiguration().setSkipNullEnabled(true);
         this.userToUserResponseDtoMapper.getConfiguration().setMethodAccessLevel(Configuration.AccessLevel.PRIVATE);
         TypeMap<User, UserResponseDto> propertyMapper = this.userToUserResponseDtoMapper
                 .createTypeMap(User.class, UserResponseDto.class);
         propertyMapper.addMappings(mapper -> mapper.map(user -> user.getGender().getName(), UserResponseDto::setGender));
+
+        this.userToUserRequestDtoMapper.getConfiguration().setMethodAccessLevel(Configuration.AccessLevel.PRIVATE);
+        this.userToUserRequestDtoMapper.getConfiguration().setSkipNullEnabled(true);
+
     }
 
-    public void setUserToUserRequestDtoMapper(){
-        userRequestDtoToUserMapper.getConfiguration().setMethodAccessLevel(Configuration.AccessLevel.PRIVATE);
-        userRequestDtoToUserMapper.getConfiguration().setSkipNullEnabled(true);
-    }
 
 }

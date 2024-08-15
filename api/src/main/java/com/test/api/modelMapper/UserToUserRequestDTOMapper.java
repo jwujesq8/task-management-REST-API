@@ -9,6 +9,8 @@ import org.modelmapper.config.Configuration;
 
 public class UserToUserRequestDTOMapper {
 
+    public ModelMapper userRequestDtoToUserMapper;
+
     public UserToUserRequestDTOMapper(ModelMapper userRequestDtoToUserMapper) {
 
 //        TypeMap<User, UserRequestDto> propertyMapper = this.userToUserRequestDTOMapper
