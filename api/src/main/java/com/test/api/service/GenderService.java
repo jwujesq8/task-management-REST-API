@@ -1,14 +1,16 @@
 package com.test.api.service;
 
+import com.test.api.entity.ResponseMessage;
 import com.test.api.user.Gender;
+import org.springframework.http.ResponseEntity;
 
 public interface GenderService {
 
-    void addGender(Gender gender);
+    Gender addGender(Gender gender);
 
     Gender updateGender(Integer id, Gender gender);
 
-    Integer deleteGenderById(Integer id);
+    Gender deleteGenderById(Integer id);
 
     void checkGenderTable();
 }

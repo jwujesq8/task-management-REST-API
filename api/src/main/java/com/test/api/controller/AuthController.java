@@ -8,6 +8,7 @@ import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,28 +25,31 @@ public class AuthController {
     @PostMapping("/login")
     @PreAuthorize("!isAuthenticated()")
     public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest jwtRequest) throws AuthException {
-        final JwtResponse jwtResponse = authService.login(jwtRequest);
-        return ResponseEntity.ok(jwtResponse);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(authService.login(jwtRequest));
     }
 
     @PostMapping("/newAccessToken")
     public ResponseEntity<JwtResponse> getNewAccessToken(@RequestBody RefreshJwtRequest refreshJwtRequest) throws AuthException{
-        final JwtResponse jwtResponse = authService.getNewAccessToken(refreshJwtRequest.getRefreshJwtRequest());
-        return ResponseEntity.ok(jwtResponse);
+       return ResponseEntity
+               .status(HttpStatus.OK)
+               .body(authService.getNewAccessToken(refreshJwtRequest.getRefreshJwtRequest()));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<JwtResponse> refresh(@RequestBody RefreshJwtRequest refreshJwtRequest) throws AuthException {
-        final JwtResponse jwtResponse = authService.refresh(refreshJwtRequest.getRefreshJwtRequest());
-        return ResponseEntity.ok(jwtResponse);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(authService.refresh(refreshJwtRequest.getRefreshJwtRequest()));
     }
 
     @DeleteMapping("/logout")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<JwtResponse> logout(@RequestBody RefreshJwtRequest refreshJwtRequest) throws AuthException{
-        final JwtResponse jwtResponse = authService.logout(refreshJwtRequest.getRefreshJwtRequest());
-
-        return ResponseEntity.ok(jwtResponse);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(authService.logout(refreshJwtRequest.getRefreshJwtRequest()));
     }
 
 }

@@ -66,9 +66,10 @@ public class AuthService {
                 refreshTokensStorage.put(user.getLogin(), null);
                 return new JwtResponse(newAccessToken, null);
             }
+            throw new AuthException("Wrong refresh token");
 
         }
-        return new JwtResponse(null, null);
+        throw new AuthException("Non valid refresh token");
     }
 
     public JwtResponse refresh(@NotNull String refreshToken) throws AuthException{
@@ -90,8 +91,9 @@ public class AuthService {
 
                 return new JwtResponse(newAccessToken, newRefreshToken);
             }
+            throw new AuthException("Wrong refresh token");
         }
-        throw new AuthException("Token is not valid");
+        throw new AuthException("Non valid refresh token");
     }
 
     public JwtResponse logout(@NotNull String refreshToken) throws AuthException {
@@ -108,9 +110,10 @@ public class AuthService {
                 refreshTokensStorage.remove(user.getLogin());
 
                 return new JwtResponse(null, null);
-            } else { throw new AuthException("user id already logged out");}
+            }
+            throw new AuthException("User is already logged out");
         }
-        throw new AuthException("Token is not valid");
+        throw new AuthException("Non valid refresh token");
     }
 
     public boolean isUserLoggedIn(String login){

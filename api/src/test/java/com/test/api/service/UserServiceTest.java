@@ -44,7 +44,7 @@ class UserServiceTest {
                 .gender(genderRepository.findByName("female"))
                 .build();
 
-        String login_actual = userService.addUser(user5);
+        String login_actual = userService.addUser(user5).getLogin();
         String login_expected = "opkw6305@gmail.com";
         assertEquals(login_expected, login_actual);
 

@@ -2,6 +2,7 @@ package com.test.api.user;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -39,8 +40,10 @@ public class User implements UserDetails {
     @NotEmpty(message = "login is empty!")
     @Size(
             max = 50,
+            min = 11,
             message = "Max size for login is 50"
     )
+    @Valid
     @Column(unique = true)
     private String login;
 

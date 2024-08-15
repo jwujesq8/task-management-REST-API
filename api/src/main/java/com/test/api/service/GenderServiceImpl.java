@@ -1,11 +1,17 @@
 package com.test.api.service;
 
+import com.test.api.entity.ResponseMessage;
 import com.test.api.repository.GenderRepository;
 import com.test.api.repository.UserRepository;
 import com.test.api.user.Gender;
 import com.test.api.user.User;
+import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ServerErrorException;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,13 +26,24 @@ public class GenderServiceImpl implements GenderService{
     private UserRepository userRepository;
 
     @Override
-    public void addGender(Gender gender) {
+    public Gender addGender(Gender gender) throws ValidationException {
         genderRepository.save(gender);
+        if(genderRepository.findByName(gender.getName()) != null){
+
+            return gender;
+        }
+        throw new ValidationException("""
+                Gender requirements:
+                \tid|name
+                \t1: male
+                \t2: female
+                \t3: none""");
+
     }
 
 
     @Override
-    public Gender updateGender(Integer id, Gender gender) {
+    public Gender updateGender(Integer id, Gender gender) throws HttpClientErrorException {
 
         Gender genderDB = genderRepository.findById(id).get();
 
@@ -34,14 +51,20 @@ public class GenderServiceImpl implements GenderService{
                 !"".equalsIgnoreCase(gender.getName())) {
             genderDB.setName(gender.getName());
 
+            try{
+                genderRepository.save(genderDB);
+                return gender;
+            }
+            catch (ValidationException valEx){
+                throw new ValidationException("Non valid gender name, name: " + gender.getName());
+            }
         }
-
-        return genderRepository.save(genderDB);
+        throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Gender not found, id: " + id);
 
     }
 
     @Override
-    public Integer deleteGenderById(Integer id) {
+    public Gender deleteGenderById(Integer id) throws HttpClientErrorException {
 
         Gender genderToDelete = genderRepository.findById(id).get();
         List<User> userListWithDeletedGender = userRepository.findByGender(Optional.of(genderToDelete));
@@ -57,13 +80,13 @@ public class GenderServiceImpl implements GenderService{
 
         genderRepository.deleteById(id);
         if(!genderRepository.existsById(id)){
-            return id;
+            return genderToDelete;
         }
-        return null;
+        throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Gender not found, id: " + id);
     }
 
     @Override
-    public void checkGenderTable() {
+    public void checkGenderTable(){
 
         if(genderRepository.count()==0){
             Gender gender_male = Gender.builder()
@@ -81,8 +104,8 @@ public class GenderServiceImpl implements GenderService{
             genderRepository.save(gender_male);
             genderRepository.save(gender_female);
             genderRepository.save(gender_none);
-        }
 
+        }
 
     }
 }
