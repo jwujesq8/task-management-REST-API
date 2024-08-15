@@ -9,6 +9,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-public class dtoId {
+public class IdDto {
     private Long id;
 }

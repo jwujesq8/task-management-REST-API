@@ -1,6 +1,6 @@
 package com.test.api.exceptionHandler;
 
-import com.test.api.entity.ResponseMessage;
+import com.test.api.dto.response.MessageResponseDto;
 import jakarta.security.auth.message.AuthException;
 import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,7 @@ public class ExceptionControllerAdvice {
 
 
     @ExceptionHandler(AuthException.class)
-    public ResponseEntity<ResponseMessage> authExceptionHandler(AuthException aE){
+    public ResponseEntity<MessageResponseDto> authExceptionHandler(AuthException aE){
         String message = aE.getMessage();
         HttpStatus httpStatus;
         if(message.contains("User not found")) { httpStatus = HttpStatus.NOT_FOUND;}
@@ -28,11 +28,11 @@ public class ExceptionControllerAdvice {
 
         return ResponseEntity
                 .status(httpStatus)
-                .body(new ResponseMessage(message, httpStatus.getReasonPhrase()));
+                .body(new MessageResponseDto(message, httpStatus.getReasonPhrase()));
     }
 
     @ExceptionHandler(HttpClientErrorException.class)
-    public ResponseEntity<ResponseMessage> httpClientErrorExceptionHandler(HttpClientErrorException httpClErrEx){
+    public ResponseEntity<MessageResponseDto> httpClientErrorExceptionHandler(HttpClientErrorException httpClErrEx){
         String message = httpClErrEx.getMessage();
         HttpStatus httpStatus = (HttpStatus) httpClErrEx.getStatusCode();
 
@@ -43,11 +43,11 @@ public class ExceptionControllerAdvice {
 
         return ResponseEntity
                 .status(httpStatus)
-                .body(new ResponseMessage(message, httpStatus.getReasonPhrase()));
+                .body(new MessageResponseDto(message, httpStatus.getReasonPhrase()));
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ResponseMessage> validationExceptionHandler(ValidationException valEx){
+    public ResponseEntity<MessageResponseDto> validationExceptionHandler(ValidationException valEx){
         String message = valEx.getMessage();
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
 
@@ -62,11 +62,11 @@ public class ExceptionControllerAdvice {
 
         return ResponseEntity
                 .status(httpStatus)
-                .body(new ResponseMessage(message, httpStatus.getReasonPhrase()));
+                .body(new MessageResponseDto(message, httpStatus.getReasonPhrase()));
     }
 
     @ExceptionHandler(ServerErrorException.class)
-    public ResponseEntity<ResponseMessage> serverErrorExceptionHandler(ServerErrorException serErrEx){
+    public ResponseEntity<MessageResponseDto> serverErrorExceptionHandler(ServerErrorException serErrEx){
         String message = serErrEx.getMessage();
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -76,7 +76,7 @@ public class ExceptionControllerAdvice {
 
         return ResponseEntity
                 .status(httpStatus)
-                .body(new ResponseMessage(message, httpStatus.getReasonPhrase()));
+                .body(new MessageResponseDto(message, httpStatus.getReasonPhrase()));
 
     }
 

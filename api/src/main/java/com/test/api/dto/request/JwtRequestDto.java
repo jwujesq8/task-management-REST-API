@@ -1,11 +1,11 @@
-package com.test.api.entity;
+package com.test.api.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class JwtRequest {
+public class JwtRequestDto {
 
     private String login;
     private String password;

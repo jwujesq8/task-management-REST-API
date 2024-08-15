@@ -1,4 +1,4 @@
-package com.test.api.dto;
+package com.test.api.dto.response;
 
 import lombok.*;
 
@@ -8,7 +8,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class dtoUser {
+public class UserResponseDto {
 
     private String login;
     private String fullName;

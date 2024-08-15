@@ -1,8 +1,7 @@
-package com.test.api.filter;
+package com.test.api.config.JWT;
 
 import com.test.api.entity.JwtAuthentication;
 import com.test.api.service.AuthService;
-import com.test.api.service.JwtProvider;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

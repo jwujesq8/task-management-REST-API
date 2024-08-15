@@ -1,8 +1,6 @@
 package com.test.api.service;
 
-import com.test.api.entity.ResponseMessage;
 import com.test.api.user.Gender;
-import org.springframework.http.ResponseEntity;
 
 public interface GenderService {
 

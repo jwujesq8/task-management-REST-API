@@ -1,8 +1,8 @@
 package com.test.api.service;
 
-import com.test.api.entity.JwtAuthentication;
-import com.test.api.entity.JwtRequest;
-import com.test.api.entity.JwtResponse;
+import com.test.api.config.JWT.JwtProvider;
+import com.test.api.dto.request.JwtRequestDto;
+import com.test.api.dto.response.JwtResponseDto;
 import com.test.api.user.User;
 import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
@@ -10,8 +10,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -25,19 +23,19 @@ public class AuthService {
     private final Map<String, String> refreshTokensStorage = new HashMap<>();
     private final JwtProvider jwtProvider;
 
-    public JwtResponse login(@NotNull JwtRequest jwtRequest) throws AuthException {
+    public JwtResponseDto login(@NotNull JwtRequestDto JwtRequestDto) throws AuthException {
 
-        final User user = userService.getUserByLogin(jwtRequest.getLogin())
+        final User user = userService.getUserByLogin(JwtRequestDto.getLogin())
                 .orElseThrow(() -> new AuthException("User not found"));
 
         if(!refreshTokensStorage.containsKey(user.getLogin())){
 
-            if(user.getPassword().equals(jwtRequest.getPassword())){
+            if(user.getPassword().equals(JwtRequestDto.getPassword())){
 
                 final String accessToken = jwtProvider.generateAccessToken(user);
                 final String refreshToken = jwtProvider.generateRefreshToken(user);
                 refreshTokensStorage.put(user.getLogin(), refreshToken);
-                return new JwtResponse(accessToken, refreshToken);
+                return new JwtResponseDto(accessToken, refreshToken);
             }
             else {
                 throw  new AuthException("Wrong password");
@@ -49,7 +47,7 @@ public class AuthService {
 
     }
 
-    public JwtResponse getNewAccessToken(@NotNull String refreshToken) throws AuthException{
+    public JwtResponseDto getNewAccessToken(@NotNull String refreshToken) throws AuthException{
 
         if(jwtProvider.validateRefreshToken(refreshToken)){
 
@@ -64,7 +62,7 @@ public class AuthService {
 
                 String newAccessToken = jwtProvider.generateAccessToken(user);
                 refreshTokensStorage.put(user.getLogin(), null);
-                return new JwtResponse(newAccessToken, null);
+                return new JwtResponseDto(newAccessToken, null);
             }
             throw new AuthException("Wrong refresh token");
 
@@ -72,7 +70,7 @@ public class AuthService {
         throw new AuthException("Non valid refresh token");
     }
 
-    public JwtResponse refresh(@NotNull String refreshToken) throws AuthException{
+    public JwtResponseDto refresh(@NotNull String refreshToken) throws AuthException{
 
         if(jwtProvider.validateRefreshToken(refreshToken)){
 
@@ -89,14 +87,14 @@ public class AuthService {
                 String newRefreshToken = jwtProvider.generateRefreshToken(user);
                 refreshTokensStorage.put(user.getLogin(), newRefreshToken);
 
-                return new JwtResponse(newAccessToken, newRefreshToken);
+                return new JwtResponseDto(newAccessToken, newRefreshToken);
             }
             throw new AuthException("Wrong refresh token");
         }
         throw new AuthException("Non valid refresh token");
     }
 
-    public JwtResponse logout(@NotNull String refreshToken) throws AuthException {
+    public JwtResponseDto logout(@NotNull String refreshToken) throws AuthException {
 
         if (jwtProvider.validateRefreshToken(refreshToken)) {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
@@ -109,7 +107,7 @@ public class AuthService {
 
                 refreshTokensStorage.remove(user.getLogin());
 
-                return new JwtResponse(null, null);
+                return new JwtResponseDto(null, null);
             }
             throw new AuthException("User is already logged out");
         }

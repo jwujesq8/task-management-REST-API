@@ -1,18 +1,14 @@
 package com.test.api.controller;
 
-import com.test.api.entity.JwtRequest;
-import com.test.api.entity.JwtResponse;
-import com.test.api.entity.RefreshJwtRequest;
+import com.test.api.dto.request.JwtRequestDto;
+import com.test.api.dto.response.JwtResponseDto;
+import com.test.api.dto.request.RefreshJwtRequestDto;
 import com.test.api.service.AuthService;
 import jakarta.security.auth.message.AuthException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,32 +20,32 @@ public class AuthController {
 
     @PostMapping("/login")
     @PreAuthorize("!isAuthenticated()")
-    public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest jwtRequest) throws AuthException {
+    public ResponseEntity<JwtResponseDto> login(@RequestBody JwtRequestDto JwtRequestDto) throws AuthException {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(authService.login(jwtRequest));
+                .body(authService.login(JwtRequestDto));
     }
 
     @PostMapping("/newAccessToken")
-    public ResponseEntity<JwtResponse> getNewAccessToken(@RequestBody RefreshJwtRequest refreshJwtRequest) throws AuthException{
+    public ResponseEntity<JwtResponseDto> getNewAccessToken(@RequestBody RefreshJwtRequestDto RefreshJwtRequestDto) throws AuthException{
        return ResponseEntity
                .status(HttpStatus.OK)
-               .body(authService.getNewAccessToken(refreshJwtRequest.getRefreshJwtRequest()));
+               .body(authService.getNewAccessToken(RefreshJwtRequestDto.getRefreshJwtRequest()));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<JwtResponse> refresh(@RequestBody RefreshJwtRequest refreshJwtRequest) throws AuthException {
+    public ResponseEntity<JwtResponseDto> refresh(@RequestBody RefreshJwtRequestDto RefreshJwtRequestDto) throws AuthException {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(authService.refresh(refreshJwtRequest.getRefreshJwtRequest()));
+                .body(authService.refresh(RefreshJwtRequestDto.getRefreshJwtRequest()));
     }
 
     @DeleteMapping("/logout")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<JwtResponse> logout(@RequestBody RefreshJwtRequest refreshJwtRequest) throws AuthException{
+    public ResponseEntity<JwtResponseDto> logout(@RequestBody RefreshJwtRequestDto RefreshJwtRequestDto) throws AuthException{
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(authService.logout(refreshJwtRequest.getRefreshJwtRequest()));
+                .body(authService.logout(RefreshJwtRequestDto.getRefreshJwtRequest()));
     }
 
 }

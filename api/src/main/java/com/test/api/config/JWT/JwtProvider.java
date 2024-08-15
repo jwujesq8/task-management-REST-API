@@ -1,4 +1,4 @@
-package com.test.api.service;
+package com.test.api.config.JWT;
 
 import com.test.api.user.User;
 import io.jsonwebtoken.*;
@@ -7,8 +7,6 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

@@ -1,10 +1,10 @@
-package com.test.api.entity;
+package com.test.api.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class RefreshJwtRequest {
+public class RefreshJwtRequestDto {
     private String refreshJwtRequest;
 }

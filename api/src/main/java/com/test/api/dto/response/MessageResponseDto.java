@@ -1,4 +1,4 @@
-package com.test.api.entity;
+package com.test.api.dto.response;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseMessage {
+public class MessageResponseDto {
     private String description;
     private String httpStatusDesc;
 }

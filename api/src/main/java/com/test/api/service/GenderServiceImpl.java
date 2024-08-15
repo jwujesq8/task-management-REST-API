@@ -1,6 +1,5 @@
 package com.test.api.service;
 
-import com.test.api.entity.ResponseMessage;
 import com.test.api.repository.GenderRepository;
 import com.test.api.repository.UserRepository;
 import com.test.api.user.Gender;
@@ -8,10 +7,8 @@ import com.test.api.user.User;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.server.ServerErrorException;
 
 import java.util.List;
 import java.util.Objects;

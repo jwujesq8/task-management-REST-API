@@ -1,14 +1,11 @@
 package com.test.api.service;
 
-import com.test.api.entity.ResponseMessage;
 import com.test.api.repository.UserRepository;
 import com.test.api.user.User;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ServerErrorException;
