@@ -1,5 +1,6 @@
 package com.test.api.dto.response;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Getter
@@ -8,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MessageResponseDto {
+
+    @NotBlank
     private String description;
-    private String httpStatusDesc;
 }

@@ -1,20 +1,29 @@
 package com.test.api.controller;
 
+import com.test.api.dto.DeleteUsersListByIdDto;
+import com.test.api.dto.IdDto;
 import com.test.api.dto.request.UserRequestDto;
 import com.test.api.dto.response.MessageResponseDto;
 import com.test.api.dto.UserActionMessageDto;
-import com.test.api.modelMapper.UserRequestDtoToUserMapper;
-import com.test.api.modelMapper.UserToUserRequestDTOMapper;
-import com.test.api.modelMapper.User_UserResponseDTO_UserRequestDTO_Mapper;
+import com.test.api.exception.BadClientRequestException;
+import com.test.api.exception.IdNotFoundException;
+import com.test.api.exception.OurServiceErrorException;
+import com.test.api.exception.ValidException;
+import com.test.api.modelMapper.UserModelMapper;
 import com.test.api.service.GenderService;
 import com.test.api.service.UserService;
 import com.test.api.user.User;
+import jakarta.persistence.Id;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -37,92 +46,104 @@ public class UserController {
     private final UserService userService;
     private final GenderService genderService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final User_UserResponseDTO_UserRequestDTO_Mapper userModelMapper;
+    private final UserModelMapper userModelMapper;
 
 
     @PostMapping("")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MessageResponseDto> addUser(@Valid @RequestBody UserRequestDto userRequestDto) throws ValidationException {
+    public ResponseEntity<MessageResponseDto> addUser(@RequestBody @NotNull UserRequestDto userRequestDto) throws ConstraintViolationException {
         try {
-            User user = userModelMapper.userRequestDtoToUserMapper.map();
+            User user = userModelMapper.convert_UserRequestDto_to_User(userRequestDto);
             userService.addUser(user);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(new MessageResponseDto("User is saved", HttpStatus.CREATED.getReasonPhrase()));
+                    .body(new MessageResponseDto("User is saved"));
         }
-        catch (ValidationException valEx){
-            throw new ValidationException("Non valid user parameters");
+        catch (ValidException valEx){
+            throw valEx;
         }
         catch (ServerErrorException serverErrEx){
-            throw new ServerErrorException(serverErrEx.getMessage(), null);
+            throw new OurServiceErrorException("Server error while adding new user. " + serverErrEx.getMessage());
         }
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MessageResponseDto> updateUser(@PathVariable("id") Long id, @Valid @RequestBody User user){
+    public ResponseEntity<MessageResponseDto> updateUser(@NotNull IdDto idDto, @Valid @RequestBody @NotNull UserRequestDto userRequestDto){
 
         try{
 
-            userService.updateUser(id, user);
+            if(userRequestDto.getId()==null) {userRequestDto.setId(idDto.getId());}
+
+            User user = userModelMapper.convert_UserRequestDto_to_User(userRequestDto);
+            userService.updateUser(idDto.getId(), user);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(new MessageResponseDto("User is updated, id: " + user.getId(), HttpStatus.CREATED.getReasonPhrase()));
+                    .body(new MessageResponseDto("User is updated, id: " + user.getId()));
+
         }
-        catch (HttpClientErrorException httpClErrEx){
-            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "User not found, id: " + id);
+        catch (BadClientRequestException badClReqEx){
+            throw new BadClientRequestException("Bad user request to update user info");
+        }
+        catch (ServerErrorException serverErrEx){
+            throw new OurServiceErrorException("Server error with updating user by id. " +
+                    serverErrEx.getMessage());
+        }
+        catch (ValidException valEx){
+            throw valEx;
         }
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MessageResponseDto> deleteUserById(@PathVariable("id") Long id){
+    public ResponseEntity<MessageResponseDto> deleteUserById(@NotNull IdDto idDto){
 
-        try{
-            if(userService.deleteUser(id)==null){
-                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "User not found, id: " + id);
-            }
+        try {
+            userService.deleteUser(idDto.getId());
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new MessageResponseDto("User is removed, id: " + id, HttpStatus.OK.getReasonPhrase()));
+                    .body(new MessageResponseDto("User is removed, id: " + idDto.getId()));
         }
-
         catch (ServerErrorException serverErrEx){
-            throw new ServerErrorException(serverErrEx.getMessage(), null);
+            throw new OurServiceErrorException("Server error with deleting user by id. " +
+                    serverErrEx.getMessage());
         }
     }
 
     @DeleteMapping("/{startId}/{endId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MessageResponseDto> deleteListOfUsersById(@PathVariable("startId") Long startId,
-                                                                    @PathVariable("endId") Long endId){
+    public ResponseEntity<MessageResponseDto> deleteListOfUsersById(@NotNull @Valid DeleteUsersListByIdDto deleteUsersListByIdDto){
         try{
-            userService.deleteListOfUsersById(startId,endId);
+            userService.deleteListOfUsersById(deleteUsersListByIdDto.getStartId(),deleteUsersListByIdDto.getEndId());
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new MessageResponseDto("Deleted users: " + startId + "-" + endId,
-                            HttpStatus.OK.getReasonPhrase()));
+                    .body(new MessageResponseDto("Deleted users: " + deleteUsersListByIdDto.getStartId()
+                            + "-" + deleteUsersListByIdDto.getEndId()));
         }
         catch (ServerErrorException serverErrEx) {
-            throw new ServerErrorException("Server error with removing users with id in range " + startId + "-" + endId
-                    , null);
+            throw new OurServiceErrorException("Server error with deleting list of users. " + serverErrEx.getMessage());
         }
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public Optional<User> getUserById(@PathVariable("id") Long id){
+    public Optional<User> getUserById(@NotNull IdDto idDto){
 
         //log.info("(userController) is authenticated : " + SecurityContextHolder.getContext().getAuthentication().isAuthenticated());
 
         try{
-            return userService.getUserById(id);
+            return userService.getUserById(idDto.getId());
         }
         catch (ServerErrorException serverErrEx){
-            throw new ServerErrorException("Server error with User Table", null);
+            throw new OurServiceErrorException("Server error while getting user bu id. " +
+                    serverErrEx.getMessage());
         }
         catch (HttpClientErrorException httpClErrEx){
-            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "User not found, id: " + id);
+            throw new BadClientRequestException("Bad client request to get user info by id. " +
+                    httpClErrEx.getMessage());
+        }
+        catch (IdNotFoundException idNotFoundException){
+            throw new IdNotFoundException(idNotFoundException.getMessage());
         }
 
     }
@@ -139,10 +160,12 @@ public class UserController {
             message.setAction("use request GET user/all");
             log.info("message: " + message.getUser() + ", action: " + message.getAction());
             messagingTemplate.convertAndSend("/topic", "use request GET user/all");
+
             return userService.getAllUsers();
         }
         catch (ServerErrorException serverErrEx){
-            throw new ServerErrorException("Server error with User Table", null);
+            throw new OurServiceErrorException("Server error while getting all users. " +
+                    serverErrEx.getMessage());
         }
 
     }
@@ -154,7 +177,5 @@ public class UserController {
         return "Hello!" ;
     }
 
-
-
-    }
+}
 

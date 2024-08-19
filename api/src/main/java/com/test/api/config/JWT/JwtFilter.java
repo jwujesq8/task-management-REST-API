@@ -1,7 +1,7 @@
 package com.test.api.config.JWT;
 
 import com.test.api.entity.JwtAuthentication;
-import com.test.api.service.AuthService;
+import com.test.api.service.AuthServiceImpl;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,7 +23,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final String AUTHORIZATION = "Authorization";
     private final JwtProvider jwtProvider;
-    private final AuthService authService;
+    private final AuthServiceImpl authServiceImpl;
 
     @Override
     protected void doFilterInternal(
@@ -42,7 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             final JwtAuthentication jwtAuthentication = new JwtAuthentication();
             jwtAuthentication.setLogin(claims.getSubject());
-            jwtAuthentication.setAuthenticated(authService.isUserLoggedIn(claims.getSubject()));
+            jwtAuthentication.setAuthenticated(authServiceImpl.isUserLoggedIn(claims.getSubject()));
             SecurityContextHolder.getContext().setAuthentication(jwtAuthentication);
 
         }

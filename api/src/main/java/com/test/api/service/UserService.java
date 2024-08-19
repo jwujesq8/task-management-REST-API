@@ -17,6 +17,8 @@ public interface UserService {
 
     boolean existsByLoginAndPasswordIgnoreCase(String login, String password);
 
+    boolean existsById(Long id);
+
     Optional<User> getUserById(Long id);
 
     List<User> getAllUsers();

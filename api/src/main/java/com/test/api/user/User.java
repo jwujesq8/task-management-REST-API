@@ -36,8 +36,7 @@ public class User implements UserDetails {
     )
     private Long id;
 
-    @NotBlank(message = "login needs to be filled")
-    @NotEmpty(message = "login is empty!")
+    @NotEmpty(message = "login is required")
     @Size(
             max = 50,
             min = 11,
@@ -47,8 +46,7 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String login;
 
-    @NotBlank(message = "password needs to be filled")
-    @NotEmpty(message = "password is empty!")
+    @NotEmpty(message = "password is required")
     @Size(
             min = 7,
             max = 20,
@@ -59,8 +57,7 @@ public class User implements UserDetails {
     @Pattern(regexp = "^(?=.*\\d{3,})(?=.*[^A-Za-z0-9])[\\S]{7,20}$", message = "Non valid password")
     private String password;
 
-    @NotBlank(message = "fullName needs to be filled")
-    @NotEmpty(message = "fullName is empty!")
+    @NotEmpty(message = "fullName is required")
     @Size(
             max = 256,
             message = "Max size for full name is 256"

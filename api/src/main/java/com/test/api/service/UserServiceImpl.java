@@ -1,7 +1,9 @@
 package com.test.api.service;
 
+import com.test.api.exception.*;
 import com.test.api.repository.UserRepository;
 import com.test.api.user.User;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,26 +25,30 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User addUser(User user) {
-        userRepository.save(user);
-        if(userRepository.existsByLoginAndPasswordIgnoreCase(user.getLogin(), user.getPassword())){
-            return user;
+        try {
+            userRepository.save(user);
+            if(userRepository.existsByLoginAndPasswordIgnoreCase(user.getLogin(), user.getPassword())){
+                return user;
+            }
+            throw new ServerDBException("Error with saving new user in the User Table");
         }
-        return null;
+        catch (ConstraintViolationException e){
+            throw new ValidException(e);
+        }
     }
 
     @Override
-    public User updateUser(Long id, User user) throws ValidationException, HttpClientErrorException {
+    public User updateUser(Long id, User user) throws ValidException, HttpClientErrorException {
 
-        User userDB = userRepository.findById(id).get();
+        User userDB = userRepository.findById(id).orElseThrow(
+                () -> new IdNotFoundException("User not found, id: " + id));
 
         // login
         if(Objects.nonNull(user.getLogin()) &&
                 !"".equalsIgnoreCase(user.getLogin())) {
             try { userDB.setLogin(user.getLogin());}
-            catch (ValidationException valEx){
-                throw new ValidationException("Login requirements:" +
-                        "\tlength 11-50" +
-                        "\tunique among all users login");
+            catch (ConstraintViolationException valEx){
+                throw new ValidException(valEx);
             }
 
         }
@@ -50,13 +56,8 @@ public class UserServiceImpl implements UserService{
         if(Objects.nonNull(user.getPassword()) &&
                 !"".equalsIgnoreCase(user.getPassword())) {
             try{userDB.setPassword(user.getPassword());}
-            catch (ValidationException valEx){
-                throw new ValidationException("""
-                        Password requirements:
-                        \tlength 7-20
-                        \t3 digit or more
-                        \t1 special character or more
-                        \tno white spaces\s""");
+            catch (ConstraintViolationException valEx){
+                throw new ValidException(valEx);
             }
 
         }
@@ -64,11 +65,8 @@ public class UserServiceImpl implements UserService{
         if(Objects.nonNull(user.getFullName()) &&
                 !"".equalsIgnoreCase(user.getFullName())) {
             try{userDB.setFullName(user.getFullName());}
-            catch (ValidationException valEx){
-                throw new ValidationException("""
-                        Full name requirements:
-                        \tlength 1-256
-                        \tnot blank\s""");
+            catch (ConstraintViolationException valEx){
+                throw new ValidException(valEx);
             }
 
         }
@@ -84,6 +82,8 @@ public class UserServiceImpl implements UserService{
 
         userRepository.save(userDB);
         return userDB;
+
+
     }
 
     @Override
@@ -94,31 +94,52 @@ public class UserServiceImpl implements UserService{
             return id;
 
         }
-        return null;
+        else throw new IdNotFoundException("User not found, id " + id);
     }
 
     @Override
     public void deleteListOfUsersById(Long startId, Long endId) {
-        userRepository.deleteListOfUsersById(startId, endId);
-//        if (userRepository.existsByLog)
+
+        if (startId>0 && endId>=startId){
+            userRepository.deleteListOfUsersById(startId, endId);
+        }
+        else throw new BadClientRequestException("Bad id's range for deleting users, " +
+                "start id: " + startId + ", end id: " + endId);
+
     }
+
+    @Override
+    public Optional<User> getUserById(Long id) {
+
+        if (userRepository.existsById(id)){
+            return userRepository.findById(id);
+        }
+        else throw new IdNotFoundException("User not found, id: " + id);
+
+    }
+
+    @Override
+    public List<User> getAllUsers(){
+
+        if(userRepository.count()>0){
+            return userRepository.findAll();
+        }
+        else throw new NoContentException("Empty all users list");
+
+    }
+
 
     @Override
     public boolean existsByLoginAndPasswordIgnoreCase(String login, String password){
         try{return userRepository.existsByLoginAndPasswordIgnoreCase(login, password);}
         catch (ServerErrorException serverErrEx){
-            throw new ServerErrorException("Server error with function existsByLoginAndPasswordIgnoreCase()", null);
+            throw new ObjectNotFoundException("No user with login " + login);
         }
     }
 
     @Override
-    public List<User> getAllUsers(){
-        return userRepository.findAll();
-    }
-
-    @Override
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+    public boolean existsById(Long id) {
+        return userRepository.existsById(id);
     }
 
     @Override

@@ -28,4 +28,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByLoginAndPasswordIgnoreCase(String login, String password);
 
+    boolean existsById(Long id);
+
 }
