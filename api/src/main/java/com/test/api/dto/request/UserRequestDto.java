@@ -13,26 +13,28 @@ import lombok.Setter;
 @Setter
 public class UserRequestDto {
 
+    @NotNull(message = "Id is required")
     private Long id;
 
-    @NotEmpty(message = "login is required")
-    @Size(
-            max = 50,
-            min = 11,
-            message = "Max size for login is 50"
-    )
+    @NotEmpty(message = "Login is required")
+    @Min(value = 11L, message = "Min size is 11")
+    @Max(value = 50L, message = "Max size is 50")
+    @Email(message = "Enter email address")
     private String login;
 
     @Pattern(regexp = "^(?=.*\\d{3,})(?=.*[^A-Za-z0-9])[\\S]{7,20}$", message = "Non valid password")
-    @NotEmpty(message = "password is required")
+    @NotEmpty(message = "Password is required")
     private String password;
 
     @Size(
             max = 256,
-            message = "Max size for full name is 256"
+            message = "Non valid full name"
     )
-    @NotEmpty(message = "full name is required")
+    @Max(value = 256, message = "Max size is 256")
+    @NotEmpty(message = "Full name is required")
     private String fullName;
 
+//    @Null
+//    @Pattern(regexp = "^[male|female|none]$")
     private Gender gender;
 }

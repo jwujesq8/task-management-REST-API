@@ -1,5 +1,6 @@
 package com.test.api.config.JWT;
 
+import com.test.api.exception.TokenValidationException;
 import com.test.api.user.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -91,14 +92,19 @@ public class JwtProvider {
             return true;
         } catch (ExpiredJwtException expEx) {
             log.error("Token expired", expEx);
+//            throw new TokenValidationException("Token expired: " + expEx);
         } catch (UnsupportedJwtException unsEx) {
             log.error("Unsupported jwt", unsEx);
+//            throw new TokenValidationException("Unsupported jwt: " + unsEx);
         } catch (MalformedJwtException mjEx) {
             log.error("Malformed jwt", mjEx);
+//            throw new TokenValidationException("Malformed jwt: " + mjEx);
         } catch (SignatureException sEx) {
             log.error("Invalid signature", sEx);
+//            throw new TokenValidationException("Invalid signature: " + sEx);
         } catch (Exception e) {
-            log.error("invalid token", e);
+            log.error("Invalid token", e);
+//            throw new TokenValidationException("Invalid token: " + e);
         }
         return false;
     }
@@ -107,7 +113,7 @@ public class JwtProvider {
         return validateToken(accessToken, accessSecretKey);
     }
 
-    public boolean validateRefreshToken(@NonNull String refreshToken) {
+    public boolean validateRefreshToken(@NonNull String refreshToken){
         return validateToken(refreshToken, refreshSecretKey);
     }
 

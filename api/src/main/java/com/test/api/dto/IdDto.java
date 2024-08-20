@@ -14,7 +14,7 @@ import lombok.Setter;
 @Getter
 public class IdDto {
 
-    @NotEmpty(message = "id is required")
+    @NotEmpty(message = "Id is required")
     @Min(1)
     private Long id;
 }

@@ -1,42 +1,83 @@
 package com.test.api.exceptionHandler;
 
-import com.test.api.dto.ViolationDto;
 import com.test.api.dto.response.MessageResponseDto;
-import com.test.api.dto.response.ValidationErrorResponseDto;
 import com.test.api.exception.*;
 import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.constraints.Null;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.MessagingException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @RestControllerAdvice
 public class ExceptionControllerAdvice {
+    private static final Logger log = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
 
 
-    @ExceptionHandler(BadClientRequestException.class)
-    public ResponseEntity<MessageResponseDto> badRequestExceptionHandler(
-            BadClientRequestException badClientRequestException){
+
+
+    // AUTHORIZATION
+
+    @ExceptionHandler(TokenValidationException.class)
+    public ResponseEntity<MessageResponseDto> tokenValidationExceptionHandler(
+            TokenValidationException tokenValidationException){
+        return ResponseEntity
+                .status(HttpStatus.NOT_ACCEPTABLE)
+                .body(new MessageResponseDto(tokenValidationException.getMessage()));
+    }
+    @ExceptionHandler(UserAuthenticationException.class)
+    public ResponseEntity<MessageResponseDto> userAuthenticationExceptionHandler(UserAuthenticationException userAuthenticationException){
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new MessageResponseDto(userAuthenticationException.getMessage()));
+    }
+    @ExceptionHandler(AlreadyLoggedInOrLoggedOutException.class)
+    public ResponseEntity<MessageResponseDto> alreadyLoggedInOrLoggedOutExceptionHandler(
+            AlreadyLoggedInOrLoggedOutException alreadyLoggedInOrLoggedOutException){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new MessageResponseDto(alreadyLoggedInOrLoggedOutException.getMessage()));
+    }
+
+
+
+
+    // VALIDATION
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> ValidationExceptionHandler(MethodArgumentNotValidException mANotValidEx){
+
+        Map<String, String> errors = new HashMap<>();
+
+        mANotValidEx.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new MessageResponseDto(badClientRequestException.getMessage()));
+                .body(errors);
 
     }
 
-    @ExceptionHandler(IdNotFoundException.class)
-    public ResponseEntity<MessageResponseDto> idNotFoundExceptionHandler(
-            IdNotFoundException idNotFoundException){
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new MessageResponseDto(idNotFoundException.getMessage()));
 
-    }
+
+
+    // MODEL MAPPER
 
     @ExceptionHandler(ModelMappingException.class)
     public ResponseEntity<MessageResponseDto> modelMappingExceptionHandler(
@@ -46,6 +87,89 @@ public class ExceptionControllerAdvice {
                 .body(new MessageResponseDto(modelMappingException.getMessage()));
     }
 
+
+
+
+    // SERVICE
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<MessageResponseDto> dataIntegrityViolationExceptionHandler(
+            DataIntegrityViolationException dataIntegrityViolationException){
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new MessageResponseDto("Data conflict: " +
+                        dataIntegrityViolationException.getMessage()));
+    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<MessageResponseDto> unexpectedExceptionHandler(Exception e){
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new MessageResponseDto("Unexpected error: " + e.getMessage()));
+    }
+    @ExceptionHandler(OurMessagingException.class)
+    public ResponseEntity<MessageResponseDto> ourMessagingExceptionHandler(MessagingException mEx){
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new MessageResponseDto(mEx.getMessage()));
+    }
+    @ExceptionHandler(OurDataAccessException.class)
+    public ResponseEntity<MessageResponseDto> ourDataAccessExceptionHandler(
+            OurMessagingException ourMessagingException){
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new MessageResponseDto("Error retrieving users from database: " +
+                        ourMessagingException.getMessage()));
+    }
+    @ExceptionHandler(ValidException.class)
+    public ResponseEntity<MessageResponseDto> validationExceptionHandler(ValidException validException){
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponseDto(validException.getMessage()));
+    }
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<MessageResponseDto> userAlreadyExistsExceptionHandler(
+            UserAlreadyExistsException userAlreadyExistsException){
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new MessageResponseDto(userAlreadyExistsException.getMessage()));
+    }
+    @ExceptionHandler(BadClientRequestException.class)
+    public ResponseEntity<MessageResponseDto> badRequestExceptionHandler(
+            BadClientRequestException badClientRequestException){
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponseDto(badClientRequestException.getMessage()));
+
+    }
+    @ExceptionHandler(IdNotFoundException.class)
+    public ResponseEntity<MessageResponseDto> idNotFoundExceptionHandler(
+            IdNotFoundException idNotFoundException){
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponseDto(idNotFoundException.getMessage()));
+
+    }
+    @ExceptionHandler(ServerDBException.class)
+    public ResponseEntity<MessageResponseDto> serverDBExceptionHandler(
+            ServerDBException serverDBException){
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new MessageResponseDto(serverDBException.getMessage()));
+    }
+    @ExceptionHandler(NoContentException.class)
+    public ResponseEntity<MessageResponseDto> noContentExceptionHandler(
+            NoContentException noContentException){
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .body(new MessageResponseDto(noContentException.getMessage()));
+    }
+
+
+
+
+
+
     @ExceptionHandler(OurServiceErrorException.class)
     public ResponseEntity<MessageResponseDto> serverExceptionHandler(
             OurServiceErrorException ourServiceErrorException){
@@ -54,21 +178,9 @@ public class ExceptionControllerAdvice {
                 .body(new MessageResponseDto(ourServiceErrorException.getMessage()));
     }
 
-    @ExceptionHandler(ServerDBException.class)
-    public ResponseEntity<MessageResponseDto> serverDBExceptionHandler(
-            ServerDBException serverDBException){
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new MessageResponseDto(serverDBException.getMessage()));
-    }
 
-    @ExceptionHandler(NoContentException.class)
-    public ResponseEntity<MessageResponseDto> noContentExceptionHandler(
-            NoContentException noContentException){
-        return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
-                .body(new MessageResponseDto(noContentException.getMessage()));
-    }
+
+
 
     @ExceptionHandler(ObjectNotFoundException.class)
     public ResponseEntity<MessageResponseDto> objectNotFoundExceptionHandler(
@@ -78,40 +190,33 @@ public class ExceptionControllerAdvice {
                 .body(new MessageResponseDto(objectNotFoundException.getMessage()));
     }
 
-    @ExceptionHandler(NonValidTokenException.class)
-    public ResponseEntity<MessageResponseDto> nonValidTokenExceptionHandler(NonValidTokenException nonValidTokenException){
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(new MessageResponseDto(
-                        nonValidTokenException.getMessage()
-                ));
 
-    }
 
-    @ExceptionHandler(UserAuthenticationException.class)
-    public ResponseEntity<MessageResponseDto> userAuthenticationExceptionHandler(UserAuthenticationException userAuthenticationException){
 
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(new MessageResponseDto(userAuthenticationException.getMessage()));
-    }
 
-    @ExceptionHandler(ValidException.class)
-    @ResponseBody
-    public ResponseEntity<MessageResponseDto> validationExceptionHandler(ValidException validException){
-        final List<ViolationDto> violations = validException.getConstraintViolationException().getConstraintViolations().stream()
-                .map(
-                        violation -> new ViolationDto(
-                                violation.getPropertyPath().toString(),
-                                violation.getMessage()
-                        )
-                )
-                .toList();
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new MessageResponseDto(new ValidationErrorResponseDto(violations).getViolations().toString()));
-    }
+
+
+
+
+
+
+
+
+
+//    @ExceptionHandler(ConstraintViolationException.class)
+//    public ResponseEntity<ValidationErrorResponseDto> handleConstraintViolationException(ConstraintViolationException ex){
+//        List<ViolationDto> details =
+//                ex.getConstraintViolations().stream()
+//                        .map(e -> new ViolationDto(e.getPropertyPath().toString(), e.getMessage()))
+//                        .toList();
+//
+//        return ResponseEntity
+//                .status(HttpStatus.BAD_REQUEST)
+//                .body(new ValidationErrorResponseDto(details));
+//    }
+
+
 
 
 

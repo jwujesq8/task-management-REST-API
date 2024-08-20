@@ -4,11 +4,14 @@ import com.test.api.exception.*;
 import com.test.api.repository.UserRepository;
 import com.test.api.user.User;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ServerErrorException;
 
@@ -18,103 +21,110 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Validated
 public class UserServiceImpl implements UserService{
 
-    @Autowired
+//    @Autowired
     private UserRepository userRepository;
 
     @Override
-    public User addUser(User user) {
-        try {
+    public User addUser(@Valid User user) {
+
+        try{
+            if(userRepository.existsByLoginAndPasswordIgnoreCase(user.getLogin(), user.getPassword())){
+                throw new UserAlreadyExistsException("Such user (login:" + user.getLogin() + ") already exists");
+            }
+
             userRepository.save(user);
             if(userRepository.existsByLoginAndPasswordIgnoreCase(user.getLogin(), user.getPassword())){
                 return user;
             }
             throw new ServerDBException("Error with saving new user in the User Table");
         }
-        catch (ConstraintViolationException e){
-            throw new ValidException(e);
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
         }
-    }
-
-    @Override
-    public User updateUser(Long id, User user) throws ValidException, HttpClientErrorException {
-
-        User userDB = userRepository.findById(id).orElseThrow(
-                () -> new IdNotFoundException("User not found, id: " + id));
-
-        // login
-        if(Objects.nonNull(user.getLogin()) &&
-                !"".equalsIgnoreCase(user.getLogin())) {
-            try { userDB.setLogin(user.getLogin());}
-            catch (ConstraintViolationException valEx){
-                throw new ValidException(valEx);
-            }
-
-        }
-        // password
-        if(Objects.nonNull(user.getPassword()) &&
-                !"".equalsIgnoreCase(user.getPassword())) {
-            try{userDB.setPassword(user.getPassword());}
-            catch (ConstraintViolationException valEx){
-                throw new ValidException(valEx);
-            }
-
-        }
-        // fullName
-        if(Objects.nonNull(user.getFullName()) &&
-                !"".equalsIgnoreCase(user.getFullName())) {
-            try{userDB.setFullName(user.getFullName());}
-            catch (ConstraintViolationException valEx){
-                throw new ValidException(valEx);
-            }
-
-        }
-        // gender
-        if(Objects.nonNull(user.getGender()) &&
-                !"".equalsIgnoreCase(user.getGender().getName())) {
-            try{userDB.setGender(user.getGender());}
-            catch (HttpClientErrorException httpClientErrEx){
-                throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Wrong gender, id: " + user.getGender().getId());
-            }
-
-        }
-
-        userRepository.save(userDB);
-        return userDB;
 
 
     }
 
     @Override
-    public Long deleteUser(Long id) throws HttpClientErrorException{
+    public User updateUser(@Valid User user) {
 
-        if(userRepository.existsById(id)){
-            userRepository.deleteById(id);
-            return id;
+        try{
+            userRepository.findById(user.getId()).orElseThrow(
+                    () -> new IdNotFoundException("User not found, id: " + user.getId()));
+
+            userRepository.save(user);
+            return user;
 
         }
-        else throw new IdNotFoundException("User not found, id " + id);
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
+        }
+
+    }
+
+    @Override
+    public Long deleteUser(Long id){
+
+        try{
+
+            if(userRepository.existsById(id)){
+                userRepository.deleteById(id);
+                return id;
+            }
+            else throw new IdNotFoundException("User not found, id " + id);
+        }
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
+        }
+
     }
 
     @Override
     public void deleteListOfUsersById(Long startId, Long endId) {
 
-        if (startId>0 && endId>=startId){
+        try{
             userRepository.deleteListOfUsersById(startId, endId);
         }
-        else throw new BadClientRequestException("Bad id's range for deleting users, " +
-                "start id: " + startId + ", end id: " + endId);
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
+        }
 
     }
 
     @Override
-    public Optional<User> getUserById(Long id) {
-
-        if (userRepository.existsById(id)){
-            return userRepository.findById(id);
+    public void deleteListOfUsersByStartAndEndId(Long startId, Long endId){
+        try{
+            userRepository.deleteListOfUsersByStartAndEndId(startId, endId);
         }
-        else throw new IdNotFoundException("User not found, id: " + id);
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteListOfUsersByStartIdAsc(Long startId){
+        try{
+            userRepository.deleteListOfUsersByStartIdAsc(startId);
+        }
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
+        }
+    }
+
+
+
+    @Override
+    public User getUserById(Long id) {
+
+        try{
+            return userRepository.findById(id).orElseThrow(() -> new IdNotFoundException("User not found, id: " + id));
+        }
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
+        }
 
     }
 
@@ -122,19 +132,21 @@ public class UserServiceImpl implements UserService{
     public List<User> getAllUsers(){
 
         if(userRepository.count()>0){
-            return userRepository.findAll();
+            try{
+                return userRepository.findAll();
+            }
+            catch (DataAccessException e) {
+                throw new OurDataAccessException(e.getMessage());
+            }
         }
-        else throw new NoContentException("Empty all users list");
+        else throw new NoContentException("User table is empty");
 
     }
 
 
     @Override
     public boolean existsByLoginAndPasswordIgnoreCase(String login, String password){
-        try{return userRepository.existsByLoginAndPasswordIgnoreCase(login, password);}
-        catch (ServerErrorException serverErrEx){
-            throw new ObjectNotFoundException("No user with login " + login);
-        }
+        return userRepository.existsByLoginAndPasswordIgnoreCase(login, password);
     }
 
     @Override
@@ -144,7 +156,9 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public Optional<User> getUserByLogin(String login) {
-        try {return userRepository.findByLogin(login);}
+        try{
+            return userRepository.findByLogin(login);
+        }
         catch (ServerErrorException serverErrEx){
             throw new ServerErrorException("Server error with User Table", null);}
     }

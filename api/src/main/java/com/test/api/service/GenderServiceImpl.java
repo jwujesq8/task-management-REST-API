@@ -5,6 +5,7 @@ import com.test.api.repository.GenderRepository;
 import com.test.api.repository.UserRepository;
 import com.test.api.user.Gender;
 import com.test.api.user.User;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotEmpty;
@@ -27,24 +28,21 @@ public class GenderServiceImpl implements GenderService{
     private UserRepository userRepository;
 
     @Override
-    public Gender addGender(Gender gender) throws ValidationException {
-        genderRepository.save(gender);
-        if(genderRepository.findByName(gender.getName()) != null){
+    public Gender addGender(Gender gender) throws ConstraintViolationException {
 
+        try {
+            genderRepository.save(gender);
             return gender;
         }
-        throw new ValidException("""
-                Gender requirements:
-                \tid|name
-                \t1: male
-                \t2: female
-                \t3: none""");
+        catch (ConstraintViolationException valEx){
+            throw new ValidException(valEx);
+        }
 
     }
 
 
     @Override
-    public Gender updateGender(Integer id, @Valid @NotNull Gender gender) throws HttpClientErrorException {
+    public Gender updateGender(Integer id, @Valid @NotNull Gender gender) throws HttpClientErrorException, ConstraintViolationException {
 
         Gender genderDB = genderRepository.findById(id).orElseThrow(
                 () -> new IdNotFoundException("Gender not found, id: " + id));
@@ -57,22 +55,25 @@ public class GenderServiceImpl implements GenderService{
                 genderRepository.save(genderDB);
                 return gender;
             }
-            catch (ValidationException valEx){
-                throw new ValidException("Non valid gender name, name: " + gender.getName());
+            catch (ConstraintViolationException valEx){
+                throw new ValidException(valEx);
+            }
+            catch (HttpClientErrorException httpClErrEx){
+                throw new BadClientRequestException(httpClErrEx.getMessage());
             }
         }
-        throw new BadClientRequestException("Bad gender request to update gender info");
+        throw new OurServiceErrorException("Server error while updating gender");
 
     }
 
     @Override
-    public Gender deleteGenderById(Integer id) throws HttpClientErrorException {
+    public Gender deleteGenderById(Integer id) throws HttpClientErrorException, IdNotFoundException {
 
 
         Gender genderToDelete = genderRepository.findById(id).orElseThrow(
                 () -> new IdNotFoundException("Gender not found, id: " + id));
 
-        List<User> userListWithDeletedGender = userRepository.findByGender(Optional.of(genderToDelete));
+        List<User> userListWithDeletedGender = userRepository.findByGender(genderToDelete);
 
         if(!userListWithDeletedGender.isEmpty()){
 
@@ -87,7 +88,7 @@ public class GenderServiceImpl implements GenderService{
         if(!genderRepository.existsById(id)){
             return genderToDelete;
         }
-        throw new OurServiceErrorException("Server error while deleting gender by id. ");
+        throw new OurServiceErrorException("Server error while deleting gender by id");
     }
 
     @Override

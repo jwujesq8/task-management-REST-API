@@ -10,6 +10,6 @@ import lombok.*;
 @NoArgsConstructor
 public class MessageResponseDto {
 
-    @NotBlank
+    @NotBlank(message = "description is required")
     private String description;
 }

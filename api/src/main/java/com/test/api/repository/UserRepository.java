@@ -23,7 +23,23 @@ public interface UserRepository extends JpaRepository<User, Long> {
     )
     void deleteListOfUsersById(Long startId, Long endId);
 
-    List<User> findByGender(Optional<Gender> gender);
+    @Modifying
+    @Transactional
+    @Query(
+            value = "DELETE FROM user u WHERE u.id>=?1 AND u.id<=?2;",
+            nativeQuery = true
+    )
+    void deleteListOfUsersByStartAndEndId(Long startId, Long endId);
+
+    @Modifying
+    @Transactional
+    @Query(
+            value = "DELETE FROM user u WHERE u.id>=?1",
+            nativeQuery = true
+    )
+    void deleteListOfUsersByStartIdAsc(Long startId);
+
+    List<User> findByGender(Gender gender);
     Optional<User> findByLogin(String login);
 
     boolean existsByLoginAndPasswordIgnoreCase(String login, String password);

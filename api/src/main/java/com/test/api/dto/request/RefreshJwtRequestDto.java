@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RefreshJwtRequestDto {
-    @NotEmpty
+    @NotEmpty(message = "refresh token is required")
     private String refreshJwtRequest;
 }
