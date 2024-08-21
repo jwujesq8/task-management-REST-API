@@ -11,10 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserRequestDto {
-
-    @NotNull(message = "Id is required")
-    private Long id;
+public class POSTUserRequestDto {
 
     @NotEmpty(message = "Login is required")
     @Size(
@@ -22,6 +19,7 @@ public class UserRequestDto {
             max = 50,
             message = "Min size is 11, max size is 50"
     )
+    @Email(message = "Enter email address")
     private String login;
 
     @Pattern(regexp = "^(?=.*\\d{3,})(?=.*[^A-Za-z0-9])[\\S]{7,20}$", message = "Non valid password")
@@ -30,11 +28,12 @@ public class UserRequestDto {
 
     @Size(
             max = 256,
-            message = "Non valid full name"
+            message = "Max size is 256"
     )
     @NotEmpty(message = "Full name is required")
     private String fullName;
 
     @Pattern(regexp = "^(male|female|none)$")
-    private Gender gender;
+    private String genderName;
+
 }

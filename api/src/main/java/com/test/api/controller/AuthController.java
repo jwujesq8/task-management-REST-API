@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private AuthServiceImpl authServiceImpl;
+    private final AuthServiceImpl authServiceImpl;
 
     @PostMapping("/login")
     @PreAuthorize("!isAuthenticated()")

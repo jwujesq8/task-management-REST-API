@@ -100,12 +100,12 @@ public class ExceptionControllerAdvice {
                 .body(new MessageResponseDto("Data conflict: " +
                         dataIntegrityViolationException.getMessage()));
     }
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<MessageResponseDto> unexpectedExceptionHandler(Exception e){
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new MessageResponseDto("Unexpected error: " + e.getMessage()));
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<MessageResponseDto> unexpectedExceptionHandler(Exception e){
+//        return ResponseEntity
+//                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body(new MessageResponseDto("Unexpected error: " + e.getMessage()));
+//    }
     @ExceptionHandler(OurMessagingException.class)
     public ResponseEntity<MessageResponseDto> ourMessagingExceptionHandler(MessagingException mEx){
         return ResponseEntity

@@ -1,31 +1,43 @@
 package com.test.api.service;
 
+import com.test.api.dto.request.POSTUserRequestDto;
+import com.test.api.dto.request.PUTUserRequestDto;
+import com.test.api.dto.response.UserResponseDto;
 import com.test.api.user.User;
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
 
-    User addUser(User user);
+//    User addUser(User user);
 
-    User updateUser(User user);
+    UserResponseDto getUserById(Long id);
 
-    Long deleteUser(Long id);
+    void addUser(POSTUserRequestDto postUserRequestDto);
 
-    void deleteListOfUsersById(Long startId, Long endId);
+    void updateUser(PUTUserRequestDto putUserRequestDto);
 
-    void deleteListOfUsersByStartAndEndId(Long startId, Long endId);
+    void deleteUser(Long id);
 
-    void deleteListOfUsersByStartIdAsc(Long startId);
+    List<UserResponseDto> getAllUsers();
+
+    Long deleteListOfUsersById(Long startId, Long endId);
+
+    Long deleteListOfUsersByStartAndEndId(Long startId, Long endId);
+
+    Long deleteListOfUsersByStartIdAsc(Long startId);
+
+
+
+
 
     boolean existsByLoginAndPasswordIgnoreCase(String login, String password);
 
     boolean existsById(Long id);
 
-    User getUserById(Long id);
 
-    List<User> getAllUsers();
 
     Optional<User> getUserByLogin(String login);
 }

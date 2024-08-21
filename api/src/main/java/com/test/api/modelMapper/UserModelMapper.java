@@ -1,6 +1,8 @@
 package com.test.api.modelMapper;
 
 
+import com.test.api.dto.request.POSTUserRequestDto;
+import com.test.api.dto.request.PUTUserRequestDto;
 import com.test.api.dto.request.UserRequestDto;
 import com.test.api.dto.response.UserResponseDto;
 import com.test.api.exception.ModelMappingException;
@@ -41,6 +43,40 @@ public class UserModelMapper {
             throw new RuntimeException("Unexpected error during mapping: " + e.getMessage());
         }
     }
+
+    public User convert_POSTUserRequestDto_to_User(POSTUserRequestDto postUserRequestDto){
+        try{
+            return mapper.map(postUserRequestDto, User.class);
+        }
+        catch (IllegalArgumentException e) {
+            throw new ModelMappingException("Invalid argument provided for mapping: " + e.getMessage());
+        }
+        catch (org.modelmapper.MappingException e) {
+            throw new ModelMappingException("Mapping failed: " + e.getMessage());
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Unexpected error during mapping: " + e.getMessage());
+        }
+    }
+
+    public User convert_PUTUserRequestDto_to_User(PUTUserRequestDto putUserRequestDto){
+        try{
+            return mapper.map(putUserRequestDto, User.class);
+        }
+        catch (IllegalArgumentException e) {
+            throw new ModelMappingException("Invalid argument provided for mapping: " + e.getMessage());
+        }
+        catch (org.modelmapper.MappingException e) {
+            throw new ModelMappingException("Mapping failed: " + e.getMessage());
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Unexpected error during mapping: " + e.getMessage());
+        }
+    }
+
+
+
+
 
     public UserResponseDto convert_User_to_UserResponseDto(User user){
         try{

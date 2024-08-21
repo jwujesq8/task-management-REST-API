@@ -16,11 +16,13 @@ import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Validated
 public class AuthServiceImpl {
 
     private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);

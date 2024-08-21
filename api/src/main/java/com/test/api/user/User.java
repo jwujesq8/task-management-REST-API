@@ -52,9 +52,8 @@ public class User implements UserDetails {
             max = 20,
             message = "Max size for password is 20"
     )
-    @Column(unique = true)
-    //size = 20, должен обязательно содержать спец символ и 3 числа, минимальное кол-во символом 7
     @Pattern(regexp = "^(?=.*\\d{3,})(?=.*[^A-Za-z0-9])[\\S]{7,20}$", message = "Non valid password")
+    @Column(unique = true)
     private String password;
 
     @NotEmpty(message = "fullName is required")

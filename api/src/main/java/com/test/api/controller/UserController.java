@@ -2,16 +2,21 @@ package com.test.api.controller;
 
 import com.test.api.dto.DeleteUsersListByIdDto;
 import com.test.api.dto.IdDto;
+import com.test.api.dto.request.POSTUserRequestDto;
+import com.test.api.dto.request.PUTUserRequestDto;
 import com.test.api.dto.request.UserRequestDto;
 import com.test.api.dto.response.MessageResponseDto;
 import com.test.api.dto.UserActionMessageDto;
+import com.test.api.dto.response.UserResponseDto;
 import com.test.api.exception.*;
 import com.test.api.modelMapper.UserModelMapper;
 import com.test.api.service.GenderService;
 import com.test.api.service.UserService;
+import com.test.api.user.Gender;
 import com.test.api.user.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,20 +36,20 @@ import java.util.List;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class UserController {
 
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
+    //private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
     private final GenderService genderService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final UserModelMapper userModelMapper;
 
 
 
 
     @GetMapping("")
     @PreAuthorize("isAuthenticated()")
-    public User getUserById(@RequestBody @Valid IdDto idDto){
+    public UserResponseDto getUserById(@RequestBody @Valid IdDto idDto){
 
         //log.info("(userController) is authenticated : " + SecurityContextHolder.getContext().getAuthentication().isAuthenticated());
 
@@ -60,12 +65,15 @@ public class UserController {
 
     }
 
+
+
     @PostMapping("")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MessageResponseDto> addUser(@RequestBody @Valid UserRequestDto userRequestDto){
+    public ResponseEntity<MessageResponseDto> addUser(
+            @RequestBody @Valid POSTUserRequestDto postUserRequestDto){
         try {
-            User user = userModelMapper.convert_UserRequestDto_to_User(userRequestDto);
-            userService.addUser(user);
+
+            userService.addUser(postUserRequestDto);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(new MessageResponseDto("User is saved!"));
@@ -78,17 +86,20 @@ public class UserController {
         }
     }
 
+
+
     @PutMapping("")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MessageResponseDto> updateUser(@RequestBody @Valid UserRequestDto userRequestDto){
+    public ResponseEntity<MessageResponseDto> updateUser(
+            @RequestBody @Valid PUTUserRequestDto putUserRequestDto){
 
         try{
 
-            User user = userModelMapper.convert_UserRequestDto_to_User(userRequestDto);
-            userService.updateUser(user);
+            userService.updateUser(putUserRequestDto);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(new MessageResponseDto("User is updated, id: " + user.getId()));
+                    .body(new MessageResponseDto(
+                            "User is updated, id: " + putUserRequestDto.getId()));
 
         }
         catch (DataIntegrityViolationException e) {
@@ -98,6 +109,8 @@ public class UserController {
             throw new UserAuthenticationException("User is not authenticated: " + e.getMessage());
         }
     }
+
+
 
     @DeleteMapping("")
     @PreAuthorize("isAuthenticated()")
@@ -119,17 +132,16 @@ public class UserController {
 
 
 
-
     @GetMapping("/list")
     @PreAuthorize("isAuthenticated()")
-    public List<User> getAllUsers(){
+    public List<UserResponseDto> getAllUsers(){
 
         try{
-            // webSocket message
+            // TODO: optimize webSocket message
             UserActionMessageDto message = new UserActionMessageDto();
             message.setUser((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             message.setAction("use request GET user/all");
-            log.info("message: " + message.getUser() + ", action: " + message.getAction());
+            log.info("message: {}, action: {}", message.getUser(), message.getAction());
             messagingTemplate.convertAndSend("/topic", "use request GET user/all");
 
             return userService.getAllUsers();
@@ -146,16 +158,20 @@ public class UserController {
 
     }
 
+
+
     @DeleteMapping("/list")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MessageResponseDto> deleteListOfUsersById(
             @RequestBody @Valid DeleteUsersListByIdDto deleteUsersListByIdDto){
+
         try{
-            userService.deleteListOfUsersById(deleteUsersListByIdDto.getStartId(),deleteUsersListByIdDto.getEndId());
+            Long idCountInRange = userService.deleteListOfUsersById(deleteUsersListByIdDto.getStartId(),deleteUsersListByIdDto.getEndId());
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new MessageResponseDto("Deleted users: " + deleteUsersListByIdDto.getStartId()
-                            + "-" + deleteUsersListByIdDto.getEndId()));
+                    .body(new MessageResponseDto(idCountInRange + " users have been deleted " +
+                            "(provided range: " + deleteUsersListByIdDto.getStartId()
+                            + "-" + deleteUsersListByIdDto.getEndId() + ")"));
         }
         catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(e.getMessage());
@@ -164,17 +180,24 @@ public class UserController {
             throw new UserAuthenticationException("User is not authenticated: " + e.getMessage());
         }
     }
+
+
 
     @DeleteMapping("/list/range")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MessageResponseDto> deleteListOfUsersByStartAndEndId(
             @RequestBody @Valid DeleteUsersListByIdDto deleteUsersListByIdDto){
+
         try{
-            userService.deleteListOfUsersByStartAndEndId(deleteUsersListByIdDto.getStartId(), deleteUsersListByIdDto.getEndId());
+
+            Long idCountInRange = userService.deleteListOfUsersByStartAndEndId(
+                    deleteUsersListByIdDto.getStartId(),deleteUsersListByIdDto.getEndId());
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new MessageResponseDto("Deleted users: " + deleteUsersListByIdDto.getStartId()
-                            + "-" + deleteUsersListByIdDto.getEndId()));
+                    .body(new MessageResponseDto(idCountInRange + " users have been deleted " +
+                            "(provided range: " + deleteUsersListByIdDto.getStartId()
+                            + "-" + deleteUsersListByIdDto.getEndId() + ")"));
+
         }
         catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(e.getMessage());
@@ -183,15 +206,19 @@ public class UserController {
             throw new UserAuthenticationException("User is not authenticated: " + e.getMessage());
         }
     }
+
+
 
     @DeleteMapping("/list/asc")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MessageResponseDto> deleteListOfUsersByStartIdAsc(@RequestBody @Valid IdDto idDto){
+
         try{
-            userService.deleteListOfUsersByStartIdAsc(idDto.getId());
+            Long idCountFrom = userService.deleteListOfUsersByStartIdAsc(idDto.getId());
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new MessageResponseDto("Users have been deleted from id: " + idDto.getId()));
+                    .body(new MessageResponseDto(idCountFrom + " users have been deleted " +
+                            "(provided start id: " + idDto.getId()+ ")"));
         }
         catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException(e.getMessage());
@@ -200,15 +227,16 @@ public class UserController {
             throw new UserAuthenticationException("User is not authenticated: " + e.getMessage());
         }
     }
-
 
 
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/checkGenderTable")
-    public String checkGenderTableAndWelcome(){
+    public ResponseEntity<MessageResponseDto> checkGenderTableAndWelcome(){
         genderService.checkGenderTable();
-        return "Hello!" ;
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new MessageResponseDto("Gender table has an appropriate content"));
     }
 
 }
