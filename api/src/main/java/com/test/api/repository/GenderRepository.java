@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface GenderRepository extends JpaRepository<Gender, Integer> {
 
     Gender findByName(String name);
+    Gender findByNameIgnoreCase(String name);
 }

@@ -1,76 +1,222 @@
 package com.test.api.service;
 
+import com.test.api.dto.request.POSTUserRequestDto;
+import com.test.api.dto.request.PUTUserRequestDto;
+import com.test.api.dto.response.UserResponseDto;
+import com.test.api.exception.*;
+import com.test.api.modelMapper.UserModelMapper;
+import com.test.api.repository.GenderRepository;
 import com.test.api.repository.UserRepository;
+import com.test.api.user.Gender;
 import com.test.api.user.User;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.server.ServerErrorException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService{
 
-    @Autowired
-    private UserRepository userRepository;
+    //private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+//        private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final UserModelMapper userModelMapper;
+    private final GenderRepository genderRepository;
 
     @Override
-    public String addUser(User user) {
-        userRepository.save(user);
+    public UserResponseDto getUserById(Long id) {
 
-        if(userRepository.existsByLoginAndPasswordIgnoreCase(user.getLogin(),user.getPassword())){
-            return user.getLogin();
+        try{
+            User user =  userRepository.findById(id).orElseThrow(
+                    () -> new IdNotFoundException("User not found, id: " + id));
+
+            return userModelMapper.convert_User_to_UserResponseDto(user);
+
         }
-        return null;
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
+        }
+
     }
 
     @Override
-    public User updateUser(Long id, User user) {
+    public void addUser(POSTUserRequestDto postUserRequestDto) {
 
-        User userDB = userRepository.findById(id).get();
+        try{
+            if(userRepository.existsByLoginAndPasswordIgnoreCase(
+                    postUserRequestDto.getLogin(), postUserRequestDto.getPassword())){
+                throw new UserAlreadyExistsException(
+                        "Such user (login:" + postUserRequestDto.getLogin() + ") already exists");
+            }
 
-        // login
-        if(Objects.nonNull(user.getLogin()) &&
-                !"".equalsIgnoreCase(user.getLogin())) {
-            userDB.setLogin(user.getLogin());
+            Gender postUserGender;
 
+            if(postUserRequestDto.getGenderName().equalsIgnoreCase("male")){
+                postUserGender = genderRepository.findByNameIgnoreCase("male");
+            }
+            else if (postUserRequestDto.getGenderName().equalsIgnoreCase("female")){
+                postUserGender = genderRepository.findByNameIgnoreCase("female");
+            }
+            else {
+                postUserGender = genderRepository.findByNameIgnoreCase("none");
+            }
+
+            postUserRequestDto.setGenderName(null);
+
+            //TODO: String null genderName to Gender null
+            User postUser = userModelMapper.convert_POSTUserRequestDto_to_User(postUserRequestDto);
+            postUser.setGender(postUserGender);
+
+            userRepository.save(postUser);
+            if(userRepository.existsByLoginAndPasswordIgnoreCase(
+                    postUser.getLogin(), postUser.getPassword())){
+
+                return;
+            }
+            throw new ServerDBException("Error with saving new user in the User Table");
         }
-        // password
-        if(Objects.nonNull(user.getPassword()) &&
-                !"".equalsIgnoreCase(user.getPassword())) {
-            userDB.setPassword(user.getPassword());
-
-        }
-        // fullName
-        if(Objects.nonNull(user.getFullName()) &&
-                !"".equalsIgnoreCase(user.getFullName())) {
-            userDB.setFullName(user.getFullName());
-
-        }
-        // gender
-        if(Objects.nonNull(user.getGender()) &&
-                !"".equalsIgnoreCase(user.getGender().getName())) {
-            userDB.setGender(user.getGender());
-
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
         }
 
-        return userRepository.save(userDB);
+
     }
 
     @Override
-    public Long deleteUser(Long id) {
+    public void updateUser(PUTUserRequestDto putUserRequestDto) {
 
-        userRepository.deleteById(id);
+        try{
+            userRepository.findById(putUserRequestDto.getId()).orElseThrow(
+                    () -> new IdNotFoundException("User not found, id: " + putUserRequestDto.getId()));
 
-        if(!userRepository.existsById(id)){
-            return id;
+            Gender putUserGender = genderRepository.findByNameIgnoreCase(putUserRequestDto.getGenderName());
+            putUserRequestDto.setGenderName(null);
+            User putUser = userModelMapper.convert_PUTUserRequestDto_to_User(putUserRequestDto);
+            putUser.setGender(putUserGender);
+
+            try{
+                userRepository.save(putUser);
+            }
+            catch(ConstraintViolationException valEx){
+                throw new ServerDBException("Validation error on a database level");
+            }
+
+            if(userRepository.existsByLoginAndPasswordIgnoreCase(
+                    putUser.getLogin(), putUser.getPassword())){
+
+                return;
+            }
+            throw new ServerDBException("Error with saving new user in the User Table");
+
+        }
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
         }
 
-        return null;
     }
+
+    @Override
+    public void deleteUser(Long id){
+
+        try{
+            if(userRepository.existsById(id)){
+
+                userRepository.deleteById(id);
+
+            }
+            else throw new IdNotFoundException("User not found, id " + id);
+        }
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
+        }
+
+    }
+
+    @Override
+    public List<UserResponseDto> getAllUsers() {
+        try {
+            List<User> userList = userRepository.findAll();
+
+            if (!userList.isEmpty()) {
+                List<UserResponseDto> userResponseDtoList = new ArrayList<>();
+                userList
+                        .forEach(user ->
+                                    userResponseDtoList.add(userModelMapper.convert_User_to_UserResponseDto(user))
+
+                        );
+                return userResponseDtoList;
+            } else {
+                throw new NoContentException("User table is empty");
+            }
+        } catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Long deleteListOfUsersById(Long startId, Long endId) {
+
+        try{
+            Long idCountInRange = userRepository.idCountInRange(startId, endId);
+            if (idCountInRange>0){
+                userRepository.deleteListOfUsersById(startId, endId);
+                return idCountInRange;
+            }
+            else throw new IdNotFoundException("There are no one user with id in range " + startId + "-" + endId);
+        }
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
+        }
+
+    }
+
+    @Override
+    public Long deleteListOfUsersByStartAndEndId(Long startId, Long endId){
+
+        try{
+            Long idCountInRange = userRepository.idCountInRange(startId, endId);
+            if (idCountInRange>0){
+                userRepository.deleteListOfUsersByStartAndEndId(startId, endId);
+                return idCountInRange;
+            }
+            else throw new IdNotFoundException("There are no one user with id in range " + startId + "-" + endId);
+
+        }
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Long deleteListOfUsersByStartIdAsc(Long startId){
+
+        try{
+            Long idCountFrom = userRepository.idCountFrom(startId);
+            if (idCountFrom>0){
+                userRepository.deleteListOfUsersByStartIdAsc(startId);
+                return idCountFrom;
+            }
+            else throw new IdNotFoundException("There are no one user with id from " + startId);
+
+        }
+        catch (DataAccessException e) {
+            throw new OurDataAccessException(e.getMessage());
+        }
+    }
+
 
     @Override
     public boolean existsByLoginAndPasswordIgnoreCase(String login, String password){
@@ -78,36 +224,16 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<User> getAllUsers(){
-        return userRepository.findAll();
-    }
-
-    @Override
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
-    }
-
-    @Override
-    public String deleteListOfUsersById(Long startId, Long endId) {
-
-        StringBuilder undeletedUsers = new StringBuilder();
-        userRepository.deleteListOfUsersById(startId, endId);
-
-        for(Long id=startId;id<=endId;id++){
-            if(userRepository.existsById(id)) {
-                undeletedUsers.append("  ").append(id);}
-
-        }
-        if (undeletedUsers.isEmpty()) {
-            return  "Deleted users: " + startId + "-" + endId;
-        }
-        else{
-            return  "Id list of undeleted users:" + undeletedUsers;
-        }
+    public boolean existsById(Long id) {
+        return userRepository.existsById(id);
     }
 
     @Override
     public Optional<User> getUserByLogin(String login) {
-        return userRepository.findByLogin(login);
+        try{
+            return userRepository.findByLogin(login);
+        }
+        catch (ServerErrorException serverErrEx){
+            throw new ServerErrorException("Server error with User Table", null);}
     }
 }

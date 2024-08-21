@@ -2,6 +2,7 @@ package com.test.api.user;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -35,29 +36,27 @@ public class User implements UserDetails {
     )
     private Long id;
 
-    @NotBlank(message = "login needs to be filled")
-    @NotEmpty(message = "login is empty!")
+    @NotEmpty(message = "login is required")
     @Size(
             max = 50,
+            min = 11,
             message = "Max size for login is 50"
     )
+    @Valid
     @Column(unique = true)
     private String login;
 
-    @NotBlank(message = "password needs to be filled")
-    @NotEmpty(message = "password is empty!")
+    @NotEmpty(message = "password is required")
     @Size(
             min = 7,
             max = 20,
             message = "Max size for password is 20"
     )
-    @Column(unique = true)
-    //size = 20, должен обязательно содержать спец символ и 3 числа, минимальное кол-во символом 7
     @Pattern(regexp = "^(?=.*\\d{3,})(?=.*[^A-Za-z0-9])[\\S]{7,20}$", message = "Non valid password")
+    @Column(unique = true)
     private String password;
 
-    @NotBlank(message = "fullName needs to be filled")
-    @NotEmpty(message = "fullName is empty!")
+    @NotEmpty(message = "fullName is required")
     @Size(
             max = 256,
             message = "Max size for full name is 256"

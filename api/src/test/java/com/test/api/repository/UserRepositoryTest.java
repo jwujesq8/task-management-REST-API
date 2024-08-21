@@ -121,7 +121,7 @@ class UserRepositoryTest {
 
         Gender gender_male = genderRepository.findByName("male");
         assert gender_male != null;
-        List<User> maleList = userRepository.findByGender(Optional.of(gender_male));
+        List<User> maleList = userRepository.findByGender(gender_male);
 
         if(!maleList.isEmpty()){
 

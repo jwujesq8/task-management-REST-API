@@ -1,12 +1,11 @@
-package com.test.api.entity;
+package com.test.api.dto;
 
-import com.test.api.user.User;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class UserActionMessage {
+public class UserActionMessageDto {
     private String user;
     private String action;
 

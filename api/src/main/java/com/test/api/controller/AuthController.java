@@ -1,51 +1,60 @@
 package com.test.api.controller;
 
-import com.test.api.entity.JwtRequest;
-import com.test.api.entity.JwtResponse;
-import com.test.api.entity.RefreshJwtRequest;
-import com.test.api.service.AuthService;
+import com.test.api.dto.request.JwtRequestDto;
+import com.test.api.dto.response.JwtResponseDto;
+import com.test.api.dto.request.RefreshJwtRequestDto;
+import com.test.api.dto.response.MessageResponseDto;
+import com.test.api.service.AuthServiceImpl;
 import jakarta.security.auth.message.AuthException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("user/auth")
+@Validated
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthServiceImpl authServiceImpl;
 
     @PostMapping("/login")
     @PreAuthorize("!isAuthenticated()")
-    public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest jwtRequest) throws AuthException {
-        final JwtResponse jwtResponse = authService.login(jwtRequest);
-        return ResponseEntity.ok(jwtResponse);
+    public ResponseEntity<JwtResponseDto> login(@RequestBody @Valid @NotNull JwtRequestDto JwtRequestDto) throws ConstraintViolationException {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(authServiceImpl.login(JwtRequestDto));
     }
 
     @PostMapping("/newAccessToken")
-    public ResponseEntity<JwtResponse> getNewAccessToken(@RequestBody RefreshJwtRequest refreshJwtRequest) throws AuthException{
-        final JwtResponse jwtResponse = authService.getNewAccessToken(refreshJwtRequest.getRefreshJwtRequest());
-        return ResponseEntity.ok(jwtResponse);
+    public ResponseEntity<JwtResponseDto> getNewAccessToken(@RequestBody @Valid @NotNull RefreshJwtRequestDto RefreshJwtRequestDto){
+       return ResponseEntity
+               .status(HttpStatus.OK)
+               .body(authServiceImpl.getNewAccessToken(RefreshJwtRequestDto.getRefreshJwtRequest()));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<JwtResponse> refresh(@RequestBody RefreshJwtRequest refreshJwtRequest) throws AuthException {
-        final JwtResponse jwtResponse = authService.refresh(refreshJwtRequest.getRefreshJwtRequest());
-        return ResponseEntity.ok(jwtResponse);
+    public ResponseEntity<JwtResponseDto> refresh(@RequestBody @Valid @NotNull RefreshJwtRequestDto RefreshJwtRequestDto){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(authServiceImpl.refresh(RefreshJwtRequestDto.getRefreshJwtRequest()));
     }
 
     @DeleteMapping("/logout")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<JwtResponse> logout(@RequestBody RefreshJwtRequest refreshJwtRequest) throws AuthException{
-        final JwtResponse jwtResponse = authService.logout(refreshJwtRequest.getRefreshJwtRequest());
-
-        return ResponseEntity.ok(jwtResponse);
+    public ResponseEntity<MessageResponseDto> logout(@RequestBody @Valid @NotNull RefreshJwtRequestDto RefreshJwtRequestDto){
+        authServiceImpl.logout(RefreshJwtRequestDto.getRefreshJwtRequest());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new MessageResponseDto("Successfully log out"));
     }
 
 }

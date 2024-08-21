@@ -1,58 +1,62 @@
 package com.test.api.service;
 
-import com.test.api.entity.JwtAuthentication;
-import com.test.api.entity.JwtRequest;
-import com.test.api.entity.JwtResponse;
+import com.test.api.config.JWT.JwtProvider;
+import com.test.api.dto.request.JwtRequestDto;
+import com.test.api.dto.response.JwtResponseDto;
+import com.test.api.exception.AlreadyLoggedInOrLoggedOutException;
+import com.test.api.exception.ObjectNotFoundException;
+import com.test.api.exception.TokenValidationException;
+import com.test.api.exception.UserAuthenticationException;
 import com.test.api.user.User;
-import io.jsonwebtoken.Claims;
-import jakarta.security.auth.message.AuthException;
+import io.jsonwebtoken.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+@Validated
+public class AuthServiceImpl {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
     private final UserService userService;
     private final Map<String, String> refreshTokensStorage = new HashMap<>();
     private final JwtProvider jwtProvider;
 
-    public JwtResponse login(@NotNull JwtRequest jwtRequest) throws AuthException {
+    public JwtResponseDto login(@Valid @NotNull JwtRequestDto jwtRequestDto) {
 
-        final User user = userService.getUserByLogin(jwtRequest.getLogin())
-                .orElseThrow(() -> new AuthException("User not found"));
+        final User user = userService.getUserByLogin(jwtRequestDto.getLogin())
+                .orElseThrow(() -> new ObjectNotFoundException("User not found"));
 
         if(!refreshTokensStorage.containsKey(user.getLogin())){
 
-            if(user.getPassword().equals(jwtRequest.getPassword())){
+            if(user.getPassword().equals(jwtRequestDto.getPassword())){
 
                 final String accessToken = jwtProvider.generateAccessToken(user);
                 final String refreshToken = jwtProvider.generateRefreshToken(user);
                 refreshTokensStorage.put(user.getLogin(), refreshToken);
-                return new JwtResponse(accessToken, refreshToken);
+                return new JwtResponseDto(accessToken, refreshToken);
             }
             else {
-                throw  new AuthException("Wrong password");
+                throw new UserAuthenticationException("Wrong password");
             }
         } else {
-            throw new AuthException("User is already logged in");
+            throw new AlreadyLoggedInOrLoggedOutException("User is already logged in");
         }
 
 
     }
 
-    public JwtResponse getNewAccessToken(@NotNull String refreshToken) throws AuthException{
+    public JwtResponseDto getNewAccessToken(@NotNull String refreshToken){
 
         if(jwtProvider.validateRefreshToken(refreshToken)){
-
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
             final String login = claims.getSubject();
             final String refreshTokenDB = refreshTokensStorage.get(login);
@@ -60,18 +64,19 @@ public class AuthService {
             if(refreshTokenDB!=null && refreshTokenDB.equals(refreshToken)){
 
                 final User user = userService.getUserByLogin(login)
-                        .orElseThrow(() -> new AuthException("User not found"));
+                        .orElseThrow(() -> new UserAuthenticationException("User not found"));
 
                 String newAccessToken = jwtProvider.generateAccessToken(user);
                 refreshTokensStorage.put(user.getLogin(), null);
-                return new JwtResponse(newAccessToken, null);
+                return new JwtResponseDto(newAccessToken, null);
             }
-
+            throw new TokenValidationException("Wrong refresh token");
         }
-        return new JwtResponse(null, null);
+        throw new TokenValidationException("Non valid refresh token");
+
     }
 
-    public JwtResponse refresh(@NotNull String refreshToken) throws AuthException{
+    public JwtResponseDto refresh(@NotNull String refreshToken){
 
         if(jwtProvider.validateRefreshToken(refreshToken)){
 
@@ -82,19 +87,20 @@ public class AuthService {
             if(refreshTokenDB!=null && refreshTokenDB.equals(refreshToken)){
 
                 final User user = userService.getUserByLogin(login)
-                        .orElseThrow(() -> new AuthException("User not found"));
+                        .orElseThrow(() -> new UserAuthenticationException("User not found"));
 
                 String newAccessToken = jwtProvider.generateAccessToken(user);
                 String newRefreshToken = jwtProvider.generateRefreshToken(user);
                 refreshTokensStorage.put(user.getLogin(), newRefreshToken);
 
-                return new JwtResponse(newAccessToken, newRefreshToken);
+                return new JwtResponseDto(newAccessToken, newRefreshToken);
             }
+            throw new TokenValidationException("Wrong refresh token");
         }
-        throw new AuthException("Token is not valid");
+        throw new TokenValidationException("Non valid refresh token");
     }
 
-    public JwtResponse logout(@NotNull String refreshToken) throws AuthException {
+    public void logout(@NotNull String refreshToken) {
 
         if (jwtProvider.validateRefreshToken(refreshToken)) {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
@@ -103,14 +109,15 @@ public class AuthService {
 
             if (refreshTokenDB != null && refreshTokenDB.equals(refreshToken)) {
                 final User user = userService.getUserByLogin(login)
-                        .orElseThrow(() -> new AuthException("User not found"));
+                        .orElseThrow(() -> new UserAuthenticationException("User not found"));
 
                 refreshTokensStorage.remove(user.getLogin());
-
-                return new JwtResponse(null, null);
-            } else { throw new AuthException("user id already logged out");}
+                return;
+            }
+            throw new AlreadyLoggedInOrLoggedOutException("User is already logged out");
         }
-        throw new AuthException("Token is not valid");
+        throw new UserAuthenticationException("Non valid refresh token");
+
     }
 
     public boolean isUserLoggedIn(String login){
