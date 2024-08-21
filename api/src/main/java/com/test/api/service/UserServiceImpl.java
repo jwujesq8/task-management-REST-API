@@ -30,8 +30,6 @@ import java.util.Optional;
 @Slf4j
 public class UserServiceImpl implements UserService{
 
-    //private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
-//        private UserRepository userRepository;
     private final UserRepository userRepository;
     private final UserModelMapper userModelMapper;
     private final GenderRepository genderRepository;

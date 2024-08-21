@@ -1,6 +1,5 @@
-package com.test.api.entity;
+package com.test.api.config.JWT;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.Authentication;

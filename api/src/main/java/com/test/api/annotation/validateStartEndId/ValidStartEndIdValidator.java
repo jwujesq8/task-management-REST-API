@@ -9,7 +9,7 @@ public class ValidStartEndIdValidator implements ConstraintValidator<ValidStartE
     @Override
     public boolean isValid(DeleteUsersListByIdDto dto, ConstraintValidatorContext context) {
         if (dto.getStartId() == null || dto.getEndId() == null) {
-            return true; // @NotNull or @NotEmpty should handle null/empty cases
+            return true;
         }
         return dto.getEndId()>=dto.getStartId();
 
