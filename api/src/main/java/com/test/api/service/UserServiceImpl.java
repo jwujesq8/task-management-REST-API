@@ -24,7 +24,6 @@ import java.util.Optional;
 @Validated
 public class UserServiceImpl implements UserService{
 
-//    @Autowired
     private UserRepository userRepository;
 
     @Override

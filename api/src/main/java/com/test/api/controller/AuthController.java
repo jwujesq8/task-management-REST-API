@@ -9,6 +9,7 @@ import jakarta.security.auth.message.AuthException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("user/auth")
 @Validated
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
     private AuthServiceImpl authServiceImpl;
 
     @PostMapping("/login")

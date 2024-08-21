@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,11 +21,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class GenderServiceImpl implements GenderService{
 
-    @Autowired
     private GenderRepository genderRepository;
-    @Autowired
     private UserRepository userRepository;
 
     @Override

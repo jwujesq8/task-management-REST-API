@@ -1,5 +1,6 @@
 package com.test.api.dto.request;
 
+import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
