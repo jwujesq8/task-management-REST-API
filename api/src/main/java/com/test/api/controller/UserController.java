@@ -12,6 +12,7 @@ import com.test.api.exception.*;
 import com.test.api.modelMapper.UserModelMapper;
 import com.test.api.service.GenderService;
 import com.test.api.service.UserService;
+import com.test.api.service.WebSocketNotificationService;
 import com.test.api.user.Gender;
 import com.test.api.user.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,6 +38,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/user")
@@ -50,7 +52,8 @@ public class UserController {
     //private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
     private final GenderService genderService;
-    private final SimpMessagingTemplate messagingTemplate;
+//    private final SimpMessagingTemplate messagingTemplate;
+    private final WebSocketNotificationService webSocketNotificationService;
 
 
 
@@ -159,13 +162,9 @@ public class UserController {
     public List<UserResponseDto> getAllUsers(){
 
         try{
-            // TODO: optimize webSocket message
-            UserActionMessageDto message = new UserActionMessageDto();
-            message.setUser((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-            message.setAction("use request GET user/all");
-            log.info("message: {}, action: {}", message.getUser(), message.getAction());
-            messagingTemplate.convertAndSend("/topic", "use request GET user/all");
 
+            String user_requiter = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            webSocketNotificationService.sendNotification("/topic", user_requiter,"use request GET user/all");
             return userService.getAllUsers();
         }
         catch (DataIntegrityViolationException e) {

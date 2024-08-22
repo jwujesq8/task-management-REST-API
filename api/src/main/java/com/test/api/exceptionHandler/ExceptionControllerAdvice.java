@@ -48,21 +48,45 @@ public class ExceptionControllerAdvice {
 
     // VALIDATION
 
+    //FOR FIELDS VALIDATION ONLY
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity<Map<String, String>> ValidationExceptionHandler(MethodArgumentNotValidException mANotValidEx){
+//
+//        Map<String, String> errors = new HashMap<>();
+//
+//        mANotValidEx.getBindingResult().getAllErrors().forEach(error -> {
+//            String fieldName = ((FieldError) error).getField();
+//            String errorMessage = error.getDefaultMessage();
+//            errors.put(fieldName, errorMessage);
+//        });
+//
+//        return ResponseEntity
+//                .status(HttpStatus.BAD_REQUEST)
+//                .body(errors);
+//
+//    }
+    // FOR FIELDS AND CLASSES VALIDATION
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> ValidationExceptionHandler(MethodArgumentNotValidException mANotValidEx){
+    public ResponseEntity<Map<String, String>> validationExceptionHandler(MethodArgumentNotValidException ex) {
 
         Map<String, String> errors = new HashMap<>();
 
-        mANotValidEx.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName;
             String errorMessage = error.getDefaultMessage();
+
+            if (error instanceof FieldError) {
+                fieldName = ((FieldError) error).getField();
+            } else {
+                fieldName = error.getObjectName();
+            }
+
             errors.put(fieldName, errorMessage);
         });
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(errors);
-
     }
 
 

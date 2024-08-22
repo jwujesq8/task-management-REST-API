@@ -23,8 +23,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws").withSockJS();
         registry.addEndpoint("/ws");
     }
-
-
-
 }
 

@@ -2,6 +2,7 @@ package com.test.api.config.JWT;
 
 import com.test.api.service.AuthServiceImpl;
 import io.jsonwebtoken.Claims;
+import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,7 +26,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final AuthServiceImpl authServiceImpl;
 
     @Override
-    protected void doFilterInternal(
+    protected void doFilterInternal (
             jakarta.servlet.http.HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {

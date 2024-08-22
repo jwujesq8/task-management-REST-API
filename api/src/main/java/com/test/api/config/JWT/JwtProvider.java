@@ -5,6 +5,7 @@ import com.test.api.user.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.security.auth.message.AuthException;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -110,7 +111,7 @@ public class JwtProvider {
         return false;
     }
 
-    public boolean validateAccessToken(@NonNull String accessToken) {
+    public boolean validateAccessToken(@NonNull String accessToken){
         return validateToken(accessToken, accessSecretKey);
     }
 
