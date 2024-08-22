@@ -1,6 +1,7 @@
 package com.test.api.dto.request;
 
 import com.test.api.user.Gender;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,6 +15,7 @@ import lombok.Setter;
 public class PUTUserRequestDto {
 
     @NotNull(message = "Id is required")
+    @Schema(description = "user id", example = "1", minimum = "1")
     private Long id;
 
     @Size(
@@ -23,10 +25,12 @@ public class PUTUserRequestDto {
     )
     @Email(message = "Enter email address")
     @NotEmpty(message = "Login is required")
+    @Schema(description = "user login", example = "iii@gmail.com")
     private String login;
 
     @Pattern(regexp = "^(?=.*\\d{3,})(?=.*[^A-Za-z0-9])[\\S]{7,20}$", message = "Non valid password")
     @NotEmpty(message = "Password is required")
+    @Schema(description = "user password: digit 3 or more, special char 1 or more", example = "qqq_111")
     private String password;
 
     @Size(
@@ -34,10 +38,12 @@ public class PUTUserRequestDto {
             message = "Max size is 256"
     )
     @NotEmpty(message = "Full name is required")
+    @Schema(description = "user full name", example = "Ole Szhaf")
     private String fullName;
 
     @Pattern(regexp = "^(male|female|none)$")
     @NotEmpty(message = "Gender is required")
+    @Schema(description = "user gender: male, female or none", example = "female")
     private String genderName;
 
 }

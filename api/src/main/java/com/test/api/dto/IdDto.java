@@ -1,5 +1,6 @@
 package com.test.api.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -17,5 +18,6 @@ public class IdDto {
 
     @NotNull(message = "Id is required")
     @Min(value = 1L, message = "Min value is 1")
+    @Schema(description = "user id", example = "1")
     private Long id;
 }
