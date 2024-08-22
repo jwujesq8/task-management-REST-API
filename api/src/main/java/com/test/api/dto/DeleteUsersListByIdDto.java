@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.validation.annotation.Validated;
 
 @AllArgsConstructor
 @Getter

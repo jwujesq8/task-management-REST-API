@@ -1,5 +1,6 @@
 package com.test.api.config.JWT;
 
+import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,21 +22,25 @@ public class SecurityConfig {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            return http
-                    .httpBasic(AbstractHttpConfigurer::disable)
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                    .authorizeHttpRequests(
-                            auth -> auth
-                                    .requestMatchers(
-                                            "/user/auth/login", "/user/auth/newAccessToken",
-                                            "/ws/**", "/topic/**",
-                                            "/v3/api-docs/**", "/swagger-ui/**", "/v3/api-docs")
-                                    .permitAll()
-                                    .anyRequest().authenticated()
-                    )
-                    .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                    .build();
+            try{
+                    return http
+                            .httpBasic(AbstractHttpConfigurer::disable)
+                            .csrf(AbstractHttpConfigurer::disable)
+                            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                            .authorizeHttpRequests(
+                                    auth -> auth
+                                            .requestMatchers(
+                                                    "/user/auth/login", "/user/auth/newAccessToken",
+                                                    "/ws/**", "/topic/**",
+                                                    "/v3/api-docs/**", "/swagger-ui/**", "/v3/api-docs")
+                                            .permitAll()
+                                            .anyRequest().authenticated()
+                            )
+                            .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                            .build();
+            } catch (Exception e){
+                    throw new AuthException("Authentication error:" + e.getMessage());
+            }
         }
 }
 
