@@ -12,9 +12,7 @@ import io.jsonwebtoken.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.antlr.v4.runtime.Token;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -23,9 +21,9 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class AuthServiceImpl {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
     private final UserService userService;
     private final Map<String, String> refreshTokensStorage = new HashMap<>();
     private final JwtProvider jwtProvider;

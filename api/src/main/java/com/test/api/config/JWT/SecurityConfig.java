@@ -27,7 +27,11 @@ public class SecurityConfig {
                     .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .authorizeHttpRequests(
                             auth -> auth
-                                    .requestMatchers("/user/auth/login", "/user/auth/newAccessToken", "/ws/**", "/topic/**").permitAll()
+                                    .requestMatchers(
+                                            "/user/auth/login", "/user/auth/newAccessToken",
+                                            "/ws/**", "/topic/**",
+                                            "/v3/api-docs/**", "/swagger-ui/**", "/v3/api-docs")
+                                    .permitAll()
                                     .anyRequest().authenticated()
                     )
                     .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)

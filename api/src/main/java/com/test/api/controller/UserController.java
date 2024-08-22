@@ -14,6 +14,12 @@ import com.test.api.service.GenderService;
 import com.test.api.service.UserService;
 import com.test.api.user.Gender;
 import com.test.api.user.User;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +43,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 @Slf4j
+
+@Tag(name="User controller", description="Interaction with users")
 public class UserController {
 
     //private static final Logger log = LoggerFactory.getLogger(UserController.class);
@@ -49,7 +57,11 @@ public class UserController {
 
     @GetMapping("")
     @PreAuthorize("isAuthenticated()")
-    public UserResponseDto getUserById(@RequestBody @Valid IdDto idDto){
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "get user info (login, full name, gender) by id inside the body request")
+    public UserResponseDto getUserById(@Parameter(description = "id inside the body request", required = true, content = @Content(
+            schema = @Schema(implementation = IdDto.class, example = "{ \"id\": 1}")))
+            @RequestBody @Valid IdDto idDto){
 
         //log.info("(userController) is authenticated : " + SecurityContextHolder.getContext().getAuthentication().isAuthenticated());
 
@@ -69,7 +81,9 @@ public class UserController {
 
     @PostMapping("")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MessageResponseDto> addUser(
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "add new user")
+    public ResponseEntity<MessageResponseDto> addUser(@Parameter(description = "postUser(without id, it's auto generated) inside the body request", required = true)
             @RequestBody @Valid POSTUserRequestDto postUserRequestDto){
         try {
 
@@ -90,7 +104,9 @@ public class UserController {
 
     @PutMapping("")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MessageResponseDto> updateUser(
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "update user info")
+    public ResponseEntity<MessageResponseDto> updateUser(@Parameter(description = "putUser( with id !!! ) inside the body request", required = true)
             @RequestBody @Valid PUTUserRequestDto putUserRequestDto){
 
         try{
@@ -114,7 +130,11 @@ public class UserController {
 
     @DeleteMapping("")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MessageResponseDto> deleteUserById(@RequestBody @Valid IdDto idDto){
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "delete user")
+    public ResponseEntity<MessageResponseDto> deleteUserById(@Parameter(description = "id inside the body request", required = true, content = @Content(
+            schema = @Schema(implementation = IdDto.class, example = "{ \"id\": 1}")))
+            @RequestBody @Valid IdDto idDto){
 
         try {
             userService.deleteUser(idDto.getId());
@@ -134,6 +154,8 @@ public class UserController {
 
     @GetMapping("/list")
     @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "get all users list (login, full name, gender)")
     public List<UserResponseDto> getAllUsers(){
 
         try{
@@ -162,7 +184,9 @@ public class UserController {
 
     @DeleteMapping("/list")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MessageResponseDto> deleteListOfUsersById(
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "(OLD) delete a list of users by start and end id")
+    public ResponseEntity<MessageResponseDto> deleteListOfUsersById(@Parameter(description = "start and end users id inside the request body", required = true)
             @RequestBody @Valid DeleteUsersListByIdDto deleteUsersListByIdDto){
 
         try{
@@ -185,7 +209,9 @@ public class UserController {
 
     @DeleteMapping("/list/range")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MessageResponseDto> deleteListOfUsersByStartAndEndId(
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "(NEW) delete a list of users by start and end id")
+    public ResponseEntity<MessageResponseDto> deleteListOfUsersByStartAndEndId(@Parameter(description = "start and end users id inside the request body", required = true)
             @RequestBody @Valid DeleteUsersListByIdDto deleteUsersListByIdDto){
 
         try{
@@ -211,7 +237,10 @@ public class UserController {
 
     @DeleteMapping("/list/asc")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MessageResponseDto> deleteListOfUsersByStartIdAsc(@RequestBody @Valid IdDto idDto){
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "delete a list of users by start id (ASCENT)")
+    public ResponseEntity<MessageResponseDto> deleteListOfUsersByStartIdAsc(@Parameter(description = "start user id inside the request body", required = true)
+            @RequestBody @Valid IdDto idDto){
 
         try{
             Long idCountFrom = userService.deleteListOfUsersByStartIdAsc(idDto.getId());
@@ -232,6 +261,8 @@ public class UserController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/checkGenderTable")
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "check if gender table has appropriate content (1-male, 2-female, 3-none)")
     public ResponseEntity<MessageResponseDto> checkGenderTableAndWelcome(){
         genderService.checkGenderTable();
         return ResponseEntity

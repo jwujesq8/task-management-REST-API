@@ -7,17 +7,9 @@ import com.test.api.dto.request.UserRequestDto;
 import com.test.api.dto.response.UserResponseDto;
 import com.test.api.exception.ModelMappingException;
 import com.test.api.user.User;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
-import org.modelmapper.config.Configuration;
-import org.springframework.boot.Banner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -26,7 +18,7 @@ public class UserModelMapper {
     protected final ModelMapper mapper;
 
     public UserModelMapper() {
-        this.mapper = new ModelMapper(); // Initialize ModelMapper if not provided
+        this.mapper = new ModelMapper();
     }
 
     public User convert_UserRequestDto_to_User(UserRequestDto userRequestDto){

@@ -2,7 +2,6 @@ package com.test.api.modelMapper;
 
 import com.test.api.dto.response.UserResponseDto;
 import com.test.api.user.User;
-import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
 import org.modelmapper.config.Configuration;
@@ -22,6 +21,6 @@ public class ModelMapperConfig {
                 .createTypeMap(User.class, UserResponseDto.class);
         propertyMapper.addMappings(mapper -> mapper.map(user -> user.getGender().getName(), UserResponseDto::setGender));
 
-        return new UserModelMapper(modelMapper); // Inject ModelMapper here
+        return new UserModelMapper(modelMapper);
     }
 }

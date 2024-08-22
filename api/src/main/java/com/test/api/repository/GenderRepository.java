@@ -1,10 +1,11 @@
 package com.test.api.repository;
 
 import com.test.api.user.Gender;
-import jakarta.transaction.Transactional;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+@Hidden
 @Repository
 public interface GenderRepository extends JpaRepository<Gender, Integer> {
 

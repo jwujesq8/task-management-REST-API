@@ -26,8 +26,6 @@ import java.util.Optional;
 @Validated
 public class GenderServiceImpl implements GenderService{
 
-//    private GenderRepository genderRepository;
-//    private UserRepository userRepository;
     private final GenderRepository genderRepository;
     private final UserRepository userRepository;
 

@@ -19,8 +19,6 @@ import java.util.List;
 public class Gender {
 
     @Id
-//    @NotBlank
-//    @NotEmpty
 //    @Max(value = 3, message = "Id must be in range 1-3")
 //    @Min(value = 1, message = "Id must be in range 1-3")
     private Integer id;

@@ -40,7 +40,8 @@ public class JwtProvider {
 
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Minsk"));
         Date currentDate = calendar.getTime();
-        Date expirationDate = new Date(currentDate.getTime() + 300000);
+//        Date expirationDate = new Date(currentDate.getTime() + 300000); // 5 min
+        Date expirationDate = new Date(currentDate.getTime() + 600000); // 10 min
 
         return Jwts.builder()
                 .setSubject(user.getLogin())
