@@ -3,6 +3,7 @@ package com.test.api.repository;
 
 import com.test.api.user.Gender;
 import com.test.api.user.User;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+@Hidden
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 

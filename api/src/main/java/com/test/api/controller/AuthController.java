@@ -5,6 +5,7 @@ import com.test.api.dto.response.JwtResponseDto;
 import com.test.api.dto.request.RefreshJwtRequestDto;
 import com.test.api.dto.response.MessageResponseDto;
 import com.test.api.service.AuthServiceImpl;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.security.auth.message.AuthException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
@@ -42,6 +43,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<JwtResponseDto> refresh(@RequestBody @Valid @NotNull RefreshJwtRequestDto RefreshJwtRequestDto){
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -50,6 +52,7 @@ public class AuthController {
 
     @DeleteMapping("/logout")
     @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<MessageResponseDto> logout(@RequestBody @Valid @NotNull RefreshJwtRequestDto RefreshJwtRequestDto){
         authServiceImpl.logout(RefreshJwtRequestDto.getRefreshJwtRequest());
         return ResponseEntity

@@ -29,7 +29,8 @@ public class SecurityConfig {
                             auth -> auth
                                     .requestMatchers(
                                             "/user/auth/login", "/user/auth/newAccessToken",
-                                            "/ws/**", "/topic/**", "/swagger-ui", "/v3/api-docs")
+                                            "/ws/**", "/topic/**",
+                                            "/v3/api-docs/**", "/swagger-ui/**", "/v3/api-docs")
                                     .permitAll()
                                     .anyRequest().authenticated()
                     )
