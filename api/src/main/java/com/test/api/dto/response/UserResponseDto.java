@@ -11,6 +11,8 @@ import lombok.*;
 @Builder
 public class UserResponseDto {
 
+    @Schema(description = "user id", example = "1")
+    private Long id;
     @Schema(description = "user login", example = "iii@gmail.com")
     private String login;
     @Schema(description = "user full name", example = "Ole Szhaf")

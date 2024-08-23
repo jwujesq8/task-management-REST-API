@@ -67,10 +67,10 @@ public class GenderServiceImpl implements GenderService{
 
 
     @Override
-    public void deleteGenderById(Gender gender){
+    public void deleteGenderById(Integer id){
 
-        Gender genderToDelete = genderRepository.findById(gender.getId()).orElseThrow(
-                () -> new IdNotFoundException("Gender not found, id: " + gender.getId()));
+        Gender genderToDelete = genderRepository.findById(id).orElseThrow(
+                () -> new IdNotFoundException("Gender not found, id: " + id));
 
         List<User> userListWithDeletedGender = userRepository.findByGender(genderToDelete);
 
@@ -83,10 +83,7 @@ public class GenderServiceImpl implements GenderService{
             }
         }
 
-        genderRepository.deleteById(gender.getId());
-        if(genderRepository.existsById(gender.getId())){
-            throw new OurServiceErrorException("Server error while deleting gender by id");
-        }
+        genderRepository.deleteById(id);
 
     }
 

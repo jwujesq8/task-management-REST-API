@@ -13,11 +13,11 @@ public interface UserService {
 
     UserResponseDto getUserById(Long id);
 
-    void addUser(POSTUserRequestDto postUserRequestDto);
+    UserResponseDto addUser(POSTUserRequestDto postUserRequestDto);
 
-    void updateUser(PUTUserRequestDto putUserRequestDto);
+    UserResponseDto updateUser(PUTUserRequestDto putUserRequestDto);
 
-    void deleteUser(Long id);
+    UserResponseDto deleteUser(Long id);
 
     List<UserResponseDto> getAllUsers();
 
@@ -26,6 +26,7 @@ public interface UserService {
     Long deleteListOfUsersByStartAndEndId(Long startId, Long endId);
 
     Long deleteListOfUsersByStartIdAsc(Long startId);
+
 
 
     boolean existsByLoginAndPasswordIgnoreCase(String login, String password);

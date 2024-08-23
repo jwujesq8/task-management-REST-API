@@ -41,7 +41,6 @@ public class User implements UserDetails {
             min = 11,
             message = "Max size for login is 50"
     )
-    @Valid
     @Column(unique = true)
     private String login;
 

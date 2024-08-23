@@ -9,7 +9,7 @@ public interface GenderService {
 
     void updateGender(@Valid Gender gender);
 
-    void deleteGenderById(Gender gender);
+    void deleteGenderById(Integer id);
 
     void checkGenderTable();
 }
