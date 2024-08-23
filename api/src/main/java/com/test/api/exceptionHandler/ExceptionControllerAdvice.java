@@ -25,7 +25,7 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<MessageResponseDto> tokenValidationExceptionHandler(
             TokenValidationException tokenValidationException){
         return ResponseEntity
-                .status(HttpStatus.NOT_ACCEPTABLE)
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(new MessageResponseDto(tokenValidationException.getMessage()));
     }
     @ExceptionHandler(UserAuthenticationException.class)

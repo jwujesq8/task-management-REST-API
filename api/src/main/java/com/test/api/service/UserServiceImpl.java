@@ -74,7 +74,6 @@ public class UserServiceImpl implements UserService{
 
             postUserRequestDto.setGenderName(null);
 
-            //TODO: String null genderName to Gender null
             User postUser = userModelMapper.convert_POSTUserRequestDto_to_User(postUserRequestDto);
             postUser.setGender(postUserGender);
 
