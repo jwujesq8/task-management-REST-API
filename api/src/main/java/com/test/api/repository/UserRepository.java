@@ -1,6 +1,7 @@
 package com.test.api.repository;
 
 
+import com.test.api.dto.response.UserResponseDto;
 import com.test.api.user.Gender;
 import com.test.api.user.User;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -17,27 +18,28 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Transactional
-    @Query(
-            value = "SELECT COUNT(*) FROM user u WHERE u.id>=?1 AND u.id<=?2;",
-            nativeQuery = true
-    )
-    Long idCountInRange(Long startId, Long endId);
+
+    List<User> findByGender(Gender gender);
+
+    Optional<User> findByLogin(String login);
+
+    boolean existsByLoginAndPasswordIgnoreCase(String login, String password);
+
+    boolean existsById(Long id);
 
     @Transactional
     @Query(
-            value = "SELECT COUNT(*) FROM user u WHERE u.id>=?1;",
+            value = "SELECT * FROM user u WHERE u.id>=?1 AND u.id<=?2;",
             nativeQuery = true
     )
-    Long idCountFrom(Long startId);
+    List<User> userWhichIdInRange(Long startId, Long endId);
 
-    @Modifying
     @Transactional
     @Query(
-            value = "DELETE FROM user u WHERE u.id>=?1 AND u.id<=?2;",
+            value = "SELECT * FROM user u WHERE u.id>=?1;",
             nativeQuery = true
     )
-    void deleteListOfUsersById(Long startId, Long endId);
+    List<User> userWhichIdFrom(Long startId);
 
     @Modifying
     @Transactional
@@ -55,11 +57,22 @@ public interface UserRepository extends JpaRepository<User, Long> {
     )
     void deleteListOfUsersByStartIdAsc(Long startId);
 
-    List<User> findByGender(Gender gender);
-    Optional<User> findByLogin(String login);
-
-    boolean existsByLoginAndPasswordIgnoreCase(String login, String password);
-
-    boolean existsById(Long id);
 
 }
+
+
+
+
+//    @Transactional
+//    @Query(
+//            value = "SELECT COUNT(*) FROM user u WHERE u.id>=?1 AND u.id<=?2;",
+//            nativeQuery = true
+//    )
+//    Long idCountInRange(Long startId, Long endId);
+//
+//    @Transactional
+//    @Query(
+//            value = "SELECT COUNT(*) FROM user u WHERE u.id>=?1;",
+//            nativeQuery = true
+//    )
+//    Long idCountFrom(Long startId);

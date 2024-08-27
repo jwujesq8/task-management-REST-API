@@ -4,7 +4,7 @@ import com.test.api.dto.DeleteUsersListByIdDto;
 import com.test.api.dto.IdDto;
 import com.test.api.dto.request.POSTUserRequestDto;
 import com.test.api.dto.request.PUTUserRequestDto;
-import com.test.api.dto.response.MessageResponseDto;
+import com.test.api.dto.response.ErrorMessageResponseDto;
 import com.test.api.dto.response.UserResponseDto;
 import com.test.api.service.GenderService;
 import com.test.api.service.UserService;
@@ -49,10 +49,10 @@ public class UserController {
     @Operation(summary = "get user info (login, full name, gender) by id inside the body request")
     @SecurityRequirement(name = "JWT")
     @ApiResponses({
-            @ApiResponse(responseCode = "400", description = "Bad request (id not found)", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "500", description = "Server error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
+            @ApiResponse(responseCode = "400", description = "Bad request (id not found)", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "Server error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json"))
     }
     )
     public UserResponseDto getUserById(@Parameter(description = "id inside the body request", required = true)
@@ -68,11 +68,11 @@ public class UserController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "add new user")
     @ApiResponses({
-            @ApiResponse(responseCode = "400", description = "Bad request (validation error)", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "409", description = "Conflict (user is already exists)", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
+            @ApiResponse(responseCode = "400", description = "Bad request (validation error)", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "409", description = "Conflict (user is already exists)", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json"))
     }
     )
     public UserResponseDto addUser(@Parameter(description = "postUser(without id, it's auto generated) inside the body request", required = true)
@@ -88,10 +88,10 @@ public class UserController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "update user info")
     @ApiResponses({
-            @ApiResponse(responseCode = "400", description = "Bad request (validation error | user not found)", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
+            @ApiResponse(responseCode = "400", description = "Bad request (validation error | user not found)", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json"))
     }
     )
     public UserResponseDto updateUser(@Parameter(description = "putUser( with id !!! ) inside the body request", required = true)
@@ -107,10 +107,9 @@ public class UserController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "delete user")
     @ApiResponses({
-            @ApiResponse(responseCode = "400", description = "Bad request (user not found)", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
+            @ApiResponse(responseCode = "400", description = "Bad request (user not found)", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json"))
     }
     )
     public UserResponseDto deleteUserById(@Parameter(description = "id inside the body request", required = true, content = @Content(
@@ -127,9 +126,9 @@ public class UserController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "get all users list (login, full name, gender)")
     @ApiResponses({
-            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
+            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json"))
     }
     )
     public List<UserResponseDto> getAllUsers(){
@@ -142,50 +141,23 @@ public class UserController {
 
 
 
-    @DeleteMapping("/list")
-    @PreAuthorize("isAuthenticated()")
-    @SecurityRequirement(name = "JWT")
-    @Operation(summary = "(OLD) delete a list of users by start and end id")
-    @ApiResponses({
-            @ApiResponse(responseCode = "400", description = "Bad request (0 users with id in provided range)", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
-    }
-    )
-    public MessageResponseDto deleteListOfUsersById(@Parameter(description = "start and end users id inside the request body", required = true)
-            @RequestBody @Valid DeleteUsersListByIdDto deleteUsersListByIdDto){
-
-            Long idCountInRange = userService.deleteListOfUsersById(deleteUsersListByIdDto.getStartId(),deleteUsersListByIdDto.getEndId());
-            return new MessageResponseDto(idCountInRange + " users have been deleted " +
-                    "(provided range: " + deleteUsersListByIdDto.getStartId()
-                    + "-" + deleteUsersListByIdDto.getEndId() + ")");
-
-    }
-
-
-
     @DeleteMapping("/list/range")
     @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "(NEW) delete a list of users by start and end id")
     @ApiResponses({
-            @ApiResponse(responseCode = "400", description = "Bad request (0 users with id in provided range)", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
+            @ApiResponse(responseCode = "400", description = "Bad request (0 users with id in provided range)", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json"))
     }
     )
-    public MessageResponseDto deleteListOfUsersByStartAndEndId(@Parameter(description = "start and end users id inside the request body", required = true)
+    public List<UserResponseDto> deleteListOfUsersByStartAndEndId(@Parameter(description = "start and end users id inside the request body", required = true)
             @RequestBody @Valid DeleteUsersListByIdDto deleteUsersListByIdDto){
 
-            Long idCountInRange = userService.deleteListOfUsersByStartAndEndId(
-                    deleteUsersListByIdDto.getStartId(),deleteUsersListByIdDto.getEndId());
-            return new MessageResponseDto(idCountInRange + " users have been deleted " +
-                    "(provided range: " + deleteUsersListByIdDto.getStartId()
-                    + "-" + deleteUsersListByIdDto.getEndId() + ")");
-
-
+            return userService.deleteListOfUsersByStartAndEndId(
+                    deleteUsersListByIdDto.getStartId(),deleteUsersListByIdDto.getEndId()
+            );
     }
 
 
@@ -195,19 +167,16 @@ public class UserController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "delete a list of users by start id (ASCENT)")
     @ApiResponses({
-            @ApiResponse(responseCode = "400", description = "Bad request (0 users with id in provided range)", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
+            @ApiResponse(responseCode = "400", description = "Bad request (0 users with id in provided range)", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json"))
     }
     )
-    public MessageResponseDto deleteListOfUsersByStartIdAsc(@Parameter(description = "user id inside the request body", required = true)
+    public List<UserResponseDto> deleteListOfUsersByStartIdAsc(@Parameter(description = "user id inside the request body", required = true)
             @RequestBody @Valid IdDto idDto){
 
-            Long idCountFrom = userService.deleteListOfUsersByStartIdAsc(idDto.getId());
-            return new MessageResponseDto(idCountFrom + " users have been deleted " +
-                    "(provided start id: " + idDto.getId()+ ")");
-
+            return userService.deleteListOfUsersByStartIdAsc(idDto.getId());
     }
 
 
@@ -217,15 +186,15 @@ public class UserController {
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "check if gender table has appropriate content (1-male, 2-female, 3-none)")
     @ApiResponses({
-            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
-            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
+            @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json"))
     }
     )
-    public MessageResponseDto checkGenderTableAndWelcome(){
+    public String checkGenderTableAndWelcome(){
 
         genderService.checkGenderTable();
-        return new MessageResponseDto("Gender table has an appropriate content");
+        return "Gender table has an appropriate content";
     }
 
 }

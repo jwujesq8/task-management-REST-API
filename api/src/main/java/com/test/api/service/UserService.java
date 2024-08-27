@@ -21,11 +21,9 @@ public interface UserService {
 
     List<UserResponseDto> getAllUsers();
 
-    Long deleteListOfUsersById(Long startId, Long endId);
+    List<UserResponseDto> deleteListOfUsersByStartAndEndId(Long startId, Long endId);
 
-    Long deleteListOfUsersByStartAndEndId(Long startId, Long endId);
-
-    Long deleteListOfUsersByStartIdAsc(Long startId);
+    List<UserResponseDto> deleteListOfUsersByStartIdAsc(Long startId);
 
 
 

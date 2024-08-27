@@ -5,7 +5,7 @@ import com.test.api.dto.request.POSTUserRequestDto;
 import com.test.api.dto.request.PUTUserRequestDto;
 import com.test.api.dto.request.UserRequestDto;
 import com.test.api.dto.response.UserResponseDto;
-import com.test.api.exception.ModelMappingException;
+import com.test.api.exception.ServerException;
 import com.test.api.user.User;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -26,10 +26,10 @@ public class UserModelMapper {
             return mapper.map(userRequestDto, User.class);
         }
         catch (IllegalArgumentException e) {
-            throw new ModelMappingException("Invalid argument provided for mapping: " + e.getMessage());
+            throw new ServerException.ModelMappingException("Invalid argument provided for mapping: " + e.getMessage());
         }
         catch (org.modelmapper.MappingException e) {
-            throw new ModelMappingException("Mapping failed: " + e.getMessage());
+            throw new ServerException.ModelMappingException("Mapping failed: " + e.getMessage());
         }
         catch (Exception e) {
             throw new RuntimeException("Unexpected error during mapping: " + e.getMessage());
@@ -41,10 +41,10 @@ public class UserModelMapper {
             return mapper.map(postUserRequestDto, User.class);
         }
         catch (IllegalArgumentException e) {
-            throw new ModelMappingException("Invalid argument provided for mapping: " + e.getMessage());
+            throw new ServerException.ModelMappingException("Invalid argument provided for mapping: " + e.getMessage());
         }
         catch (org.modelmapper.MappingException e) {
-            throw new ModelMappingException("Mapping failed: " + e.getMessage());
+            throw new ServerException.ModelMappingException("Mapping failed: " + e.getMessage());
         }
         catch (Exception e) {
             throw new RuntimeException("Unexpected error during mapping: " + e.getMessage());
@@ -56,10 +56,10 @@ public class UserModelMapper {
             return mapper.map(putUserRequestDto, User.class);
         }
         catch (IllegalArgumentException e) {
-            throw new ModelMappingException("Invalid argument provided for mapping: " + e.getMessage());
+            throw new ServerException.ModelMappingException("Invalid argument provided for mapping: " + e.getMessage());
         }
         catch (org.modelmapper.MappingException e) {
-            throw new ModelMappingException("Mapping failed: " + e.getMessage());
+            throw new ServerException.ModelMappingException("Mapping failed: " + e.getMessage());
         }
         catch (Exception e) {
             throw new RuntimeException("Unexpected error during mapping: " + e.getMessage());
@@ -75,10 +75,10 @@ public class UserModelMapper {
             return mapper.map(user, UserResponseDto.class);
         }
         catch (IllegalArgumentException e) {
-            throw new ModelMappingException("Invalid argument provided for mapping: " + e.getMessage());
+            throw new ServerException.ModelMappingException("Invalid argument provided for mapping: " + e.getMessage());
         }
         catch (org.modelmapper.MappingException e) {
-            throw new ModelMappingException("Mapping failed: " + e.getMessage());
+            throw new ServerException.ModelMappingException("Mapping failed: " + e.getMessage());
         }
         catch (Exception e) {
             throw new RuntimeException("Unexpected error during mapping: " + e.getMessage());
@@ -90,10 +90,10 @@ public class UserModelMapper {
             return mapper.map(user, UserRequestDto.class);
         }
         catch (IllegalArgumentException e) {
-            throw new ModelMappingException("Invalid argument provided for mapping: " + e.getMessage());
+            throw new ServerException.ModelMappingException("Invalid argument provided for mapping: " + e.getMessage());
         }
         catch (org.modelmapper.MappingException e) {
-            throw new ModelMappingException("Mapping failed: " + e.getMessage());
+            throw new ServerException.ModelMappingException("Mapping failed: " + e.getMessage());
         }
         catch (Exception e) {
             throw new RuntimeException("Unexpected error during mapping: " + e.getMessage());

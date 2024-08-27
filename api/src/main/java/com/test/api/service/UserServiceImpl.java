@@ -3,7 +3,8 @@ package com.test.api.service;
 import com.test.api.dto.request.POSTUserRequestDto;
 import com.test.api.dto.request.PUTUserRequestDto;
 import com.test.api.dto.response.UserResponseDto;
-import com.test.api.exception.*;
+import com.test.api.exception.BadRequestException;
+import com.test.api.exception.OkException;
 import com.test.api.modelMapper.UserModelMapper;
 import com.test.api.repository.GenderRepository;
 import com.test.api.repository.UserRepository;
@@ -30,7 +31,7 @@ public class UserServiceImpl implements UserService{
     public UserResponseDto getUserById(Long id) {
 
         User user =  userRepository.findById(id).orElseThrow(
-                () -> new IdNotFoundException("User not found, id: " + id));
+                () -> new BadRequestException.IdNotFoundException("User not found, id: " + id));
 
         return userModelMapper.convert_User_to_UserResponseDto(user);
     }
@@ -40,7 +41,7 @@ public class UserServiceImpl implements UserService{
 
         if(userRepository.existsByLoginAndPasswordIgnoreCase(
                 postUserRequestDto.getLogin(), postUserRequestDto.getPassword())){
-            throw new UserAlreadyExistsException(
+            throw new BadRequestException.UserAlreadyExistsException(
                     "Such user (login:" + postUserRequestDto.getLogin() + ") already exists");
         }
 
@@ -69,7 +70,7 @@ public class UserServiceImpl implements UserService{
     public UserResponseDto updateUser(PUTUserRequestDto putUserRequestDto) {
 
         userRepository.findById(putUserRequestDto.getId()).orElseThrow(
-                () -> new IdNotFoundException("User not found, id: " + putUserRequestDto.getId()));
+                () -> new BadRequestException.IdNotFoundException("User not found, id: " + putUserRequestDto.getId()));
 
         Gender putUserRequestDtoGender = genderRepository.findByNameIgnoreCase(putUserRequestDto.getGenderName());
         putUserRequestDto.setGenderName(null);
@@ -85,7 +86,7 @@ public class UserServiceImpl implements UserService{
     public UserResponseDto deleteUser(Long id){
 
         User userToDelete = userRepository.findById(id).orElseThrow(
-                () -> new IdNotFoundException("User not found, id: " + id)
+                () -> new BadRequestException.IdNotFoundException("User not found, id: " + id)
         );
         userRepository.deleteById(id);
         return userModelMapper.convert_User_to_UserResponseDto(userToDelete);
@@ -106,44 +107,46 @@ public class UserServiceImpl implements UserService{
                     );
             return userResponseDtoList;
         } else {
-            throw new NoContentException("User table is empty");
+            throw new OkException.NoContentException("User table is empty");
         }
     }
 
     @Override
-    public Long deleteListOfUsersById(Long startId, Long endId) {
+    public List<UserResponseDto> deleteListOfUsersByStartAndEndId(Long startId, Long endId){
 
-        Long idCountInRange = userRepository.idCountInRange(startId, endId);
-        if (idCountInRange>0){
-            userRepository.deleteListOfUsersById(startId, endId);
-            return idCountInRange;
-        }
-        else throw new IdNotFoundException("There are no one user with id in range " + startId + "-" + endId);
+        List<User> userListToDelete = userRepository.userWhichIdInRange(startId, endId);
+        List<UserResponseDto> userResponseDtoListToDelete = new ArrayList<>();
+        userListToDelete.forEach(
+                user -> {
+                    userResponseDtoListToDelete.add(userModelMapper.convert_User_to_UserResponseDto(user));
 
+                }
+        );
 
-    }
-
-    @Override
-    public Long deleteListOfUsersByStartAndEndId(Long startId, Long endId){
-
-        Long idCountInRange = userRepository.idCountInRange(startId, endId);
-        if (idCountInRange>0){
+        if(!userResponseDtoListToDelete.isEmpty()){
             userRepository.deleteListOfUsersByStartAndEndId(startId, endId);
-            return idCountInRange;
+            return userResponseDtoListToDelete;
         }
-        else throw new IdNotFoundException("There are no one user with id in range " + startId + "-" + endId);
+        throw new BadRequestException.IdNotFoundException("There are no one user with id in range " + startId + "-" + endId);
 
     }
 
     @Override
-    public Long deleteListOfUsersByStartIdAsc(Long startId){
+    public List<UserResponseDto> deleteListOfUsersByStartIdAsc(Long startId){
 
-        Long idCountFrom = userRepository.idCountFrom(startId);
-        if (idCountFrom>0){
+        List<User> userListToDelete = userRepository.userWhichIdFrom(startId);
+        List<UserResponseDto> userResponseDtoListToDelete = new ArrayList<>();
+        userListToDelete.forEach(
+                user -> {
+                    userResponseDtoListToDelete.add(userModelMapper.convert_User_to_UserResponseDto(user));
+                }
+        );
+
+        if (!userResponseDtoListToDelete.isEmpty()){
             userRepository.deleteListOfUsersByStartIdAsc(startId);
-            return idCountFrom;
+            return userResponseDtoListToDelete;
         }
-        else throw new IdNotFoundException("There are no one user with id from " + startId);
+        else throw new BadRequestException.IdNotFoundException("There are no one user with id from " + startId);
 
     }
 
