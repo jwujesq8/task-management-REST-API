@@ -11,7 +11,8 @@ import lombok.*;
 @NoArgsConstructor
 public class MessageResponseDto {
 
-    @NotBlank(message = "description is required")
-    @Schema(description = "response body message (error|success|created etc)", example = "Description about going well or wrong")
+    @NotBlank(message = "Description is required")
+    @Schema(description = "response body message (fail|success etc)",
+            example = "Description about going well or wrong", minLength = 0)
     private String description;
 }

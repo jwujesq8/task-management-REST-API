@@ -43,7 +43,7 @@ public class UserController {
 
 
 
-    @GetMapping("")
+    @PostMapping("")
     @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "get user info (login, full name, gender) by id inside the body request")
@@ -55,8 +55,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Server error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
     }
     )
-    public UserResponseDto getUserById(@Parameter(description = "id inside the body request", required = true, content = @Content(
-            schema = @Schema(implementation = IdDto.class, example = "{ \"id\": 1}")))
+    public UserResponseDto getUserById(@Parameter(description = "id inside the body request", required = true)
             @RequestBody @Valid IdDto idDto){
 
         return userService.getUserById(idDto.getId());
@@ -64,7 +63,7 @@ public class UserController {
 
 
 
-    @PostMapping("")
+    @PostMapping("/new")
     @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "add new user")
@@ -202,7 +201,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Server error or db error", content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
     }
     )
-    public MessageResponseDto deleteListOfUsersByStartIdAsc(@Parameter(description = "start user id inside the request body", required = true)
+    public MessageResponseDto deleteListOfUsersByStartIdAsc(@Parameter(description = "user id inside the request body", required = true)
             @RequestBody @Valid IdDto idDto){
 
             Long idCountFrom = userService.deleteListOfUsersByStartIdAsc(idDto.getId());
