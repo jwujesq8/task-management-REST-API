@@ -13,7 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class ErrorMessageResponseDto {
 
-    @Schema(description = "Date and time")
+    @Schema(description = "Date and time", example = "08.08.08 15:18:13")
     private String dateTime;
 
     @NotBlank(message = "Description is required")

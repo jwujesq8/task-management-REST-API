@@ -22,7 +22,6 @@ import java.util.*;
 @Slf4j
 public class ExceptionControllerAdvice{
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
     private ErrorMessageResponseDto getResponseBody(String errorMessage) throws JsonProcessingException {
@@ -63,14 +62,14 @@ public class ExceptionControllerAdvice{
                 .body(getResponseBody(e.getMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessageResponseDto> unexpectedExceptionHandler(
-            Exception e) throws JsonProcessingException{
-
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(getResponseBody(e.getMessage()));
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ErrorMessageResponseDto> unexpectedExceptionHandler(
+//            Exception e) throws JsonProcessingException{
+//
+//        return ResponseEntity
+//                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body(getResponseBody(e.getMessage()));
+//    }
 
     @ExceptionHandler(ValidException.class)
     public ResponseEntity<ErrorMessageResponseDto> validationExceptionHandler(
