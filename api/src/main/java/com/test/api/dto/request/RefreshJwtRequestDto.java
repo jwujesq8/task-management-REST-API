@@ -9,7 +9,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RefreshJwtRequestDto {
-    @NotEmpty(message = "refresh token is required")
+
+    @NotEmpty(message = "Refresh token is required")
     @Schema(description = "refresh JWT token (used for getting a new login and refresh tokens)")
     private String refreshJwtRequest;
 }

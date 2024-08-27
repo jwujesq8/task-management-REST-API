@@ -3,10 +3,9 @@ package com.test.api.service;
 import com.test.api.config.JWT.JwtProvider;
 import com.test.api.dto.request.JwtRequestDto;
 import com.test.api.dto.response.JwtResponseDto;
-import com.test.api.exception.AlreadyLoggedInOrLoggedOutException;
-import com.test.api.exception.ObjectNotFoundException;
-import com.test.api.exception.TokenValidationException;
-import com.test.api.exception.UserAuthenticationException;
+import com.test.api.exception.AuthenticationException;
+import com.test.api.exception.BadRequestException;
+import com.test.api.exception.OkException;
 import com.test.api.user.User;
 import io.jsonwebtoken.*;
 import jakarta.validation.Valid;
@@ -31,7 +30,7 @@ public class AuthServiceImpl {
     public JwtResponseDto login(@Valid @NotNull JwtRequestDto jwtRequestDto) {
 
         final User user = userService.getUserByLogin(jwtRequestDto.getLogin())
-                .orElseThrow(() -> new ObjectNotFoundException("User not found"));
+                .orElseThrow(() -> new BadRequestException.ObjectNotFoundException("User not found"));
 
         if(!refreshTokensStorage.containsKey(user.getLogin())){
 
@@ -43,10 +42,10 @@ public class AuthServiceImpl {
                 return new JwtResponseDto(accessToken, refreshToken);
             }
             else {
-                throw new UserAuthenticationException("Wrong password");
+                throw new AuthenticationException("Wrong password");
             }
         } else {
-            throw new AlreadyLoggedInOrLoggedOutException("User is already logged in");
+            throw new OkException.AlreadyLoggedInOrLoggedOutException("User is already logged in");
         }
 
 
@@ -62,15 +61,15 @@ public class AuthServiceImpl {
             if(refreshTokenDB!=null && refreshTokenDB.equals(refreshToken)){
 
                 final User user = userService.getUserByLogin(login)
-                        .orElseThrow(() -> new UserAuthenticationException("User not found"));
+                        .orElseThrow(() -> new AuthenticationException("User not found"));
 
                 String newAccessToken = jwtProvider.generateAccessToken(user);
                 refreshTokensStorage.put(user.getLogin(), null);
                 return new JwtResponseDto(newAccessToken, null);
             }
-            throw new TokenValidationException("Wrong refresh token");
+            throw new AuthenticationException.TokenValidationException("Wrong refresh token");
         }
-        throw new TokenValidationException("Non valid refresh token");
+        throw new AuthenticationException.TokenValidationException("Non valid refresh token");
 
     }
 
@@ -85,7 +84,7 @@ public class AuthServiceImpl {
             if(refreshTokenDB!=null && refreshTokenDB.equals(refreshToken)){
 
                 final User user = userService.getUserByLogin(login)
-                        .orElseThrow(() -> new UserAuthenticationException("User not found"));
+                        .orElseThrow(() -> new AuthenticationException("User not found"));
 
                 String newAccessToken = jwtProvider.generateAccessToken(user);
                 String newRefreshToken = jwtProvider.generateRefreshToken(user);
@@ -93,9 +92,9 @@ public class AuthServiceImpl {
 
                 return new JwtResponseDto(newAccessToken, newRefreshToken);
             }
-            throw new TokenValidationException("Wrong refresh token");
+            throw new AuthenticationException.TokenValidationException("Wrong refresh token");
         }
-        throw new TokenValidationException("Non valid refresh token");
+        throw new AuthenticationException.TokenValidationException("Non valid refresh token");
     }
 
     public void logout(@NotNull String refreshToken) {
@@ -107,14 +106,14 @@ public class AuthServiceImpl {
 
             if (refreshTokenDB != null && refreshTokenDB.equals(refreshToken)) {
                 final User user = userService.getUserByLogin(login)
-                        .orElseThrow(() -> new UserAuthenticationException("User not found"));
+                        .orElseThrow(() -> new AuthenticationException("User not found"));
 
                 refreshTokensStorage.remove(user.getLogin());
                 return;
             }
-            throw new AlreadyLoggedInOrLoggedOutException("User is already logged out");
+            throw new OkException.AlreadyLoggedInOrLoggedOutException("User is already logged out");
         }
-        throw new UserAuthenticationException("Non valid refresh token");
+        throw new AuthenticationException("Non valid refresh token");
 
     }
 

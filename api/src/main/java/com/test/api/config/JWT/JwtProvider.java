@@ -1,11 +1,9 @@
 package com.test.api.config.JWT;
 
-import com.test.api.exception.TokenValidationException;
 import com.test.api.user.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.security.auth.message.AuthException;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

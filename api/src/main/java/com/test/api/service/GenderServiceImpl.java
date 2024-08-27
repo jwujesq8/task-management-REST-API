@@ -1,25 +1,21 @@
 package com.test.api.service;
 
-import com.test.api.exception.*;
+import com.test.api.exception.BadRequestException;
+import com.test.api.exception.ServerException;
+import com.test.api.exception.ValidException;
 import com.test.api.repository.GenderRepository;
 import com.test.api.repository.UserRepository;
 import com.test.api.user.Gender;
 import com.test.api.user.User;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +31,7 @@ public class GenderServiceImpl implements GenderService{
         try {
             genderRepository.save(gender);
             if(!genderRepository.existsById(gender.getId())){
-                throw new OurServiceErrorException("Server error while saving new gender");
+                throw new ServerException("Server error while saving new gender");
             }
         }
         catch (ConstraintViolationException valEx){
@@ -49,28 +45,28 @@ public class GenderServiceImpl implements GenderService{
     public void updateGender(@Valid Gender gender) {
 
         Gender genderDB = genderRepository.findById(gender.getId()).orElseThrow(
-                () -> new IdNotFoundException("Gender not found, id: " + gender.getId()));
+                () -> new BadRequestException.IdNotFoundException("Gender not found, id: " + gender.getId()));
 
             try{
                 genderRepository.save(genderDB);
                 if(!Objects.equals(genderRepository.findByName(gender.getName()).getId(), gender.getId())){
-                    throw new OurServiceErrorException("Server error while updating gender info");
+                    throw new ServerException("Server error while updating gender info");
                 }
             }
             catch (ConstraintViolationException valEx){
                 throw new ValidException(valEx);
             }
             catch (HttpClientErrorException httpClErrEx){
-                throw new BadClientRequestException(httpClErrEx.getMessage());
+                throw new BadRequestException(httpClErrEx.getMessage());
             }
     }
 
 
     @Override
-    public void deleteGenderById(Gender gender){
+    public void deleteGenderById(Integer id){
 
-        Gender genderToDelete = genderRepository.findById(gender.getId()).orElseThrow(
-                () -> new IdNotFoundException("Gender not found, id: " + gender.getId()));
+        Gender genderToDelete = genderRepository.findById(id).orElseThrow(
+                () -> new BadRequestException.IdNotFoundException("Gender not found, id: " + id));
 
         List<User> userListWithDeletedGender = userRepository.findByGender(genderToDelete);
 
@@ -83,10 +79,7 @@ public class GenderServiceImpl implements GenderService{
             }
         }
 
-        genderRepository.deleteById(gender.getId());
-        if(genderRepository.existsById(gender.getId())){
-            throw new OurServiceErrorException("Server error while deleting gender by id");
-        }
+        genderRepository.deleteById(id);
 
     }
 
@@ -112,7 +105,7 @@ public class GenderServiceImpl implements GenderService{
 
         }
         else if(genderRepository.count()!=3){
-            throw new ServerDBException("Error with gender table content");
+            throw new ServerException("Error with gender table content");
         }
 
     }
