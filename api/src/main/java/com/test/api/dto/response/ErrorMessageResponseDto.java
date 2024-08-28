@@ -16,7 +16,7 @@ public class ErrorMessageResponseDto {
     @Schema(description = "Date and time", example = "08.08.08 15:18:13")
     private String dateTime;
 
-    @NotBlank(message = "Description is required")
+    @NotBlank(message = "Description must not be blank")
     @Schema(description = "response body message (fail|success etc)",
             example = "Description about going well or wrong", minLength = 0)
     private String description;

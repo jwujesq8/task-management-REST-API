@@ -19,6 +19,6 @@ public class ValidationErrorMessageResponseDto {
 
     @Schema(description = "map of the field and errors description",
             example = "{\"id\": \"non valid id\"}")
-    @NotNull(message = "errors map must be filled")
+    @NotNull(message = "Errors map must not be empty")
     private Map<String, String> errorsMap;
 }

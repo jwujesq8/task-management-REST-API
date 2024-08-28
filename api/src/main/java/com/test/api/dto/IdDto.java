@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 public class IdDto {
 
-    @NotNull(message = "Id is required")
+    @NotNull(message = "Id must not be null")
     @Min(value = 1L, message = "Min value is 1")
     @Max(value = Long.MAX_VALUE, message = "Crossed max value")
     @Schema(description = "user id", example = "1")

@@ -14,13 +14,13 @@ import org.springframework.validation.annotation.Validated;
 @ValidStartEndId(message = "End id must be greater or equal than start id (endId >= startId)")
 public class DeleteUsersListByIdDto {
 
-    @NotNull
+    @NotNull(message = "Start id must not be null")
     @Min(value = 1L, message = "Min value is 1")
     @Max(value = Long.MAX_VALUE, message = "Crossed max value")
     @Schema(description = "start id", example = "1")
     private Long startId;
 
-    @NotNull
+    @NotNull(message = "End id must not be null")
     @Min(value = 1L, message = "Min value is 1")
     @Max(value = Long.MAX_VALUE, message = "Crossed max value")
     @Schema(description = "end id (must be greater or equal to start id)", example = "1")

@@ -10,11 +10,11 @@ import lombok.Setter;
 @Setter
 public class UserActionMessageDto {
 
-    @NotNull(message = "User is required")
+    @NotNull(message = "User must not be null")
     @Schema(description = "user login that send a request", minLength = 11, maxLength = 50)
     private String user;
 
-    @NotEmpty(message = "Action is required")
+    @NotEmpty(message = "Action must not be empty or null")
     @Schema(description = "action, specify a request type", minLength = 1)
     private String action;
 
