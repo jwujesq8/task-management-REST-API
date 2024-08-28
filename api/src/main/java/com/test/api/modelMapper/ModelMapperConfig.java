@@ -19,7 +19,7 @@ public class ModelMapperConfig {
 
         TypeMap<User, UserResponseDto> propertyMapper = modelMapper
                 .createTypeMap(User.class, UserResponseDto.class);
-        propertyMapper.addMappings(mapper -> mapper.map(user -> user.getGender().getName(), UserResponseDto::setGender));
+        propertyMapper.addMappings(mapper -> mapper.map(user -> user.getGender().getName(), UserResponseDto::setGenderName));
 
         return new UserModelMapper(modelMapper);
     }

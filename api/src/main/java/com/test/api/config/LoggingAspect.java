@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -37,7 +38,9 @@ public class LoggingAspect {
 
     @AfterReturning(pointcut = "execution(* com.test.api.controller..*(..)) && " +
             "!execution(* com.test.api.controller.AuthController.login(..)) && " +
-            "!execution(* com.test.api.controller.AuthController.newAccessToken(..))",
+            "!execution(* com.test.api.controller.AuthController.getNewAccessToken(..)) &&" +
+            "!execution(* com.test.api.controller.AuthController.refresh(..)) &&" +
+            "!execution(* com.test.api.controller.AuthController.logout(..))",
             returning = "response")
     public void logAfterRequest(JoinPoint joinPoint, Object response) {
         saveToLogger(response);
@@ -54,8 +57,11 @@ public class LoggingAspect {
                 .user(userService.getUserByLogin(user).orElseThrow(() -> new ServerException("Server error while reading logged in user")))
                 .requestMethod(method)
                 .requestPath(requestUri)
-                .response(String.valueOf(response.getClass()).replace("class ", ""))
                 .build();
+
+        if (response != null){
+            usersRequestsLogger.setResponse(String.valueOf(response.getClass()).replace("class ", ""));
+        }
 
         usersRequestsLoggerRepository.save(usersRequestsLogger);
     }

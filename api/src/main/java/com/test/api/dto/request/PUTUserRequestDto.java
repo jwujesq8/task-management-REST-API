@@ -47,6 +47,7 @@ public class PUTUserRequestDto {
 
     @Pattern(regexp = "^(male|female|none)$", message = "may be only male, female or none")
     @Schema(description = "user gender: male, female or none", example = "female", minLength = 4, maxLength = 6)
+    @NotNull(message = "must be male, female or none")
     private String genderName;
 
 }

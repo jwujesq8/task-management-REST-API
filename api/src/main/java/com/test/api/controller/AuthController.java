@@ -1,5 +1,6 @@
 package com.test.api.controller;
 
+import com.test.api.ApiApplication;
 import com.test.api.dto.request.JwtRequestDto;
 import com.test.api.dto.response.JwtResponseDto;
 import com.test.api.dto.request.RefreshJwtRequestDto;
@@ -17,6 +18,8 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthServiceImpl authServiceImpl;
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Operation(summary = "log in")
     @PostMapping("/login")
@@ -39,6 +43,7 @@ public class AuthController {
     )
     public JwtResponseDto login(@Parameter(description = "user login and password inside the request body", required = true)
             @RequestBody @Valid @NotNull JwtRequestDto JwtRequestDto) throws ConstraintViolationException {
+        logger.info(JwtRequestDto.getLogin() + " tries to log in");
         return authServiceImpl.login(JwtRequestDto);
     }
 
@@ -50,7 +55,7 @@ public class AuthController {
     )
     public JwtResponseDto getNewAccessToken(@Parameter(description = "refresh user token inside the request body", required = true)
             @RequestBody @Valid @NotNull RefreshJwtRequestDto RefreshJwtRequestDto){
-       return authServiceImpl.getNewAccessToken(RefreshJwtRequestDto.getRefreshJwtRequest());
+        return authServiceImpl.getNewAccessToken(RefreshJwtRequestDto.getRefreshJwtRequest());
     }
 
     @Operation(summary = "get new access and refresh token")

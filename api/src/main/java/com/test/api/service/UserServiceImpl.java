@@ -73,7 +73,6 @@ public class UserServiceImpl implements UserService{
                 () -> new BadRequestException.IdNotFoundException("User not found, id: " + putUserRequestDto.getId()));
 
         Gender putUserRequestDtoGender = genderRepository.findByNameIgnoreCase(putUserRequestDto.getGenderName());
-        putUserRequestDto.setGenderName(null);
         User putUser = userModelMapper.convert_PUTUserRequestDto_to_User(putUserRequestDto);
         putUser.setGender(putUserRequestDtoGender);
 
