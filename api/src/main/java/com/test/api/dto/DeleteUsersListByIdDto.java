@@ -23,6 +23,6 @@ public class DeleteUsersListByIdDto {
     @NotNull(message = "End id must not be null")
     @Min(value = 1L, message = "Min value is 1")
     @Max(value = Long.MAX_VALUE, message = "Crossed max value")
-    @Schema(description = "end id (must be greater or equal to start id)", example = "1")
+    @Schema(description = "end id: must be greater or equal to start id", example = "1")
     private Long endId;
 }

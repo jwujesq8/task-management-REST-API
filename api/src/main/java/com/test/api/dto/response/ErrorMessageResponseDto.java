@@ -18,7 +18,7 @@ public class ErrorMessageResponseDto {
 
     @NotBlank(message = "Description must not be blank")
     @Schema(description = "response body message (fail|success etc)",
-            example = "Description about going well or wrong", minLength = 0)
+            example = "Summary of successes and issues", minLength = 0)
     private String description;
 
 

@@ -39,7 +39,8 @@ public class AuthController {
     @PostMapping("/login")
     @PreAuthorize("!isAuthenticated()")
     @ApiResponses({
-            @ApiResponse(responseCode = "403", description = "Unsuccessful log in")}
+            @ApiResponse(responseCode = "200", description = "Successful request to log in", content = @Content(schema = @Schema(implementation = JwtResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Unsuccessful log in",  content = @Content(mediaType = "none"))}
     )
     public JwtResponseDto login(@Parameter(description = "user login and password inside the request body", required = true)
             @RequestBody @Valid @NotNull JwtRequestDto JwtRequestDto) throws ConstraintViolationException {
@@ -47,22 +48,48 @@ public class AuthController {
         return authServiceImpl.login(JwtRequestDto);
     }
 
-    @Operation(summary = "get new access token (after that used refresh token will be non valid)")
+
+
+
+
+
+
+
+
+
+
+    @Operation(summary = "get new access token (AFTER THAT USED REFRESH TOKEN WILL BE NON VALID)")
     @PostMapping("/newAccessToken")
     @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful request to get new access token", content = @Content(schema = @Schema(implementation = JwtResponseDto.class), mediaType = "application/json")),
             @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
-            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json"))}
+            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(mediaType = "none"))}
     )
     public JwtResponseDto getNewAccessToken(@Parameter(description = "refresh user token inside the request body", required = true)
             @RequestBody @Valid @NotNull RefreshJwtRequestDto RefreshJwtRequestDto){
         return authServiceImpl.getNewAccessToken(RefreshJwtRequestDto.getRefreshJwtRequest());
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     @Operation(summary = "get new access and refresh token")
     @PostMapping("/refresh")
     @SecurityRequirement(name = "JWT")@ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful request to get new access token and refresh token", content = @Content(schema = @Schema(implementation = JwtResponseDto.class), mediaType = "application/json")),
             @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
-            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json"))
+            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(mediaType = "none"))
     }
     )
     public JwtResponseDto refresh(@Parameter(description = "refresh user token inside the request body", required = true)
@@ -70,13 +97,24 @@ public class AuthController {
         return authServiceImpl.refresh(RefreshJwtRequestDto.getRefreshJwtRequest());
     }
 
+
+
+
+
+
+
+
+
+
+
     @Operation(summary = "log out")
     @DeleteMapping("/logout")
     @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "JWT")
     @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful request to log out"),
             @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
-            @ApiResponse(responseCode = "403", description = "Authentication error", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json"))
+            @ApiResponse(responseCode = "403", description = "Authentication error")
     }
     )
     public void logout(@Parameter(description = "refresh user token inside the request body", required = true)
