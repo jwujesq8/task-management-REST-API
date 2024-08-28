@@ -30,7 +30,7 @@ public class PUTUserRequestDto {
     @Schema(description = "user login", example = "iii@gmail.com", minLength = 11, maxLength = 50)
     private String login;
 
-    @Pattern(regexp = "^(?=.*\\d{3,})(?=.*[^A-Za-z0-9])[\\S]{7,20}$",
+    @Pattern(regexp = "^(?=(?:.*\\d.*){3,})(?=.*[^A-Za-z0-9])[A-Za-z\\d[^A-Za-z0-9]]{7,20}$",
             message = "Non valid password (must be digit 3 or more, special char 1 or more, length 7-20)")
     @NotEmpty(message = "Password must not be empty or null")
     @Schema(description = "user password: digit 3 or more, special char 1 or more, length 7-20", example = "qqq_111",
