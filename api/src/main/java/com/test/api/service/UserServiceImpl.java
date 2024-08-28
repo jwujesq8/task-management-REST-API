@@ -45,25 +45,12 @@ public class UserServiceImpl implements UserService{
                     "Such user (login:" + postUserRequestDto.getLogin() + ") already exists");
         }
 
-        Gender postUserGender;
-        if(postUserRequestDto.getGenderName().equalsIgnoreCase("male")){
-            postUserGender = genderRepository.findByNameIgnoreCase("male");
-        }
-        else if (postUserRequestDto.getGenderName().equalsIgnoreCase("female")){
-            postUserGender = genderRepository.findByNameIgnoreCase("female");
-        }
-        else {
-            postUserGender = genderRepository.findByNameIgnoreCase("none");
-        }
-        postUserRequestDto.setGenderName(null);
-
+        Gender postUserGender = genderRepository.findByNameIgnoreCase(postUserRequestDto.getGenderName());
         User postUser = userModelMapper.convert_POSTUserRequestDto_to_User(postUserRequestDto);
         postUser.setGender(postUserGender);
 
         userRepository.save(postUser);
         return userModelMapper.convert_User_to_UserResponseDto(postUser);
-
-
     }
 
     @Override
@@ -73,7 +60,6 @@ public class UserServiceImpl implements UserService{
                 () -> new BadRequestException.IdNotFoundException("User not found, id: " + putUserRequestDto.getId()));
 
         Gender putUserRequestDtoGender = genderRepository.findByNameIgnoreCase(putUserRequestDto.getGenderName());
-        putUserRequestDto.setGenderName(null);
         User putUser = userModelMapper.convert_PUTUserRequestDto_to_User(putUserRequestDto);
         putUser.setGender(putUserRequestDtoGender);
 

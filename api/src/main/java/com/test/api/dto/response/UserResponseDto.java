@@ -25,6 +25,6 @@ public class UserResponseDto {
     private String fullName;
 
     @Schema(description = "user gender: male, female or none", example = "female", minLength = 4, maxLength = 6)
-    private String gender;
+    private String genderName;
 
 }

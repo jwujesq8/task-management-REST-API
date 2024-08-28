@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.io.Console;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -22,7 +23,6 @@ import java.util.*;
 @Slf4j
 public class ExceptionControllerAdvice{
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
     private ErrorMessageResponseDto getResponseBody(String errorMessage) throws JsonProcessingException {
@@ -33,10 +33,15 @@ public class ExceptionControllerAdvice{
                 .build();
     }
 
+    public void printExceptionToConsole(Exception e){
+        log.error("Message: " + e.getMessage(), ". Stack trace: " + Arrays.toString(e.getStackTrace()));
+    }
+
 
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorMessageResponseDto> authenticationExceptionHandler(AuthenticationException e) throws JsonProcessingException {
+        printExceptionToConsole(e);
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(getResponseBody(e.getMessage()));
@@ -44,6 +49,7 @@ public class ExceptionControllerAdvice{
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorMessageResponseDto> badRequestExceptionHandler(BadRequestException e) throws JsonProcessingException {
+        printExceptionToConsole(e);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(getResponseBody(e.getMessage()));
@@ -51,6 +57,7 @@ public class ExceptionControllerAdvice{
 
     @ExceptionHandler(OkException.class)
     public ResponseEntity<ErrorMessageResponseDto> okExceptionHandler(OkException e) throws JsonProcessingException{
+        printExceptionToConsole(e);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(getResponseBody(e.getMessage()));
@@ -58,27 +65,30 @@ public class ExceptionControllerAdvice{
 
     @ExceptionHandler(ServerException.class)
     public ResponseEntity<ErrorMessageResponseDto> serverExceptionHandler(ServerException e) throws JsonProcessingException{
+        printExceptionToConsole(e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(getResponseBody(e.getMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessageResponseDto> unexpectedExceptionHandler(
-            Exception e) throws JsonProcessingException{
-
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(getResponseBody(e.getMessage()));
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ErrorMessageResponseDto> unexpectedExceptionHandler(
+//            Exception e) throws JsonProcessingException{
+//         printExceptionToConsole(e);
+//
+//        return ResponseEntity
+//                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body(getResponseBody(e.getMessage()));
+//    }
 
     @ExceptionHandler(ValidException.class)
     public ResponseEntity<ErrorMessageResponseDto> validationExceptionHandler(
-            ValidException validException) throws JsonProcessingException{
+            ValidException e) throws JsonProcessingException{
+        printExceptionToConsole(e);
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(getResponseBody(validException.getMessage()));
+                .body(getResponseBody(e.getMessage()));
     }
 
 
@@ -87,10 +97,10 @@ public class ExceptionControllerAdvice{
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorMessageResponseDto> validationExceptionHandler(
-            MethodArgumentNotValidException ex) throws JsonProcessingException {
+            MethodArgumentNotValidException e) throws JsonProcessingException {
 
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
+        e.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName;
             String errorMessage = error.getDefaultMessage();
 
@@ -106,6 +116,7 @@ public class ExceptionControllerAdvice{
                 .dateTime("UTC: " + formatter.format(Instant.now().atZone(ZoneId.of("UTC"))))
                 .errorsMap(errors)
                 .build();
+        printExceptionToConsole(e);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(validErrorMessageResponseDto);

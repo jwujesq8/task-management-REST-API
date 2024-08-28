@@ -35,30 +35,12 @@ public class User implements UserDetails {
     )
     private Long id;
 
-    @NotEmpty(message = "login is required")
-    @Size(
-            max = 50,
-            min = 11,
-            message = "Max size for login is 50"
-    )
     @Column(unique = true)
     private String login;
 
-    @NotEmpty(message = "password is required")
-    @Size(
-            min = 7,
-            max = 20,
-            message = "Max size for password is 20"
-    )
-    @Pattern(regexp = "^(?=.*\\d{3,})(?=.*[^A-Za-z0-9])[\\S]{7,20}$", message = "Non valid password")
     @Column(unique = true)
     private String password;
 
-    @NotEmpty(message = "fullName is required")
-    @Size(
-            max = 256,
-            message = "Max size for full name is 256"
-    )
     private String fullName;
 
     @ManyToOne(
