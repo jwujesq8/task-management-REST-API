@@ -2,6 +2,7 @@ package com.test.api.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.test.api.controller.UserController;
 import com.test.api.entity.UsersRequestsLogger;
 import com.test.api.exception.BadRequestException;
 import com.test.api.exception.ServerException;
@@ -40,6 +41,7 @@ public class LoggingAspect {
     private final UsersRequestsLoggerRepository usersRequestsLoggerRepository;
     private final HttpServletRequest request;
     private final UserService userService;
+    private final UserController userController;
     private ObjectMapper objectMapper = new ObjectMapper();
 
 
@@ -53,8 +55,6 @@ public class LoggingAspect {
     private void saveToLogger(Object response) throws IOException {
 
         String user = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        String requestBody = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-//        System.out.println("request body: " + requestBody);
         String method = request.getMethod();
         String requestUri = request.getRequestURI();
 
@@ -63,7 +63,6 @@ public class LoggingAspect {
                 .user(userService.getUserByLogin(user).orElseThrow(() -> new ServerException("Server error while reading logged in user")))
                 .requestMethod(method)
                 .requestPath(requestUri)
-//                .requestBody(requestBody)
                 .build();
 
         if (response != null){
@@ -73,11 +72,13 @@ public class LoggingAspect {
             }
             usersRequestsLogger.setResponse(responseString);
         }
-
-
-
-
-
+        if(userController.getRequestBody() != null){
+            String requestBodyString = objectMapper.writeValueAsString(userController.getRequestBody());
+            if (requestBodyString.length() > 16777215) {
+                requestBodyString = requestBodyString.substring(0, 16777215);
+            }
+            usersRequestsLogger.setRequestBody(requestBodyString);
+        }
 
         usersRequestsLoggerRepository.save(usersRequestsLogger);
     }
