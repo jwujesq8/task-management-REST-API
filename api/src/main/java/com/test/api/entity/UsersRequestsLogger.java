@@ -38,6 +38,6 @@ public class UsersRequestsLogger {
     private String requestBody;
 
     @Column(columnDefinition = "LONGTEXT")
-    private String response;
+    private String responseBody;
 
 }

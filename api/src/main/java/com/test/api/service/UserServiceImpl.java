@@ -10,8 +10,10 @@ import com.test.api.repository.GenderRepository;
 import com.test.api.repository.UserRepository;
 import com.test.api.user.Gender;
 import com.test.api.user.User;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -98,6 +100,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    @Transactional
     public List<UserResponseDto> deleteListOfUsersByStartAndEndId(Long startId, Long endId){
 
         List<User> userListToDelete = userRepository.userWhichIdInRange(startId, endId);
@@ -118,6 +121,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    @Transactional
     public List<UserResponseDto> deleteListOfUsersByStartIdAsc(Long startId){
 
         List<User> userListToDelete = userRepository.userWhichIdFrom(startId);

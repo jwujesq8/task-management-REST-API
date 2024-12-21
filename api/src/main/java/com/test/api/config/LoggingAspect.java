@@ -4,16 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.api.controller.UserController;
 import com.test.api.entity.UsersRequestsLogger;
-import com.test.api.exception.BadRequestException;
 import com.test.api.exception.ServerException;
 import com.test.api.repository.UsersRequestsLoggerRepository;
 import com.test.api.service.UserService;
-import com.test.api.user.User;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletRequestWrapper;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -24,13 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Aspect
 @Component
@@ -42,7 +31,8 @@ public class LoggingAspect {
     private final HttpServletRequest request;
     private final UserService userService;
     private final UserController userController;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final int MAX_FIELD_LENGTH = 16777215;
 
 
     @AfterReturning(pointcut = "execution(* com.test.api.controller..*(..)) && "  +
@@ -50,6 +40,18 @@ public class LoggingAspect {
             returning = "response")
     public void logAfterRequest(JoinPoint joinPoint, Object response) throws IOException {
         saveToLogger(response);
+    }
+
+
+    public String setField(Object object) throws JsonProcessingException {
+        if(object != null){
+            String objectString = objectMapper.writeValueAsString(object);
+            if (objectString.length() > MAX_FIELD_LENGTH) {
+                objectString = objectString.substring(0, MAX_FIELD_LENGTH);
+            }
+            return objectString;
+        }
+        else return null;
     }
 
     private void saveToLogger(Object response) throws IOException {
@@ -63,22 +65,10 @@ public class LoggingAspect {
                 .user(userService.getUserByLogin(user).orElseThrow(() -> new ServerException("Server error while reading logged in user")))
                 .requestMethod(method)
                 .requestPath(requestUri)
+                .requestBody(setField(UserController.getRequestBody()))
+                .responseBody(setField(response))
                 .build();
 
-        if (response != null){
-            String responseString = objectMapper.writeValueAsString(response);
-            if (responseString.length() > 16777215) {
-                responseString = responseString.substring(0, 16777215);
-            }
-            usersRequestsLogger.setResponse(responseString);
-        }
-        if(userController.getRequestBody() != null){
-            String requestBodyString = objectMapper.writeValueAsString(userController.getRequestBody());
-            if (requestBodyString.length() > 16777215) {
-                requestBodyString = requestBodyString.substring(0, 16777215);
-            }
-            usersRequestsLogger.setRequestBody(requestBodyString);
-        }
 
         usersRequestsLoggerRepository.save(usersRequestsLogger);
     }

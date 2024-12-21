@@ -2,10 +2,14 @@ package com.test.api.exceptionHandler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.test.api.config.LoggingAspect;
+import com.test.api.controller.UserController;
 import com.test.api.dto.response.ErrorMessageResponseDto;
 import com.test.api.dto.response.ValidationErrorMessageResponseDto;
 import com.test.api.exception.*;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -20,10 +24,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestControllerAdvice
-@Slf4j
 public class ExceptionControllerAdvice{
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+    private static final Logger log = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
 
     private ErrorMessageResponseDto getResponseBody(String errorMessage) throws JsonProcessingException {
 
@@ -33,15 +37,15 @@ public class ExceptionControllerAdvice{
                 .build();
     }
 
-    public void printExceptionToConsole(Exception e){
-        log.error("Message: " + e.getMessage(), ". Stack trace: " + Arrays.toString(e.getStackTrace()));
-    }
 
 
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorMessageResponseDto> authenticationExceptionHandler(AuthenticationException e) throws JsonProcessingException {
-        printExceptionToConsole(e);
+
+        log.error("Exception: AuthenticationException. " +
+                "Exception message: " + e.getMessage());
+
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(getResponseBody(e.getMessage()));
@@ -49,7 +53,9 @@ public class ExceptionControllerAdvice{
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorMessageResponseDto> badRequestExceptionHandler(BadRequestException e) throws JsonProcessingException {
-        printExceptionToConsole(e);
+
+        log.error("Exception: BadRequestException. " +
+                "Exception message: " + e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(getResponseBody(e.getMessage()));
@@ -57,7 +63,9 @@ public class ExceptionControllerAdvice{
 
     @ExceptionHandler(OkException.class)
     public ResponseEntity<ErrorMessageResponseDto> okExceptionHandler(OkException e) throws JsonProcessingException{
-        printExceptionToConsole(e);
+
+        log.error("Exception: OkException. " +
+                "Exception message: " + e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(getResponseBody(e.getMessage()));
@@ -65,26 +73,31 @@ public class ExceptionControllerAdvice{
 
     @ExceptionHandler(ServerException.class)
     public ResponseEntity<ErrorMessageResponseDto> serverExceptionHandler(ServerException e) throws JsonProcessingException{
-        printExceptionToConsole(e);
+
+        log.error("Exception: ServerException. " +
+                "Exception message: " + e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(getResponseBody(e.getMessage()));
     }
 
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<ErrorMessageResponseDto> unexpectedExceptionHandler(
-//            Exception e) throws JsonProcessingException{
-//         printExceptionToConsole(e);
-//
-//        return ResponseEntity
-//                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                .body(getResponseBody(e.getMessage()));
-//    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorMessageResponseDto> unexpectedExceptionHandler(
+            Exception e) throws JsonProcessingException{
+
+        log.error("Exception: unexpectedException. " +
+                "Exception message: " + e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(getResponseBody(e.getMessage()));
+    }
 
     @ExceptionHandler(ValidException.class)
     public ResponseEntity<ErrorMessageResponseDto> validationExceptionHandler(
             ValidException e) throws JsonProcessingException{
-        printExceptionToConsole(e);
+
+        log.error("Exception: ValidException. " +
+                "Exception message: " + e.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -116,12 +129,14 @@ public class ExceptionControllerAdvice{
                 .dateTime("UTC: " + formatter.format(Instant.now().atZone(ZoneId.of("UTC"))))
                 .errorsMap(errors)
                 .build();
-        printExceptionToConsole(e);
+
+        log.error("Exception: MethodArgumentNotValidException. " +
+                "Exception message: " + errors);
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(validErrorMessageResponseDto);
     }
-
 
 }
 

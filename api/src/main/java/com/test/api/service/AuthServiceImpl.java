@@ -1,6 +1,7 @@
 package com.test.api.service;
 
 import com.test.api.config.JWT.JwtProvider;
+import com.test.api.controller.UserController;
 import com.test.api.dto.request.JwtRequestDto;
 import com.test.api.dto.response.JwtResponseDto;
 import com.test.api.exception.AuthenticationException;
@@ -12,6 +13,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -20,12 +23,12 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Validated
-@Slf4j
 public class AuthServiceImpl {
 
     private final UserService userService;
     private final Map<String, String> refreshTokensStorage = new HashMap<>();
     private final JwtProvider jwtProvider;
+    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     public JwtResponseDto login(@Valid @NotNull JwtRequestDto jwtRequestDto) {
 
@@ -38,7 +41,9 @@ public class AuthServiceImpl {
 
                 final String accessToken = jwtProvider.generateAccessToken(user);
                 final String refreshToken = jwtProvider.generateRefreshToken(user);
+
                 refreshTokensStorage.put(user.getLogin(), refreshToken);
+                log.info(user.getLogin() + " is logged in");
                 return new JwtResponseDto(accessToken, refreshToken);
             }
             else {
@@ -47,8 +52,6 @@ public class AuthServiceImpl {
         } else {
             throw new OkException.AlreadyLoggedInOrLoggedOutException("User is already logged in");
         }
-
-
     }
 
     public JwtResponseDto getNewAccessToken(@NotNull String refreshToken){
@@ -65,6 +68,8 @@ public class AuthServiceImpl {
 
                 String newAccessToken = jwtProvider.generateAccessToken(user);
                 refreshTokensStorage.put(user.getLogin(), null);
+
+                log.info(user.getLogin() + " got new access token");
                 return new JwtResponseDto(newAccessToken, null);
             }
             throw new AuthenticationException.TokenValidationException("Wrong refresh token");
@@ -90,6 +95,7 @@ public class AuthServiceImpl {
                 String newRefreshToken = jwtProvider.generateRefreshToken(user);
                 refreshTokensStorage.put(user.getLogin(), newRefreshToken);
 
+                log.info(user.getLogin() + " got new access token and refresh token");
                 return new JwtResponseDto(newAccessToken, newRefreshToken);
             }
             throw new AuthenticationException.TokenValidationException("Wrong refresh token");
@@ -109,6 +115,8 @@ public class AuthServiceImpl {
                         .orElseThrow(() -> new AuthenticationException("User not found"));
 
                 refreshTokensStorage.remove(user.getLogin());
+
+                log.info(user.getLogin() + " is logged out");
                 return;
             }
             throw new OkException.AlreadyLoggedInOrLoggedOutException("User is already logged out");

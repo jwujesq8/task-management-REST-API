@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthServiceImpl authServiceImpl;
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Operation(summary = "log in")
     @PostMapping("/login")
@@ -44,7 +43,6 @@ public class AuthController {
     )
     public JwtResponseDto login(@Parameter(description = "user login and password inside the request body", required = true)
             @RequestBody @Valid @NotNull JwtRequestDto JwtRequestDto) throws ConstraintViolationException {
-        logger.info(JwtRequestDto.getLogin() + " tries to log in");
         return authServiceImpl.login(JwtRequestDto);
     }
 
