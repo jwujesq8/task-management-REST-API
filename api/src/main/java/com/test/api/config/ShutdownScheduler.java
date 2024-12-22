@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 import javax.annotation.PreDestroy;
 
 @Configuration
-@ConfigurationProperties(prefix = "test-app")
+@ConfigurationProperties(prefix = "user-rest-api")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
