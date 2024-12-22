@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -44,8 +45,8 @@ public class UserController {
     private final UserService userService;
     private final GenderService genderService;
     private final WebSocketNotificationService webSocketNotificationService;
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-
+    @Getter
+    private static Object requestBody;
 
 
 
@@ -64,8 +65,8 @@ public class UserController {
     )
     public UserResponseDto getUserById(@Parameter(description = "id inside the body request", required = true)
             @RequestBody @Valid IdDto idDto){
-        logger.info("request to get info about the user by id: " + idDto.getId());
 
+        requestBody = idDto;
         return userService.getUserById(idDto.getId());
     }
 
@@ -102,7 +103,7 @@ public class UserController {
     public UserResponseDto addUser(@Parameter(description = "postUser(without id, it's auto generated) inside the body request", required = true)
             @RequestBody @Valid POSTUserRequestDto postUserRequestDto){
 
-        logger.info("request to add new user with full name: " + postUserRequestDto.getFullName());
+        requestBody = postUserRequestDto;
         return userService.addUser(postUserRequestDto);
     }
 
@@ -132,8 +133,8 @@ public class UserController {
     public UserResponseDto updateUser(@Parameter(description = "putUser( with id !!! ) inside the body request", required = true)
             @RequestBody @Valid PUTUserRequestDto putUserRequestDto){
 
-        logger.info("request to update user with id: " + putUserRequestDto.getId());
-            return userService.updateUser(putUserRequestDto);
+        requestBody = putUserRequestDto;
+        return userService.updateUser(putUserRequestDto);
     }
 
 
@@ -161,7 +162,7 @@ public class UserController {
             schema = @Schema(implementation = IdDto.class, example = "{ \"id\": 1}")))
             @RequestBody @Valid IdDto idDto){
 
-            logger.info("request to delete user by id: " + idDto.getId());
+            requestBody = idDto;
             return userService.deleteUser(idDto.getId());
     }
 
@@ -189,11 +190,10 @@ public class UserController {
     )
     public List<UserResponseDto> getAllUsers(){
 
-
-        logger.info("request to get all users");
-            String userRequiter = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            webSocketNotificationService.sendNotification("/topic", userRequiter,"use request GET user/list");
-            return userService.getAllUsers();
+        requestBody = null;
+        String userRequiter = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        webSocketNotificationService.sendNotification("/topic", userRequiter,"use request GET user/list");
+        return userService.getAllUsers();
 
     }
 
@@ -220,9 +220,8 @@ public class UserController {
     public List<UserResponseDto> deleteListOfUsersByStartAndEndId(@Parameter(description = "start and end users id inside the request body", required = true)
             @RequestBody @Valid DeleteUsersListByIdDto deleteUsersListByIdDto){
 
-        logger.info("request to delete list of users with id: " +
-                deleteUsersListByIdDto.getStartId() + "-" + deleteUsersListByIdDto.getEndId());
-            return userService.deleteListOfUsersByStartAndEndId(
+        requestBody = deleteUsersListByIdDto;
+        return userService.deleteListOfUsersByStartAndEndId(
                     deleteUsersListByIdDto.getStartId(),deleteUsersListByIdDto.getEndId()
             );
     }
@@ -251,9 +250,8 @@ public class UserController {
     public List<UserResponseDto> deleteListOfUsersByStartIdAsc(@Parameter(description = "user id inside the request body", required = true)
             @RequestBody @Valid IdDto idDto){
 
-        logger.info("request to delete list of users from id: " +
-                idDto.getId());
-            return userService.deleteListOfUsersByStartIdAsc(idDto.getId());
+        requestBody = idDto;
+        return userService.deleteListOfUsersByStartIdAsc(idDto.getId());
     }
 
 

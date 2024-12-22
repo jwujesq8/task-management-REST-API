@@ -10,6 +10,7 @@ import com.test.api.repository.GenderRepository;
 import com.test.api.repository.UserRepository;
 import com.test.api.user.Gender;
 import com.test.api.user.User;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class UserServiceImpl implements UserService{
         User user =  userRepository.findById(id).orElseThrow(
                 () -> new BadRequestException.IdNotFoundException("User not found, id: " + id));
 
-        return userModelMapper.convert_User_to_UserResponseDto(user);
+        return userModelMapper.map_User_to_UserResponseDto(user);
     }
 
     @Override
@@ -44,13 +45,9 @@ public class UserServiceImpl implements UserService{
             throw new BadRequestException.UserAlreadyExistsException(
                     "Such user (login:" + postUserRequestDto.getLogin() + ") already exists");
         }
-
-        Gender postUserGender = genderRepository.findByNameIgnoreCase(postUserRequestDto.getGenderName());
-        User postUser = userModelMapper.convert_POSTUserRequestDto_to_User(postUserRequestDto);
-        postUser.setGender(postUserGender);
-
-        userRepository.save(postUser);
-        return userModelMapper.convert_User_to_UserResponseDto(postUser);
+        User user = userModelMapper.map_POSTUserRequestDto_to_User(postUserRequestDto);
+        userRepository.save(user);
+        return userModelMapper.map_User_to_UserResponseDto(user);
     }
 
     @Override
@@ -58,13 +55,9 @@ public class UserServiceImpl implements UserService{
 
         userRepository.findById(putUserRequestDto.getId()).orElseThrow(
                 () -> new BadRequestException.IdNotFoundException("User not found, id: " + putUserRequestDto.getId()));
-
-        Gender putUserRequestDtoGender = genderRepository.findByNameIgnoreCase(putUserRequestDto.getGenderName());
-        User putUser = userModelMapper.convert_PUTUserRequestDto_to_User(putUserRequestDto);
-        putUser.setGender(putUserRequestDtoGender);
-
-        userRepository.save(putUser);
-        return userModelMapper.convert_User_to_UserResponseDto(putUser);
+        User user = userModelMapper.map_PUTUserRequestDto_to_User(putUserRequestDto);
+        userRepository.save(user);
+        return userModelMapper.map_User_to_UserResponseDto(user);
 
     }
 
@@ -75,7 +68,7 @@ public class UserServiceImpl implements UserService{
                 () -> new BadRequestException.IdNotFoundException("User not found, id: " + id)
         );
         userRepository.deleteById(id);
-        return userModelMapper.convert_User_to_UserResponseDto(userToDelete);
+        return userModelMapper.map_User_to_UserResponseDto(userToDelete);
 
     }
 
@@ -88,7 +81,7 @@ public class UserServiceImpl implements UserService{
             List<UserResponseDto> userResponseDtoList = new ArrayList<>();
             userList
                     .forEach(user ->
-                            userResponseDtoList.add(userModelMapper.convert_User_to_UserResponseDto(user))
+                            userResponseDtoList.add(userModelMapper.map_User_to_UserResponseDto(user))
 
                     );
             return userResponseDtoList;
@@ -98,13 +91,14 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    @Transactional
     public List<UserResponseDto> deleteListOfUsersByStartAndEndId(Long startId, Long endId){
 
         List<User> userListToDelete = userRepository.userWhichIdInRange(startId, endId);
         List<UserResponseDto> userResponseDtoListToDelete = new ArrayList<>();
         userListToDelete.forEach(
                 user -> {
-                    userResponseDtoListToDelete.add(userModelMapper.convert_User_to_UserResponseDto(user));
+                    userResponseDtoListToDelete.add(userModelMapper.map_User_to_UserResponseDto(user));
 
                 }
         );
@@ -118,13 +112,14 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    @Transactional
     public List<UserResponseDto> deleteListOfUsersByStartIdAsc(Long startId){
 
         List<User> userListToDelete = userRepository.userWhichIdFrom(startId);
         List<UserResponseDto> userResponseDtoListToDelete = new ArrayList<>();
         userListToDelete.forEach(
                 user -> {
-                    userResponseDtoListToDelete.add(userModelMapper.convert_User_to_UserResponseDto(user));
+                    userResponseDtoListToDelete.add(userModelMapper.map_User_to_UserResponseDto(user));
                 }
         );
 

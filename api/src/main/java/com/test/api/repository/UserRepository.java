@@ -27,14 +27,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsById(Long id);
 
-    @Transactional
     @Query(
             value = "SELECT * FROM user u WHERE u.id>=?1 AND u.id<=?2;",
             nativeQuery = true
     )
     List<User> userWhichIdInRange(Long startId, Long endId);
 
-    @Transactional
     @Query(
             value = "SELECT * FROM user u WHERE u.id>=?1;",
             nativeQuery = true
@@ -42,7 +40,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> userWhichIdFrom(Long startId);
 
     @Modifying
-    @Transactional
     @Query(
             value = "DELETE FROM user u WHERE u.id>=?1 AND u.id<=?2;",
             nativeQuery = true
@@ -50,7 +47,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     void deleteListOfUsersByStartAndEndId(Long startId, Long endId);
 
     @Modifying
-    @Transactional
     @Query(
             value = "DELETE FROM user u WHERE u.id>=?1",
             nativeQuery = true
@@ -59,20 +55,3 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
 }
-
-
-
-
-//    @Transactional
-//    @Query(
-//            value = "SELECT COUNT(*) FROM user u WHERE u.id>=?1 AND u.id<=?2;",
-//            nativeQuery = true
-//    )
-//    Long idCountInRange(Long startId, Long endId);
-//
-//    @Transactional
-//    @Query(
-//            value = "SELECT COUNT(*) FROM user u WHERE u.id>=?1;",
-//            nativeQuery = true
-//    )
-//    Long idCountFrom(Long startId);

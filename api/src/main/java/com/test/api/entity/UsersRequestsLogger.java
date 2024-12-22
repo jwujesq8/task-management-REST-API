@@ -34,6 +34,10 @@ public class UsersRequestsLogger {
     @NotNull
     private String requestPath;
 
-    private String response;
+    @Column(columnDefinition = "LONGTEXT")
+    private String requestBody;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String responseBody;
 
 }
