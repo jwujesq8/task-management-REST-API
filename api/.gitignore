@@ -230,3 +230,4 @@ README.html
 .idea
 .exercism
 
+src/main/resources/jwt
