@@ -195,6 +195,3 @@ README.html
 *.iml
 .idea
 .exercism
-
-api/src/main/resources/application.properties
-application.properties

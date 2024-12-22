@@ -11,6 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Key;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,28 +29,40 @@ public class JwtProvider {
 
 
     public JwtProvider(
+            @Value("${jwt.access.path}") String accessPath,
+            @Value("${jwt.refresh.path}") String refreshPath
+    ) throws IOException {
 
-            @Value("${jwt.secret.access}") String accessKey,
-            @Value("${jwt.secret.refresh}") String refreshKey
-    ) {
-        accessSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessKey));
-        refreshSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshKey));
+        // ACCESS TOKEN
+        Path a = Paths.get(accessPath).toAbsolutePath().normalize();
+        if (Files.exists(a)) {
+            String access = new String(Files.readAllBytes(a));
+            accessSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(access));
+        } else {
+            throw new IOException("Access file not found: " + accessPath.toString());
+        }
 
-//        log.info("accessToken: " + accessKey + ", refreshToken: " + refreshKey);
+        // REFRESH TOKEN
+        Path r = Paths.get(refreshPath).toAbsolutePath().normalize();
+        if (Files.exists(r)) {
+            String refresh = new String(Files.readAllBytes(r));
+            refreshSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(refresh));
+        } else {
+            throw new IOException("Refresh file not found: " + accessPath.toString());
+        }
+
     }
 
     public String generateAccessToken(@NonNull User user) {
 
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Minsk"));
         Date currentDate = calendar.getTime();
-//        Date expirationDate = new Date(currentDate.getTime() + 300000); // 5 min
         Date expirationDate = new Date(currentDate.getTime() + 600000); // 10 min
 
         return Jwts.builder()
                 .setSubject(user.getLogin())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                //.setExpiration(new Date(System.currentTimeMillis() + 1000 * 5)) // around 5 min
-                .setExpiration(expirationDate) // 5 min
+                .setExpiration(expirationDate)
                 .claim("login", user.getLogin())
                 .claim("fullName", user.getFullName())
                 .signWith(accessSecretKey)
@@ -61,7 +77,6 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .setSubject(user.getLogin())
-                //.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24)) // 24 hours
                 .setExpiration(expirationDate) // 24 hours
                 .signWith(refreshSecretKey)
                 .compact();
@@ -92,19 +107,14 @@ public class JwtProvider {
             return true;
         } catch (ExpiredJwtException expEx) {
             log.error("Token expired", expEx);
-//            throw new TokenValidationException("Token expired: " + expEx);
         } catch (UnsupportedJwtException unsEx) {
             log.error("Unsupported jwt", unsEx);
-//            throw new TokenValidationException("Unsupported jwt: " + unsEx);
         } catch (MalformedJwtException mjEx) {
             log.error("Malformed jwt", mjEx);
-//            throw new TokenValidationException("Malformed jwt: " + mjEx);
         } catch (SignatureException sEx) {
             log.error("Invalid signature", sEx);
-//            throw new TokenValidationException("Invalid signature: " + sEx);
         } catch (Exception e) {
             log.error("Invalid token", e);
-//            throw new TokenValidationException("Invalid token: " + e);
         }
         return false;
     }
