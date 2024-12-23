@@ -6,9 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
-public class UserActionMessageDto {
+public class UserActionMessageDto implements Serializable {
 
     @NotNull(message = "User must not be null")
     @Schema(description = "user login that send a request", minLength = 11, maxLength = 50)
