@@ -1,4 +1,4 @@
-package com.test.api.service;
+package com.test.api.service.interfaces;
 
 import com.test.api.user.Gender;
 import jakarta.validation.Valid;

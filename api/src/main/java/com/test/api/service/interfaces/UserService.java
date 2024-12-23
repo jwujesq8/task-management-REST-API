@@ -1,4 +1,4 @@
-package com.test.api.service;
+package com.test.api.service.interfaces;
 
 import com.test.api.dto.request.POSTUserRequestDto;
 import com.test.api.dto.request.PUTUserRequestDto;

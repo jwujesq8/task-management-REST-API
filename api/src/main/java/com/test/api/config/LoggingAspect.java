@@ -6,7 +6,7 @@ import com.test.api.controller.UserController;
 import com.test.api.entity.UsersRequestsLogger;
 import com.test.api.exception.ServerException;
 import com.test.api.repository.UsersRequestsLoggerRepository;
-import com.test.api.service.UserService;
+import com.test.api.service.interfaces.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.JoinPoint;

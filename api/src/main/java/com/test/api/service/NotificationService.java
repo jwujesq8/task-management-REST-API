@@ -1,10 +1,11 @@
 package com.test.api.service;
 
-import com.test.api.dto.UserActionMessageDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.Calendar;
+import java.util.TimeZone;
 
 @Service
 @RequiredArgsConstructor
@@ -12,11 +13,11 @@ public class NotificationService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
+    Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Warsaw"));
+
     public void sendUserActionNotification(String user, String action){
-        UserActionMessageDto message = new UserActionMessageDto();
-        message.setUser(user);
-        message.setAction(action);
-        messagingTemplate.convertAndSend("/userActionNotification/all", message);
+        messagingTemplate.convertAndSend("/userActionNotification/all",
+                calendar.getTime() + " : " + user + " - " + action);
 
     }
 }

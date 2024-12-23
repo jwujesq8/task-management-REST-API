@@ -5,6 +5,7 @@ import com.test.api.exception.ServerException;
 import com.test.api.exception.ValidException;
 import com.test.api.repository.GenderRepository;
 import com.test.api.repository.UserRepository;
+import com.test.api.service.interfaces.GenderService;
 import com.test.api.user.Gender;
 import com.test.api.user.User;
 import jakarta.validation.ConstraintViolationException;
@@ -20,7 +21,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 @Validated
-public class GenderServiceImpl implements GenderService{
+public class GenderServiceImpl implements GenderService {
 
     private final GenderRepository genderRepository;
     private final UserRepository userRepository;

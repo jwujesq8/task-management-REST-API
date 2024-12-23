@@ -1,18 +1,17 @@
 package com.test.api.service;
 
 import com.test.api.config.JWT.JwtProvider;
-import com.test.api.controller.UserController;
 import com.test.api.dto.request.JwtRequestDto;
 import com.test.api.dto.response.JwtResponseDto;
 import com.test.api.exception.AuthenticationException;
 import com.test.api.exception.BadRequestException;
 import com.test.api.exception.OkException;
+import com.test.api.service.interfaces.UserService;
 import com.test.api.user.User;
 import io.jsonwebtoken.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

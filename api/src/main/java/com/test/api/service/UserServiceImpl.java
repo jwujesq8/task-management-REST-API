@@ -8,7 +8,7 @@ import com.test.api.exception.OkException;
 import com.test.api.modelMapper.UserModelMapper;
 import com.test.api.repository.GenderRepository;
 import com.test.api.repository.UserRepository;
-import com.test.api.user.Gender;
+import com.test.api.service.interfaces.UserService;
 import com.test.api.user.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserModelMapper userModelMapper;

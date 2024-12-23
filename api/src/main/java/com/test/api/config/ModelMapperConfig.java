@@ -1,4 +1,4 @@
-package com.test.api.modelMapper;
+package com.test.api.config;
 
 import com.test.api.dto.request.POSTUserRequestDto;
 import com.test.api.dto.request.PUTUserRequestDto;
