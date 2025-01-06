@@ -6,10 +6,4 @@ public class AuthenticationException extends RuntimeException{
         super(errorMessage);
     }
 
-    public static class TokenValidationException extends AuthenticationException{
-        public TokenValidationException(String errorMessage){
-            super(errorMessage);
-        }
-    }
-
 }

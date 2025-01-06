@@ -46,7 +46,7 @@ public class GenderServiceImpl implements GenderService {
     public void updateGender(@Valid Gender gender) {
 
         Gender genderDB = genderRepository.findById(gender.getId()).orElseThrow(
-                () -> new BadRequestException.IdNotFoundException("Gender not found, id: " + gender.getId()));
+                () -> new BadRequestException("Gender not found, id: " + gender.getId()));
 
             try{
                 genderRepository.save(genderDB);
@@ -67,7 +67,7 @@ public class GenderServiceImpl implements GenderService {
     public void deleteGenderById(Integer id){
 
         Gender genderToDelete = genderRepository.findById(id).orElseThrow(
-                () -> new BadRequestException.IdNotFoundException("Gender not found, id: " + id));
+                () -> new BadRequestException("Gender not found, id: " + id));
 
         List<User> userListWithDeletedGender = userRepository.findByGender(genderToDelete);
 

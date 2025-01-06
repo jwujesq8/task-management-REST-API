@@ -6,7 +6,6 @@ import com.test.api.dto.response.UserResponseDto;
 import com.test.api.exception.BadRequestException;
 import com.test.api.exception.OkException;
 import com.test.api.modelMapper.UserModelMapper;
-import com.test.api.repository.GenderRepository;
 import com.test.api.repository.UserRepository;
 import com.test.api.service.interfaces.UserService;
 import com.test.api.user.User;
@@ -26,13 +25,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserModelMapper userModelMapper;
-    private final GenderRepository genderRepository;
 
     @Override
     public UserResponseDto getUserById(Long id) {
 
         User user =  userRepository.findById(id).orElseThrow(
-                () -> new BadRequestException.IdNotFoundException("User not found, id: " + id));
+                () -> new BadRequestException("User not found, id: " + id));
 
         return userModelMapper.map_User_to_UserResponseDto(user);
     }
@@ -42,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
         if(userRepository.existsByLoginAndPasswordIgnoreCase(
                 postUserRequestDto.getLogin(), postUserRequestDto.getPassword())){
-            throw new BadRequestException.UserAlreadyExistsException(
+            throw new BadRequestException(
                     "Such user (login:" + postUserRequestDto.getLogin() + ") already exists");
         }
         User user = userModelMapper.map_POSTUserRequestDto_to_User(postUserRequestDto);
@@ -54,7 +52,7 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto updateUser(PUTUserRequestDto putUserRequestDto) {
 
         userRepository.findById(putUserRequestDto.getId()).orElseThrow(
-                () -> new BadRequestException.IdNotFoundException("User not found, id: " + putUserRequestDto.getId()));
+                () -> new BadRequestException("User not found, id: " + putUserRequestDto.getId()));
         User user = userModelMapper.map_PUTUserRequestDto_to_User(putUserRequestDto);
         userRepository.save(user);
         return userModelMapper.map_User_to_UserResponseDto(user);
@@ -65,7 +63,7 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto deleteUser(Long id){
 
         User userToDelete = userRepository.findById(id).orElseThrow(
-                () -> new BadRequestException.IdNotFoundException("User not found, id: " + id)
+                () -> new BadRequestException("User not found, id: " + id)
         );
         userRepository.deleteById(id);
         return userModelMapper.map_User_to_UserResponseDto(userToDelete);
@@ -86,7 +84,7 @@ public class UserServiceImpl implements UserService {
                     );
             return userResponseDtoList;
         } else {
-            throw new OkException.NoContentException("User table is empty");
+            throw new OkException("User table is empty");
         }
     }
 
@@ -107,7 +105,7 @@ public class UserServiceImpl implements UserService {
             userRepository.deleteListOfUsersByStartAndEndId(startId, endId);
             return userResponseDtoListToDelete;
         }
-        throw new BadRequestException.IdNotFoundException("There are no one user with id in range " + startId + "-" + endId);
+        throw new BadRequestException("There are no one user with id in range " + startId + "-" + endId);
 
     }
 
@@ -127,7 +125,7 @@ public class UserServiceImpl implements UserService {
             userRepository.deleteListOfUsersByStartIdAsc(startId);
             return userResponseDtoListToDelete;
         }
-        else throw new BadRequestException.IdNotFoundException("There are no one user with id from " + startId);
+        else throw new BadRequestException("There are no one user with id from " + startId);
 
     }
 

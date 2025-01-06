@@ -37,6 +37,15 @@ public class ExceptionControllerAdvice{
                 .build();
     }
 
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorMessageResponseDto> badRequestExceptionHandler(BadRequestException e) throws JsonProcessingException {
+
+        log.error("Exception: BadRequestException. " +
+                "Exception message: " + e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(getResponseBody(e.getMessage()));
+    }
 
 
 
@@ -51,15 +60,7 @@ public class ExceptionControllerAdvice{
                 .body(getResponseBody(e.getMessage()));
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorMessageResponseDto> badRequestExceptionHandler(BadRequestException e) throws JsonProcessingException {
 
-        log.error("Exception: BadRequestException. " +
-                "Exception message: " + e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(getResponseBody(e.getMessage()));
-    }
 
     @ExceptionHandler(OkException.class)
     public ResponseEntity<ErrorMessageResponseDto> okExceptionHandler(OkException e) throws JsonProcessingException{

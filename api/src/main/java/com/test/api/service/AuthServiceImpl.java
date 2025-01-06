@@ -32,7 +32,7 @@ public class AuthServiceImpl {
     public JwtResponseDto login(@Valid @NotNull JwtRequestDto jwtRequestDto) {
 
         final User user = userService.getUserByLogin(jwtRequestDto.getLogin())
-                .orElseThrow(() -> new BadRequestException.ObjectNotFoundException("User not found"));
+                .orElseThrow(() -> new BadRequestException("User not found"));
 
         if(!refreshTokensStorage.containsKey(user.getLogin())){
 
@@ -49,7 +49,7 @@ public class AuthServiceImpl {
                 throw new AuthenticationException("Wrong password");
             }
         } else {
-            throw new OkException.AlreadyLoggedInOrLoggedOutException("User is already logged in");
+            throw new OkException("User is already logged in");
         }
     }
 
@@ -71,9 +71,9 @@ public class AuthServiceImpl {
                 log.info(user.getLogin() + " got new access token");
                 return new JwtResponseDto(newAccessToken, null);
             }
-            throw new AuthenticationException.TokenValidationException("Wrong refresh token");
+            throw new AuthenticationException("Wrong refresh token");
         }
-        throw new AuthenticationException.TokenValidationException("Non valid refresh token");
+        throw new AuthenticationException("Non valid refresh token");
 
     }
 
@@ -97,9 +97,9 @@ public class AuthServiceImpl {
                 log.info(user.getLogin() + " got new access token and refresh token");
                 return new JwtResponseDto(newAccessToken, newRefreshToken);
             }
-            throw new AuthenticationException.TokenValidationException("Wrong refresh token");
+            throw new AuthenticationException("Wrong refresh token");
         }
-        throw new AuthenticationException.TokenValidationException("Non valid refresh token");
+        throw new AuthenticationException("Non valid refresh token");
     }
 
     public void logout(@NotNull String refreshToken) {
@@ -118,7 +118,7 @@ public class AuthServiceImpl {
                 log.info(user.getLogin() + " is logged out");
                 return;
             }
-            throw new OkException.AlreadyLoggedInOrLoggedOutException("User is already logged out");
+            throw new OkException("User is already logged out");
         }
         throw new AuthenticationException("Non valid refresh token");
 

@@ -5,15 +5,4 @@ public class OkException extends RuntimeException{
         super(errorMessage);
     }
 
-    public static class AlreadyLoggedInOrLoggedOutException extends OkException{
-        public AlreadyLoggedInOrLoggedOutException(String errorMessage){
-            super(errorMessage);
-        }
-    }
-
-    public static class NoContentException extends OkException{
-        public NoContentException(String errorMessage){
-            super(errorMessage);
-        }
-    }
 }
