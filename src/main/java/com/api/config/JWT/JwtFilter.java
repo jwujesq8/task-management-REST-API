@@ -1,8 +1,8 @@
 package com.api.config.JWT;
 
+import com.api.config.Role;
 import com.api.service.AuthServiceImpl;
 import io.jsonwebtoken.Claims;
-import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,7 +41,8 @@ public class JwtFilter extends OncePerRequestFilter {
             final Claims claims = jwtProvider.getAccessClaims(token);
 
             final JwtAuthentication jwtAuthentication = new JwtAuthentication();
-            jwtAuthentication.setLogin(claims.getSubject());
+            jwtAuthentication.setEmail(claims.getSubject());
+            jwtAuthentication.setRole(Role.valueOf(claims.get("role", String.class)));
             jwtAuthentication.setAuthenticated(authServiceImpl.isUserLoggedIn(claims.getSubject()));
             SecurityContextHolder.getContext().setAuthentication(jwtAuthentication);
 

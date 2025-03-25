@@ -66,6 +66,7 @@ public class JwtProvider {
                 .claim("login", user.getEmail())
 //                .claim("fullName", user.getLastName())
                 .claim("fullName", user.getFullName())
+                .claim("role", user.getRole())
                 .signWith(accessSecretKey)
                 .compact();
     }
@@ -79,6 +80,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .setExpiration(expirationDate) // 24 hours
+                .claim("role", user.getRole())
                 .signWith(refreshSecretKey)
                 .compact();
     }

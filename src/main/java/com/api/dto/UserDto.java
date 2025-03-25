@@ -1,6 +1,9 @@
 package com.api.dto;
 
+import com.api.config.Role;
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -31,8 +34,6 @@ public class UserDto {
         @NotNull(message = "Password must be")
         private String password;
 
-        @NotNull(message = "role must be")
-        @Pattern(regexp = "^(admin|user)$",
-                message = "Next priorities are acceptable: admin|user")
-        private String role;
+        @Enumerated(EnumType.STRING)
+        private Role role;
 }

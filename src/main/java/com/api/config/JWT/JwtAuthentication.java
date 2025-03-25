@@ -1,21 +1,29 @@
 package com.api.config.JWT;
 
+import com.api.config.Role;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
 public class JwtAuthentication implements Authentication {
     private boolean authenticated;
-    private String login;
+    private String email;
     private String fullName;
+    private Role role;
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() { return null; }
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return role != null
+                ? List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))
+                : List.of();
+    }
 
     @Override
     public Object getCredentials() { return null; }
@@ -24,7 +32,7 @@ public class JwtAuthentication implements Authentication {
     public Object getDetails() { return null; }
 
     @Override
-    public Object getPrincipal() { return login; }
+    public Object getPrincipal() { return email; }
 
     @Override
     public boolean isAuthenticated() { return authenticated; }

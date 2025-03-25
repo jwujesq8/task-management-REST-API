@@ -16,4 +16,5 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
     List<Task> findAll();
     List<Task> findAllByCreatorId(UUID id);
     List<Task> findAllByExecutorId(UUID id);
+    boolean existsByIdAndExecutorFullName(UUID id, String fullName);
 }

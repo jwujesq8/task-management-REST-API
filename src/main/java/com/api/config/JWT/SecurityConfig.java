@@ -36,9 +36,8 @@ public class SecurityConfig {
                                     auth -> auth
                                             .requestMatchers(
                                                     "/auth/login", "/auth/newAccessToken",
-                                                    "/ws/**", "/topic/**",
-                                                    "/v1/user-rest-api-docs/**", "/swagger-ui/**", "/v1/user-rest-api-docs",
-                                                    "/task/all")
+//                                                    "/ws/**", "/topic/**",
+                                                    "/v1/user-rest-api-docs/**", "/swagger-ui/**", "/v1/user-rest-api-docs")
                                             .permitAll()
                                             .anyRequest().authenticated()
                             )
@@ -52,9 +51,9 @@ public class SecurityConfig {
 
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:63342")); // Frontend URL
+        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // Frontend URL
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(Arrays.asList("*")); // Be careful with "*", restrict it to the necessary headers if possible
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

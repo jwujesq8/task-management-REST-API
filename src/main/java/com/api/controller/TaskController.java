@@ -34,8 +34,7 @@ public class TaskController {
 
 
     @PostMapping("/new")
-    @PreAuthorize("isAuthenticated()")
-    // TODO: add role
+    @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
     public TaskDto addTask(@RequestBody @Valid @NotNull TaskNoIdDto taskNoIdDto) {
         return taskService.addTask(taskNoIdDto);
     }
@@ -45,7 +44,7 @@ public class TaskController {
 
 
     @PutMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
     // TODO: add role
     public TaskDto updateTask(@RequestBody @Valid @NotNull TaskDto taskDto) {
         return taskService.updateTask(taskDto);
@@ -56,7 +55,7 @@ public class TaskController {
 
 
     @DeleteMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
     // TODO: add role
     public void deleteTask(@RequestBody @Valid @NotNull IdDto idDto) {
         taskService.deleteTask(idDto);
@@ -67,7 +66,7 @@ public class TaskController {
 
 
     @GetMapping("/all")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
     // TODO: add role
     public List<TaskDto> getAllTasks() {
         return taskService.getAllTasks();
@@ -79,7 +78,7 @@ public class TaskController {
 
 
     @GetMapping("/all/creator")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
     // TODO: add role
     // TODO: add Optional public String getFoos(@RequestParam Optional<String> id){
     public List<TaskDto> getTasksListByCreator(@RequestParam UUID id) {
@@ -91,7 +90,7 @@ public class TaskController {
 
 
     @GetMapping("/all/executor")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
     // TODO: add role
     public List<TaskDto> getTasksListByExecutor(@RequestParam UUID id) {
         return taskService.getTasksListByExecutor(id);
