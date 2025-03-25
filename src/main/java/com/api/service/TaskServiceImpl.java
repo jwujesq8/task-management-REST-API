@@ -19,7 +19,7 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
 //    private final TaskModelMapper taskModelMapper;
-    private final ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper modelMapper;
 
     @Override
     public TaskDto addTask(TaskNoIdDto taskNoIdDto) {
