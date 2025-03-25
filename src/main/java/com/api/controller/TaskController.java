@@ -67,7 +67,7 @@ public class TaskController {
 
 
     @GetMapping("/all")
-//    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     // TODO: add role
     public List<TaskDto> getAllTasks() {
         return taskService.getAllTasks();
