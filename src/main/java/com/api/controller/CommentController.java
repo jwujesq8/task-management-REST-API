@@ -21,7 +21,8 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/task/{taskId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && " +
+            "(hasRole('ADMIN') || @taskPermissionChecker.isTaskExecutor(#taskId, authentication.principal))")
     public ResponseEntity<CommentDto> addComment(@PathVariable UUID taskId,
                                                  @Valid @RequestBody CommentNoIdDto commentNoIdDto) {
         return ResponseEntity.ok(commentService.addComment(taskId, commentNoIdDto));
