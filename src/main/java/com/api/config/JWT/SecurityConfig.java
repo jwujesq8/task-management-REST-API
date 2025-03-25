@@ -35,7 +35,7 @@ public class SecurityConfig {
                             .authorizeHttpRequests(
                                     auth -> auth
                                             .requestMatchers(
-                                                    "/user/auth/login", "/user/auth/newAccessToken",
+                                                    "/auth/login", "/auth/newAccessToken",
                                                     "/ws/**", "/topic/**",
                                                     "/v1/user-rest-api-docs/**", "/swagger-ui/**", "/v1/user-rest-api-docs",
                                                     "/task/all")

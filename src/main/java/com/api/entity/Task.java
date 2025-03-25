@@ -11,7 +11,7 @@ import org.hibernate.annotations.UuidGenerator;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tasks", schema = "task_management_system")
+@Table(name = "tasks")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

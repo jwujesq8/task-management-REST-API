@@ -28,6 +28,9 @@ public class TaskController {
 
     private final TaskService taskService;
 
+
+
+
     @PostMapping("/new")
     @PreAuthorize("isAuthenticated()")
     // TODO: add role
@@ -35,12 +38,20 @@ public class TaskController {
         return taskService.addTask(taskNoIdDto);
     }
 
+
+
+
+
     @PutMapping
     @PreAuthorize("isAuthenticated()")
     // TODO: add role
     public TaskDto updateTask(TaskDto taskDto) {
         return taskService.updateTask(taskDto);
     }
+
+
+
+
 
     @DeleteMapping
     @PreAuthorize("isAuthenticated()")
@@ -68,15 +79,20 @@ public class TaskController {
     @GetMapping("/all/creator")
     @PreAuthorize("isAuthenticated()")
     // TODO: add role
-    public List<TaskDto> getTasksListByCreator(@RequestParam UUID idCreator) {
-        return taskService.getTasksListByCreator(idCreator);
+    // TODO: add Optional public String getFoos(@RequestParam Optional<String> id){
+    public List<TaskDto> getTasksListByCreator(@RequestParam UUID id) {
+        return taskService.getTasksListByCreator(id);
     }
+
+
+
+
 
     @GetMapping("/all/executor")
     @PreAuthorize("isAuthenticated()")
     // TODO: add role
-    public List<TaskDto> getTasksListByExecutor(@RequestParam UUID idExecutor) {
-        return taskService.getTasksListByExecutor(idExecutor);
+    public List<TaskDto> getTasksListByExecutor(@RequestParam UUID id) {
+        return taskService.getTasksListByExecutor(id);
     }
 
 }

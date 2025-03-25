@@ -80,7 +80,7 @@ public class AuthController {
 
 
     @Operation(summary = "get new access and refresh token")
-    @PostMapping("/refresh")
+    @PostMapping("/refreshToken")
     @SecurityRequirement(name = "JWT")@ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful request to get new access token and refresh token", content = @Content(schema = @Schema(implementation = JwtResponseDto.class), mediaType = "application/json")),
             @ApiResponse(responseCode = "401", description = "Non valid token", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),

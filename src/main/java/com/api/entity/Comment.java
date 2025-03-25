@@ -10,7 +10,7 @@ import org.hibernate.annotations.UuidGenerator;
 import java.util.UUID;
 
 @Entity
-@Table(name = "task_comment", schema = "task_management_system")
+@Table(name = "task_comment")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

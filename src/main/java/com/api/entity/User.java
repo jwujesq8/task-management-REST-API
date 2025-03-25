@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users", schema = "task_management_system")
+@Table(name = "users")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
