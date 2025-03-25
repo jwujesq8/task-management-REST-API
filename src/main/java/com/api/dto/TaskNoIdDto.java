@@ -30,15 +30,17 @@ public class TaskNoIdDto {
 
         @Pattern(regexp = "^(в ожидании|в процессе|завершено)$",
                 message = "Next statuses are acceptable: в ожидании|в процессе|завершено")
+        @NotNull(message = "Task must have a status")
         private String status;
 
         @Pattern(regexp = "^(высокий|средний|низкий)$",
                 message = "Next priorities are acceptable: высокий|средний|низкий")
+        @NotNull(message = "Task must have a priority")
         private String priority;
 
         @NotNull(message = "Creator must be")
         private UserDto creator;
 
         @NotNull(message = "Executor must be")
-        private UserDto executo;
+        private UserDto executor;
 }

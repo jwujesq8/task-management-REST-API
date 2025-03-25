@@ -6,6 +6,8 @@ import com.api.dto.TaskDto;
 import com.api.dto.TaskNoIdDto;
 import com.api.service.interfaces.TaskService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,7 +36,7 @@ public class TaskController {
     @PostMapping("/new")
     @PreAuthorize("isAuthenticated()")
     // TODO: add role
-    public TaskDto addTask(TaskNoIdDto taskNoIdDto) {
+    public TaskDto addTask(@RequestBody @Valid @NotNull TaskNoIdDto taskNoIdDto) {
         return taskService.addTask(taskNoIdDto);
     }
 
@@ -45,7 +47,7 @@ public class TaskController {
     @PutMapping
     @PreAuthorize("isAuthenticated()")
     // TODO: add role
-    public TaskDto updateTask(TaskDto taskDto) {
+    public TaskDto updateTask(@RequestBody @Valid @NotNull TaskDto taskDto) {
         return taskService.updateTask(taskDto);
     }
 
@@ -56,7 +58,7 @@ public class TaskController {
     @DeleteMapping
     @PreAuthorize("isAuthenticated()")
     // TODO: add role
-    public void deleteTask(IdDto idDto) {
+    public void deleteTask(@RequestBody @Valid @NotNull IdDto idDto) {
         taskService.deleteTask(idDto);
     }
 
