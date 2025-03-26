@@ -1,6 +1,7 @@
 package com.api.dto;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -16,31 +17,41 @@ import lombok.Setter;
 public class TaskNoIdDto {
         @NotNull(message = "Task must have a title")
         @Size(
-                max = 100,
+                max = 250,
                 min = 1,
-                message = "Non valid title size"
+                message = "Acceptable task size is 1-250"
         )
+        @Schema(description = "tasks title",
+                example = "Title 0")
         private String title;
 
         @Size(
                 max = 256,
-                message = "Non valid description size"
+                message = "Acceptable task description is 0-256"
+        )
+        @Schema(
+                description = "tasks description",
+                example = "Task 0 description"
         )
         private String description;
 
+        @NotNull(message = "Task status must have a name")
         @Pattern(regexp = "^(в ожидании|в процессе|завершено)$",
-                message = "Next statuses are acceptable: в ожидании|в процессе|завершено")
-        @NotNull(message = "Task must have a name")
+                message = "Statuses that are acceptable: в ожидании|в процессе|завершено")
+        @Schema(description = "Task status name: в ожидании|в процессе|завершено", example = "в ожидании")
         private String status;
 
-        @Pattern(regexp = "^(высокий|средний|низкий)$",
-                message = "Next priorities are acceptable: высокий|средний|низкий")
         @NotNull(message = "Task must have a priority")
+        @Pattern(regexp = "^(высокий|средний|низкий)$",
+                message = "Priorities that are acceptable: высокий|средний|низкий")
+        @Schema(description = "task priority: в ожидании|в процессе|завершено", example = "в ожидании")
         private String priority;
 
         @NotNull(message = "Creator must be")
+        @Schema(description = "tasks user-creator")
         private UserDto creator;
 
         @NotNull(message = "Executor must be")
+        @Schema(description = "tasks user-executor")
         private UserDto executor;
 }

@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
                 title = "Task Management System",
                 description = "Test Api", version = "1.0.0",
                 contact = @Contact(
-                        name = "Elena Zhukovskaja",
+                        name = "Елена Жуковская - zhukovskaja.elena@gmail.com",
                         email = "zhukovskaja.elena@gmail.com"
                 )
         )
