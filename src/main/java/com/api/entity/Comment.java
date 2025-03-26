@@ -29,7 +29,7 @@ public class Comment {
     @JoinColumn(name = "id_author", nullable = false)
     private User author;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_task", nullable = false)
     private Task task;
 }

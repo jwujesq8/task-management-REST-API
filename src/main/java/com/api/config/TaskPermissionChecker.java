@@ -17,6 +17,6 @@ public class TaskPermissionChecker {
 
     public boolean isTaskExecutor(UUID taskId, String email) {
         if(taskRepository.existsByIdAndExecutorEmail(taskId, email)) return true;
-        else throw new BadRequestException("Executor may change only task status. Admin has a full access.");
+        else throw new BadRequestException("Only executor and admin have access");
     }
 }
