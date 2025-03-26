@@ -1,12 +1,9 @@
 package com.api.service;
 
-import com.api.config.JWT.JwtAuthentication;
-import com.api.config.Role;
 import com.api.dto.IdDto;
 import com.api.dto.TaskDto;
 import com.api.dto.TaskNoIdDto;
 import com.api.entity.Task;
-import com.api.entity.User;
 import com.api.exception.BadRequestException;
 import com.api.repository.TaskRepository;
 import com.api.service.interfaces.TaskService;
@@ -16,8 +13,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -41,7 +36,6 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    // TODO: replace String newStatus with StatusDto and add @Valid to the controller
     public TaskDto updateTaskStatus(UUID taskId, String newStatus) {
         Task taskDB = taskRepository.findById(taskId)
                 .orElseThrow(() -> new BadRequestException("Provided task doesn't exist"));
@@ -61,21 +55,6 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.deleteById(idDto.id());
     }
 
-
-
-
-//    @Override
-//    public Page<TaskDto> getAllTasks(Pageable pageable) {
-//        Page<Task> tasks = taskRepository.findAll(pageable);
-//        return tasks.map(task -> modelMapper.map(task, TaskDto.class));
-//    }
-
-    // SIMPLE LIST
-//    @Override
-//    public List<TaskDto> getAllTasks() {
-//        List<Task> tasks = taskRepository.findAll();
-//        return tasks.stream().map(task -> modelMapper.map(task, TaskDto.class)).toList();
-//    }
 
     // PAGING
     @Override

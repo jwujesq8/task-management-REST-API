@@ -44,8 +44,8 @@ public class ExceptionControllerAdvice{
 
 
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorMessageResponseDto> authenticationExceptionHandler(AuthenticationException e) throws JsonProcessingException {
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<ErrorMessageResponseDto> authExceptionHandler(AuthException e) throws JsonProcessingException {
 
         log.error("Exception: AuthenticationException. " +
                 "Exception message: " + e.getMessage());
@@ -77,16 +77,16 @@ public class ExceptionControllerAdvice{
                 .body(getResponseBody(e.getMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessageResponseDto> unexpectedExceptionHandler(
-            Exception e) throws JsonProcessingException{
-
-        log.error("Exception: unexpectedException. " +
-                "Exception message: " + e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(getResponseBody(e.getMessage()));
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ErrorMessageResponseDto> unexpectedExceptionHandler(
+//            Exception e) throws JsonProcessingException{
+//
+//        log.error("Exception: unexpectedException. " +
+//                "Exception message: " + e.getMessage());
+//        return ResponseEntity
+//                .status(HttpStatus.BAD_REQUEST)
+//                .body(getResponseBody(e.getMessage()));
+//    }
 
     @ExceptionHandler(ValidException.class)
     public ResponseEntity<ErrorMessageResponseDto> validationExceptionHandler(

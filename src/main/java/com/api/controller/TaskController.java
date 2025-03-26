@@ -1,12 +1,9 @@
 package com.api.controller;
 
-
-import com.api.config.JWT.JwtAuthentication;
 import com.api.dto.IdDto;
 import com.api.dto.StatusDto;
 import com.api.dto.TaskDto;
 import com.api.dto.TaskNoIdDto;
-import com.api.entity.User;
 import com.api.service.interfaces.TaskService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -18,7 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

@@ -3,7 +3,7 @@ package com.api.service;
 import com.api.config.JWT.JwtProvider;
 import com.api.dto.jwt.JwtRequestDto;
 import com.api.dto.jwt.JwtResponseDto;
-import com.api.exception.AuthenticationException;
+import com.api.exception.AuthException;
 import com.api.exception.BadRequestException;
 import com.api.exception.OkException;
 import com.api.entity.User;
@@ -46,7 +46,7 @@ public class AuthServiceImpl {
                 return new JwtResponseDto(accessToken, refreshToken);
             }
             else {
-                throw new AuthenticationException("Wrong password");
+                throw new AuthException("Wrong password");
             }
         } else {
             throw new OkException("User is already logged in");
@@ -63,7 +63,7 @@ public class AuthServiceImpl {
             if(refreshTokenDB!=null && refreshTokenDB.equals(refreshToken)){
 
                 final User user = userService.getUserByEmail(login)
-                        .orElseThrow(() -> new AuthenticationException("User not found"));
+                        .orElseThrow(() -> new AuthException("User not found"));
 
                 String newAccessToken = jwtProvider.generateAccessToken(user);
                 refreshTokensStorage.put(user.getEmail(), null);
@@ -71,9 +71,9 @@ public class AuthServiceImpl {
                 log.info(user.getEmail() + " got new access token");
                 return new JwtResponseDto(newAccessToken, null);
             }
-            throw new AuthenticationException("Wrong refresh token");
+            throw new AuthException("Wrong refresh token");
         }
-        throw new AuthenticationException("Non valid refresh token");
+        throw new AuthException("Non valid refresh token");
 
     }
 
@@ -88,7 +88,7 @@ public class AuthServiceImpl {
             if(refreshTokenDB!=null && refreshTokenDB.equals(refreshToken)){
 
                 final User user = userService.getUserByEmail(login)
-                        .orElseThrow(() -> new AuthenticationException("User not found"));
+                        .orElseThrow(() -> new AuthException("User not found"));
 
                 String newAccessToken = jwtProvider.generateAccessToken(user);
                 String newRefreshToken = jwtProvider.generateRefreshToken(user);
@@ -97,9 +97,9 @@ public class AuthServiceImpl {
                 log.info(user.getEmail() + " got new access token and refresh token");
                 return new JwtResponseDto(newAccessToken, newRefreshToken);
             }
-            throw new AuthenticationException("Wrong refresh token");
+            throw new AuthException("Wrong refresh token");
         }
-        throw new AuthenticationException("Non valid refresh token");
+        throw new AuthException("Non valid refresh token");
     }
 
     public void logout(@NotNull String refreshToken) {
@@ -111,7 +111,7 @@ public class AuthServiceImpl {
 
             if (refreshTokenDB != null && refreshTokenDB.equals(refreshToken)) {
                 final User user = userService.getUserByEmail(login)
-                        .orElseThrow(() -> new AuthenticationException("User not found"));
+                        .orElseThrow(() -> new AuthException("User not found"));
 
                 refreshTokensStorage.remove(user.getEmail());
 
@@ -120,7 +120,7 @@ public class AuthServiceImpl {
             }
             throw new OkException("User is already logged out");
         }
-        throw new AuthenticationException("Non valid refresh token");
+        throw new AuthException("Non valid refresh token");
 
     }
 

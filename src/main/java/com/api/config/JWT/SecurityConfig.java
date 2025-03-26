@@ -27,26 +27,22 @@ public class SecurityConfig {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            try{
-                return http
-                            .httpBasic(AbstractHttpConfigurer::disable)
-                            .csrf(AbstractHttpConfigurer::disable)
-                            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                            .authorizeHttpRequests(
-                                    auth -> auth
-                                            .requestMatchers(
-                                                    "/auth/login", "/auth/newAccessToken",
+            return http
+                    .httpBasic(AbstractHttpConfigurer::disable)
+                    .csrf(AbstractHttpConfigurer::disable)
+                    .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .authorizeHttpRequests(
+                            auth -> auth
+                                    .requestMatchers(
+                                            "/auth/login", "/auth/newAccessToken",
 //                                                    "/ws/**", "/topic/**",
-                                                    "/v1/user-rest-api-docs/**", "/swagger-ui/**", "/v1/user-rest-api-docs")
-                                            .permitAll()
-                                            .anyRequest().authenticated()
-                            )
-                            .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                            .cors((cors) -> cors.configurationSource(corsConfigurationSource()))
-                            .build();
-            } catch (Exception e){
-                    throw new AuthException("Authentication error:" + e.getMessage());
-            }
+                                            "/v1/user-rest-api-docs/**", "/swagger-ui/**", "/v1/user-rest-api-docs")
+                                    .permitAll()
+                                    .anyRequest().authenticated()
+                    )
+                    .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                    .cors((cors) -> cors.configurationSource(corsConfigurationSource()))
+                    .build();
         }
 
     CorsConfigurationSource corsConfigurationSource() {

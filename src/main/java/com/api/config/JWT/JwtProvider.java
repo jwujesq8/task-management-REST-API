@@ -1,6 +1,7 @@
 package com.api.config.JWT;
 
 import com.api.entity.User;
+import com.api.exception.AuthException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -109,17 +110,21 @@ public class JwtProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException expEx) {
-            log.error("Token expired", expEx);
+            log.error("Expired JWT token: {}", expEx.getMessage(), expEx);
+            throw new AuthException("Token expired: " + expEx.getMessage());
         } catch (UnsupportedJwtException unsEx) {
-            log.error("Unsupported jwt", unsEx);
+            log.error("Unsupported JWT token: {}", unsEx.getMessage(), unsEx);
+            throw new AuthException("Unsupported JWT: " + unsEx.getMessage());
         } catch (MalformedJwtException mjEx) {
-            log.error("Malformed jwt", mjEx);
+            log.error("Malformed JWT token: {}", mjEx.getMessage(), mjEx);
+            throw new AuthException("Malformed JWT: " + mjEx.getMessage());
         } catch (SignatureException sEx) {
-            log.error("Invalid signature", sEx);
+            log.error("Invalid JWT signature: {}", sEx.getMessage(), sEx);
+            throw new AuthException("Invalid signature: " + sEx.getMessage());
         } catch (Exception e) {
-            log.error("Invalid token", e);
+            log.error("Unknown JWT exception: {}", e.getMessage(), e);
+            throw new AuthException("Auth exception: " + e.getMessage());
         }
-        return false;
     }
 
     public boolean validateAccessToken(@NonNull String accessToken){

@@ -1,5 +1,6 @@
 package com.api.config;
 
+import com.api.exception.BadRequestException;
 import com.api.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +16,7 @@ public class TaskPermissionChecker {
     private final TaskRepository taskRepository;
 
     public boolean isTaskExecutor(UUID taskId, String email) {
-        Boolean access = taskRepository.existsByIdAndExecutorEmail(taskId, email);
-        log.info("access for " + email + " - " + access);
-        return access;
+        if(taskRepository.existsByIdAndExecutorEmail(taskId, email)) return true;
+        else throw new BadRequestException("Executor may change only task status. Admin has a full access.");
     }
 }
