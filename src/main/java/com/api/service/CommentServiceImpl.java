@@ -9,6 +9,8 @@ import com.api.repository.TaskRepository;
 import com.api.service.interfaces.CommentService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,8 +33,8 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentDto> getTasksCommentsListById(IdDto idTask) {
-        List<Comment> comments= commentRepository.getByTaskId(idTask.id());
-        return comments.stream().map(comment -> modelMapper.map(comment,CommentDto.class)).toList();
+    public Page<CommentDto> findAllByTaskId(UUID idTask, Pageable pageable) {
+        return commentRepository.findAllByTaskId(idTask, pageable)
+                .map(comment -> modelMapper.map(comment, CommentDto.class));
     }
 }

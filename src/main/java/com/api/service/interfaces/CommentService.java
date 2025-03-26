@@ -12,5 +12,5 @@ import java.util.UUID;
 public interface CommentService {
 
     CommentDto addComment(UUID taskId, CommentNoIdDto commentNoIdDto);
-    List<CommentDto> getTasksCommentsListById(IdDto idTask);
+    Page<CommentDto> findAllByTaskId(UUID idTask, Pageable pageable);
 }

@@ -11,7 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -67,8 +67,9 @@ public class TaskController {
 
     @GetMapping("/all")
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
-    public List<TaskDto> getAllTasks() {
-        return taskService.getAllTasks();
+    public Page<TaskDto> getAllTasks(@RequestParam(defaultValue = "0") int page,
+                                     @RequestParam(defaultValue = "3") int size) {
+        return taskService.findAll(PageRequest.of(page, size));
     }
 
 
@@ -79,8 +80,10 @@ public class TaskController {
     @GetMapping("/all/creator")
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
     // TODO: add Optional public String getFoos(@RequestParam Optional<String> id){
-    public List<TaskDto> getTasksListByCreator(@RequestParam UUID id) {
-        return taskService.getTasksListByCreator(id);
+    public Page<TaskDto> getTasksListByCreator(@RequestParam UUID id,
+                                               @RequestParam(defaultValue = "0") int page,
+                                               @RequestParam(defaultValue = "3") int size) {
+        return taskService.findAllByCreator(id, PageRequest.of(page, size));
     }
 
 
@@ -89,8 +92,10 @@ public class TaskController {
 
     @GetMapping("/all/executor")
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
-    public List<TaskDto> getTasksListByExecutor(@RequestParam UUID id) {
-        return taskService.getTasksListByExecutor(id);
+    public Page<TaskDto> getTasksListByExecutor(@RequestParam UUID id,
+                                                @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "3") int size) {
+        return taskService.findAllByExecutor(id, PageRequest.of(page, size));
     }
 
 }

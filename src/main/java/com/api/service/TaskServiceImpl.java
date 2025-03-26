@@ -8,6 +8,8 @@ import com.api.repository.TaskRepository;
 import com.api.service.interfaces.TaskService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,7 +20,6 @@ import java.util.UUID;
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
-//    private final TaskModelMapper taskModelMapper;
     private final ModelMapper modelMapper;
 
     @Override
@@ -46,27 +47,29 @@ public class TaskServiceImpl implements TaskService {
 //        Page<Task> tasks = taskRepository.findAll(pageable);
 //        return tasks.map(task -> modelMapper.map(task, TaskDto.class));
 //    }
+
+    // SIMPLE LIST
+//    @Override
+//    public List<TaskDto> getAllTasks() {
+//        List<Task> tasks = taskRepository.findAll();
+//        return tasks.stream().map(task -> modelMapper.map(task, TaskDto.class)).toList();
+//    }
+
+    // PAGING
     @Override
-    public List<TaskDto> getAllTasks() {
-        List<Task> tasks = taskRepository.findAll();
-        return tasks.stream().map(task -> modelMapper.map(task, TaskDto.class)).toList();
+    public Page<TaskDto> findAll(Pageable pageable) {
+        return taskRepository.findAll(pageable).map(task -> modelMapper.map(task, TaskDto.class));
     }
 
 
 
-
-
-
-
-    @Override
-    public List<TaskDto> getTasksListByCreator(UUID idCreator) {
-        List<Task> tasks = taskRepository.findAllByCreatorId(idCreator);
-        return tasks.stream().map(task -> modelMapper.map(task, TaskDto.class)).toList();
+    public Page<TaskDto> findAllByCreator(UUID idCreator, Pageable pageable) {
+        return taskRepository.findAllByCreatorId(idCreator, pageable)
+                .map(task -> modelMapper.map(task, TaskDto.class));
     }
 
-    @Override
-    public List<TaskDto> getTasksListByExecutor(UUID idExecutor) {
-        List<Task> tasks = taskRepository.findAllByExecutorId(idExecutor);
-        return tasks.stream().map(task -> modelMapper.map(task, TaskDto.class)).toList();
+    public Page<TaskDto> findAllByExecutor(UUID idExecutor, Pageable pageable) {
+        return taskRepository.findAllByExecutorId(idExecutor, pageable)
+                .map(task -> modelMapper.map(task, TaskDto.class));
     }
 }

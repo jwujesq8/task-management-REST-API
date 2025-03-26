@@ -6,6 +6,8 @@ import com.api.dto.IdDto;
 import com.api.service.interfaces.CommentService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,8 +31,11 @@ public class CommentController {
     }
 
     @GetMapping("/task/{taskId}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<CommentDto>> getTaskComments(@PathVariable UUID taskId) {
-        return ResponseEntity.ok(commentService.getTasksCommentsListById(new IdDto(taskId)));
+    @PreAuthorize("isAuthenticated() && " +
+            "(hasRole('ADMIN') || @taskPermissionChecker.isTaskExecutor(#taskId, authentication.principal))")
+    public ResponseEntity<Page<CommentDto>> getTaskComments(@PathVariable UUID taskId,
+                                                            @RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "3") int size) {
+        return ResponseEntity.ok(commentService.findAllByTaskId(taskId, PageRequest.of(page,size)));
     }
 }
