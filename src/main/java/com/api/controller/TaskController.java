@@ -1,10 +1,13 @@
 package com.api.controller;
 
-import com.api.dto.IdDto;
-import com.api.dto.StatusDto;
-import com.api.dto.TaskDto;
-import com.api.dto.TaskNoIdDto;
+import com.api.dto.*;
+import com.api.dto.error.ValidationErrorMessageResponseDto;
 import com.api.service.interfaces.TaskService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -16,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -36,6 +40,13 @@ public class TaskController {
 
     @PostMapping("/new")
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
+    @Operation(summary = "post a new task (only for admin)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "New task is created", content = @Content(schema = @Schema(implementation = TaskDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "Bad request (non valid data)",  content = @Content(schema = @Schema(implementation = ValidationErrorMessageResponseDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none")),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none"))}
+    ) // TODO last apiReaponse change with Access denied
     public ResponseEntity<TaskDto> addTask(@RequestBody @Valid @NotNull TaskNoIdDto taskNoIdDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -48,13 +59,25 @@ public class TaskController {
 
     @PutMapping
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
-    // TODO: executor may access to change only name not a whole task
+    @Operation(summary = "update/change task (only for admin)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Task is updated", content = @Content(schema = @Schema(implementation = TaskDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "Bad request (non valid data)",  content = @Content(schema = @Schema(implementation = ValidationErrorMessageResponseDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none")),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none"))}
+    ) // TODO last apiReaponse change with Access denied
     public ResponseEntity<TaskDto> updateTask(@RequestBody @Valid @NotNull TaskDto taskDto) {
         return ResponseEntity.ok(taskService.updateTask(taskDto));
     }
     @PutMapping("/{taskId}/status")
     @PreAuthorize("isAuthenticated() && " +
             "(hasRole('ADMIN') || @taskPermissionChecker.isTaskExecutor(#taskId, authentication.principal))")
+    @Operation(summary = "update/change task status (for admin and executor)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Tasks status is updated", content = @Content(schema = @Schema(implementation = TaskDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "Bad request (non valid data)",  content = @Content(schema = @Schema(implementation = ValidationErrorMessageResponseDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none"))}
+    )
     public ResponseEntity<TaskDto> updateTaskStatus(@RequestBody @NotNull @Valid StatusDto status,
             @PathVariable UUID taskId){
         return ResponseEntity.ok(taskService.updateTaskStatus(taskId, status.name()));
@@ -64,6 +87,13 @@ public class TaskController {
 
     @DeleteMapping
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
+    @Operation(summary = "delete task by task id (only for admin)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Task is deleted", content = @Content(mediaType = "none")),
+            @ApiResponse(responseCode = "400", description = "Bad request (non valid data)",  content = @Content(schema = @Schema(implementation = ValidationErrorMessageResponseDto.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none")),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none"))}
+    ) // TODO last apiReaponse change with Access denied
     public void deleteTask(@RequestBody @Valid @NotNull IdDto idDto) {
         taskService.deleteTask(idDto);
     }
@@ -74,6 +104,12 @@ public class TaskController {
 
     @GetMapping("/all")
     @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "get all tasks (for admin and user)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful request to get tasks", content = @Content(schema = @Schema(implementation = TaskDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none")),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none"))}
+    ) // TODO last apiReaponse change with Access denied
     public ResponseEntity<Page<TaskDto>> getAllTasks(@RequestParam(defaultValue = "0") int page,
                                      @RequestParam(defaultValue = "3") int size) {
         return ResponseEntity.ok(taskService.findAll(PageRequest.of(page, size)));
@@ -86,7 +122,12 @@ public class TaskController {
 
     @GetMapping("/all/creator")
     @PreAuthorize("isAuthenticated()")
-    // TODO: add Optional public String getFoos(@RequestParam Optional<String> id){
+    @Operation(summary = "get tasks by creator id (for admin and user)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful request to get tasks by creator id", content = @Content(schema = @Schema(implementation = TaskDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none")),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none"))}
+    ) // TODO last apiReaponse change with Access denied
     public ResponseEntity<Page<TaskDto>> getTasksListByCreator(@RequestParam UUID id,
                                                @RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "3") int size) {
@@ -99,6 +140,12 @@ public class TaskController {
 
     @GetMapping("/all/executor")
     @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "get tasks by executor id (for admin and user)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful request to get tasks by creator executor", content = @Content(schema = @Schema(implementation = TaskDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none")),
+            @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none"))}
+    ) // TODO last apiReaponse change with Access denied
     public ResponseEntity<Page<TaskDto>> getTasksListByExecutor(@RequestParam UUID id,
                                                 @RequestParam(defaultValue = "0") int page,
                                                 @RequestParam(defaultValue = "3") int size) {

@@ -9,10 +9,10 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 @OpenAPIDefinition(
         info = @Info(
-                title = "User System Test Api",
+                title = "Task Management System",
                 description = "Test Api", version = "1.0.0",
                 contact = @Contact(
-                        name = "jwujesq",
+                        name = "Elena Zhukovskaja",
                         email = "zhukovskaja.elena@gmail.com"
                 )
         )
