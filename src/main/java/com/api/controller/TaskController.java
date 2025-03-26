@@ -1,9 +1,12 @@
 package com.api.controller;
 
 
+import com.api.config.JWT.JwtAuthentication;
 import com.api.dto.IdDto;
+import com.api.dto.StatusDto;
 import com.api.dto.TaskDto;
 import com.api.dto.TaskNoIdDto;
+import com.api.entity.User;
 import com.api.service.interfaces.TaskService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -15,10 +18,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -48,14 +51,18 @@ public class TaskController {
 
 
     @PutMapping
-    @PreAuthorize("isAuthenticated() && " +
-            "(hasRole('ADMIN') || @taskPermissionChecker.isTaskExecutor(#taskDto.getId(), authentication.principal))")
-    // TODO: executor may access to change only status not a whole task
+    @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
+    // TODO: executor may access to change only name not a whole task
     public ResponseEntity<TaskDto> updateTask(@RequestBody @Valid @NotNull TaskDto taskDto) {
         return ResponseEntity.ok(taskService.updateTask(taskDto));
     }
-
-
+    @PutMapping("/{taskId}/status")
+    @PreAuthorize("isAuthenticated() && " +
+            "(hasRole('ADMIN') || @taskPermissionChecker.isTaskExecutor(#taskId, authentication.principal))")
+    public ResponseEntity<TaskDto> updateTaskStatus(@RequestBody @NotNull @Valid StatusDto status,
+            @PathVariable UUID taskId){
+        return ResponseEntity.ok(taskService.updateTaskStatus(taskId, status.name()));
+    }
 
 
 
@@ -70,7 +77,7 @@ public class TaskController {
 
 
     @GetMapping("/all")
-    @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<TaskDto>> getAllTasks(@RequestParam(defaultValue = "0") int page,
                                      @RequestParam(defaultValue = "3") int size) {
         return ResponseEntity.ok(taskService.findAll(PageRequest.of(page, size)));
@@ -82,7 +89,7 @@ public class TaskController {
 
 
     @GetMapping("/all/creator")
-    @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     // TODO: add Optional public String getFoos(@RequestParam Optional<String> id){
     public ResponseEntity<Page<TaskDto>> getTasksListByCreator(@RequestParam UUID id,
                                                @RequestParam(defaultValue = "0") int page,
@@ -95,7 +102,7 @@ public class TaskController {
 
 
     @GetMapping("/all/executor")
-    @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<TaskDto>> getTasksListByExecutor(@RequestParam UUID id,
                                                 @RequestParam(defaultValue = "0") int page,
                                                 @RequestParam(defaultValue = "3") int size) {

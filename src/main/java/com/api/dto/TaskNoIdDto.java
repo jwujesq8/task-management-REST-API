@@ -30,7 +30,7 @@ public class TaskNoIdDto {
 
         @Pattern(regexp = "^(в ожидании|в процессе|завершено)$",
                 message = "Next statuses are acceptable: в ожидании|в процессе|завершено")
-        @NotNull(message = "Task must have a status")
+        @NotNull(message = "Task must have a name")
         private String status;
 
         @Pattern(regexp = "^(высокий|средний|низкий)$",
