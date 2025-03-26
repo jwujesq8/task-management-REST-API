@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,8 +37,10 @@ public class TaskController {
 
     @PostMapping("/new")
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
-    public TaskDto addTask(@RequestBody @Valid @NotNull TaskNoIdDto taskNoIdDto) {
-        return taskService.addTask(taskNoIdDto);
+    public ResponseEntity<TaskDto> addTask(@RequestBody @Valid @NotNull TaskNoIdDto taskNoIdDto) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(taskService.addTask(taskNoIdDto));
     }
 
 
@@ -47,8 +51,8 @@ public class TaskController {
     @PreAuthorize("isAuthenticated() && " +
             "(hasRole('ADMIN') || @taskPermissionChecker.isTaskExecutor(#taskDto.getId(), authentication.principal))")
     // TODO: executor may access to change only status not a whole task
-    public TaskDto updateTask(@RequestBody @Valid @NotNull TaskDto taskDto) {
-        return taskService.updateTask(taskDto);
+    public ResponseEntity<TaskDto> updateTask(@RequestBody @Valid @NotNull TaskDto taskDto) {
+        return ResponseEntity.ok(taskService.updateTask(taskDto));
     }
 
 
@@ -67,9 +71,9 @@ public class TaskController {
 
     @GetMapping("/all")
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
-    public Page<TaskDto> getAllTasks(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<Page<TaskDto>> getAllTasks(@RequestParam(defaultValue = "0") int page,
                                      @RequestParam(defaultValue = "3") int size) {
-        return taskService.findAll(PageRequest.of(page, size));
+        return ResponseEntity.ok(taskService.findAll(PageRequest.of(page, size)));
     }
 
 
@@ -80,10 +84,10 @@ public class TaskController {
     @GetMapping("/all/creator")
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
     // TODO: add Optional public String getFoos(@RequestParam Optional<String> id){
-    public Page<TaskDto> getTasksListByCreator(@RequestParam UUID id,
+    public ResponseEntity<Page<TaskDto>> getTasksListByCreator(@RequestParam UUID id,
                                                @RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "3") int size) {
-        return taskService.findAllByCreator(id, PageRequest.of(page, size));
+        return ResponseEntity.ok(taskService.findAllByCreator(id, PageRequest.of(page, size)));
     }
 
 
@@ -92,10 +96,10 @@ public class TaskController {
 
     @GetMapping("/all/executor")
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
-    public Page<TaskDto> getTasksListByExecutor(@RequestParam UUID id,
+    public ResponseEntity<Page<TaskDto>> getTasksListByExecutor(@RequestParam UUID id,
                                                 @RequestParam(defaultValue = "0") int page,
                                                 @RequestParam(defaultValue = "3") int size) {
-        return taskService.findAllByExecutor(id, PageRequest.of(page, size));
+        return ResponseEntity.ok(taskService.findAllByExecutor(id, PageRequest.of(page, size)));
     }
 
 }

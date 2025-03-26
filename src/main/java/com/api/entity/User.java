@@ -1,6 +1,7 @@
 package com.api.entity;
 
 
+import com.api.config.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -32,7 +33,8 @@ public class User implements UserDetails {
 
     private String password;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
 
     @Override
