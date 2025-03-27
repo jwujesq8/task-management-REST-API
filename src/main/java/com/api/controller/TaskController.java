@@ -79,7 +79,7 @@ public class TaskController {
             @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none"))}
     )
     public ResponseEntity<TaskDto> updateTaskStatus(@RequestBody @NotNull @Valid StatusDto status,
-            @PathVariable UUID taskId){
+                                                    @PathVariable UUID taskId){
         return ResponseEntity.ok(taskService.updateTaskStatus(taskId, status.name()));
     }
 
@@ -111,7 +111,7 @@ public class TaskController {
             @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none"))}
     ) // TODO last apiReaponse change with Access denied
     public ResponseEntity<Page<TaskDto>> getAllTasks(@RequestParam(defaultValue = "0") int page,
-                                     @RequestParam(defaultValue = "3") int size) {
+                                                     @RequestParam(defaultValue = "3") int size) {
         return ResponseEntity.ok(taskService.findAll(PageRequest.of(page, size)));
     }
 
@@ -129,8 +129,8 @@ public class TaskController {
             @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none"))}
     ) // TODO last apiReaponse change with Access denied
     public ResponseEntity<Page<TaskDto>> getTasksListByCreator(@RequestParam UUID id,
-                                               @RequestParam(defaultValue = "0") int page,
-                                               @RequestParam(defaultValue = "3") int size) {
+                                                               @RequestParam(defaultValue = "0") int page,
+                                                               @RequestParam(defaultValue = "3") int size) {
         return ResponseEntity.ok(taskService.findAllByCreator(id, PageRequest.of(page, size)));
     }
 
@@ -147,8 +147,8 @@ public class TaskController {
             @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none"))}
     ) // TODO last apiReaponse change with Access denied
     public ResponseEntity<Page<TaskDto>> getTasksListByExecutor(@RequestParam UUID id,
-                                                @RequestParam(defaultValue = "0") int page,
-                                                @RequestParam(defaultValue = "3") int size) {
+                                                                @RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "3") int size) {
         return ResponseEntity.ok(taskService.findAllByExecutor(id, PageRequest.of(page, size)));
     }
 

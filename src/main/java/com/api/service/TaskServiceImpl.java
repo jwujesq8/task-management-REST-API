@@ -3,17 +3,21 @@ package com.api.service;
 import com.api.dto.IdDto;
 import com.api.dto.TaskDto;
 import com.api.dto.TaskNoIdDto;
+import com.api.entity.Comment;
 import com.api.entity.Task;
 import com.api.exception.BadRequestException;
 import com.api.repository.CommentRepository;
 import com.api.repository.TaskRepository;
 import com.api.service.interfaces.TaskService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -31,9 +35,17 @@ public class TaskServiceImpl implements TaskService {
         return modelMapper.map(task, TaskDto.class);
     }
 
+    @Transactional
     @Override
     public TaskDto updateTask(TaskDto taskDto) {
-        Task task = taskRepository.save(modelMapper.map(taskDto, Task.class));
+        Task taskOld = taskRepository.findById(taskDto.getId()).orElseThrow(
+                () -> new BadRequestException("Provided task doesn't exist")
+        );
+        List<Comment> comments = taskOld.getComments();
+
+        Task task = modelMapper.map(taskDto, Task.class);
+        task.setComments(comments);
+        taskRepository.save(task);
         return modelMapper.map(task, TaskDto.class);
     }
 
