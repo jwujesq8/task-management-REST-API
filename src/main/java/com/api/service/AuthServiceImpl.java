@@ -11,6 +11,7 @@ import com.api.service.interfaces.UserService;
 import io.jsonwebtoken.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ import java.util.*;
 public class AuthServiceImpl {
 
     private final UserService userService;
+    @Getter
     private final Map<String, String> refreshTokensStorage = new HashMap<>();
     private final JwtProvider jwtProvider;
     private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
