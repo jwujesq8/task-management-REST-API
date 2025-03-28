@@ -22,7 +22,7 @@ This is a Spring Boot-based REST API for managing tasks. It features JWT authent
 
 1. Clone the repository (or download from link - https://drive.google.com/drive/folders/1rgK5522T8EO1jdVB3YULkxVE1vfUNkO-?usp=sharing):
     ```bash
-    git clone <repository_url>
+    git clone https://github.com/jwujesq8/task-management-REST-API
     cd <project_directory>
     ```
 
