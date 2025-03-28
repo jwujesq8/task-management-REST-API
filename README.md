@@ -20,7 +20,7 @@ This is a Spring Boot-based REST API for managing tasks. It features JWT authent
 
 ## Setup Instructions
 
-1. Clone the repository:
+1. Clone the repository (or download from link - https://drive.google.com/drive/folders/1rgK5522T8EO1jdVB3YULkxVE1vfUNkO-?usp=sharing):
     ```bash
     git clone <repository_url>
     cd <project_directory>
