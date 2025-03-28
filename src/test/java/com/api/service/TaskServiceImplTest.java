@@ -37,8 +37,6 @@ class TaskServiceImplTest {
     @Mock
     private TaskRepository taskRepository;
     @Mock
-    private CommentRepository commentRepository;
-    @Mock
     private ModelMapper modelMapper;
 
     private TaskServiceImpl taskService;
@@ -57,7 +55,7 @@ class TaskServiceImplTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        taskService = new TaskServiceImpl(taskRepository, commentRepository, modelMapper);
+        taskService = new TaskServiceImpl(taskRepository, modelMapper);
 
         taskId = UUID.randomUUID();
         adminId = UUID.randomUUID();
@@ -105,6 +103,7 @@ class TaskServiceImplTest {
     @Test
     void updateTask_ShouldReturnUpdatedTaskDto() {
 
+        when(taskRepository.findById(taskDto.getId())).thenReturn(Optional.ofNullable(task));
         when(modelMapper.map(taskDto, Task.class)).thenReturn(task);
         when(taskRepository.save(task)).thenReturn(task);
         when(modelMapper.map(task, TaskDto.class)).thenReturn(taskDto);

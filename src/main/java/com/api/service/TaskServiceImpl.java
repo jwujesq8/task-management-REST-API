@@ -6,7 +6,6 @@ import com.api.dto.TaskNoIdDto;
 import com.api.entity.Comment;
 import com.api.entity.Task;
 import com.api.exception.BadRequestException;
-import com.api.repository.CommentRepository;
 import com.api.repository.TaskRepository;
 import com.api.service.interfaces.TaskService;
 import jakarta.transaction.Transactional;
@@ -26,7 +25,6 @@ import java.util.UUID;
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
-    private final CommentRepository commentRepository;
     private final ModelMapper modelMapper;
 
     @Override
