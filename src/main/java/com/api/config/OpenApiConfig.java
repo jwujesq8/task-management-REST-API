@@ -6,7 +6,13 @@ import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
-
+/**
+ * Class OpenApiConfig
+ *
+ * Configuration class for setting up OpenAPI documentation for the Task Management System.
+ * It provides API metadata such as the title, description, version, and contact information for the API.
+ * Additionally, it configures the security scheme used by the API, which is based on JWT authentication.
+ */
 @OpenAPIDefinition(
         info = @Info(
                 title = "Task Management System",

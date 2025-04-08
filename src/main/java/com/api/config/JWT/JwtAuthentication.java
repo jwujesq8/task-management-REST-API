@@ -10,6 +10,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Class JwtAuthentication
+ *
+ * A class representing the user's authentication details,
+ * used to store information about the user after successful authentication.
+ * Implements the {@link Authentication} interface for integration with Spring Security.
+ */
 @Getter
 @Setter
 public class JwtAuthentication implements Authentication {

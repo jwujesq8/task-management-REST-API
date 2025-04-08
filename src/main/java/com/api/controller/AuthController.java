@@ -21,16 +21,29 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Class AuthController
+ *
+ * Controller for handling user authentication and JWT token operations.
+ * Provides endpoints for login, obtaining new access tokens, refreshing tokens, and logging out.
+ */
 @RestController
 @RequestMapping("/auth")
 @Validated
 @RequiredArgsConstructor
-
 @Tag(name="Auth controller", description="Control the user authorization (JWT token)")
 public class AuthController {
 
     private final AuthServiceImpl authServiceImpl;
 
+    /**
+     * Endpoint for user login.
+     * Authenticates the user and returns a JWT access token.
+     *
+     * @param JwtRequestDto The request body containing user login credentials.
+     * @return {@link JwtResponseDto} containing the JWT access token.
+     * @throws ConstraintViolationException if the request body validation fails.
+     */
     @Operation(summary = "log in")
     @PostMapping("/login")
     @PreAuthorize("!isAuthenticated()")
@@ -43,16 +56,13 @@ public class AuthController {
         return authServiceImpl.login(JwtRequestDto);
     }
 
-
-
-
-
-
-
-
-
-
-
+    /**
+     * Endpoint to get a new access token using a valid refresh token.
+     * After the new access token is obtained, the used refresh token becomes invalid.
+     *
+     * @param RefreshJwtRequestDto The request body containing the refresh token.
+     * @return {@link JwtResponseDto} containing the new access token.
+     */
     @Operation(summary = "get new access token (AFTER THAT USED REFRESH TOKEN WILL BE NON VALID)")
     @PostMapping("/newAccessToken")
     @ApiResponses({
@@ -65,20 +75,12 @@ public class AuthController {
         return authServiceImpl.getNewAccessToken(RefreshJwtRequestDto.getRefreshJwtRequest());
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /**
+     * Endpoint to refresh both the access and refresh tokens.
+     *
+     * @param RefreshJwtRequestDto The request body containing the refresh token.
+     * @return {@link JwtResponseDto} containing the new access token and refresh token.
+     */
     @Operation(summary = "get new access and refresh token")
     @PostMapping("/refreshToken")
     @SecurityRequirement(name = "JWT")@ApiResponses({
@@ -92,16 +94,12 @@ public class AuthController {
         return authServiceImpl.refresh(RefreshJwtRequestDto.getRefreshJwtRequest());
     }
 
-
-
-
-
-
-
-
-
-
-
+    /**
+     * Endpoint for user logout.
+     * Invalidates the current refresh token and logs the user out.
+     *
+     * @param RefreshJwtRequestDto The request body containing the refresh token.
+     */
     @Operation(summary = "log out")
     @DeleteMapping("/logout")
     @PreAuthorize("isAuthenticated()")

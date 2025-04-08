@@ -1,6 +1,5 @@
 package com.api.config.JWT;
 
-import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,14 +16,32 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
+/**
+ * Class SecurityConfig
+ *
+ * Security configuration class that sets up HTTP security, JWT-based authentication, and CORS policies.
+ * This class is responsible for configuring access control, enabling JWT filtering, and defining allowed HTTP methods and headers for cross-origin requests.
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-        private final JwtFilter jwtFilter;
+    private final JwtFilter jwtFilter;
 
+    /**
+     * Configures the HTTP security settings for the application.
+     * - Disables basic authentication and CSRF protection.
+     * - Configures session management to be stateless (no session state is maintained on the server).
+     * - Defines authorized URLs that are publicly accessible.
+     * - Adds the JWT filter after the `UsernamePasswordAuthenticationFilter` to intercept requests.
+     * - Configures CORS settings for handling cross-origin requests.
+     *
+     * @param http the HttpSecurity object used to customize the security settings.
+     * @return a configured SecurityFilterChain.
+     * @throws Exception if an error occurs during configuration.
+     */
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             return http
@@ -35,7 +52,6 @@ public class SecurityConfig {
                             auth -> auth
                                     .requestMatchers(
                                             "/auth/login", "/auth/newAccessToken",
-//                                                    "/ws/**", "/topic/**",
                                             "/v1/task-management-api-docs/**", "/swagger-ui/**", "/v1/task-management-api-docs")
                                     .permitAll()
                                     .anyRequest().authenticated()
@@ -45,6 +61,13 @@ public class SecurityConfig {
                     .build();
         }
 
+    /**
+     * Configures the CORS (Cross-Origin Resource Sharing) settings for the application.
+     * This method sets the allowed origins, HTTP methods, headers, and credentials for cross-origin requests.
+     * It allows requests from any origin and supports common HTTP methods like GET, POST, PUT, and DELETE.
+     *
+     * @return a CorsConfigurationSource object with the configured CORS settings.
+     */
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(Arrays.asList("*")); // Frontend URL
