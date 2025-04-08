@@ -21,6 +21,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+/**
+ * Class JwtProvider.
+ *
+ * A utility class responsible for generating, validating, and parsing JSON Web Tokens (JWTs).
+ * This class provides methods for working with both access and refresh tokens, handling JWT creation and validation,
+ * as well as extracting claims from tokens.
+ */
 @Slf4j
 @Component
 public class JwtProvider {
@@ -28,7 +35,14 @@ public class JwtProvider {
     private final SecretKey accessSecretKey;
     private final SecretKey refreshSecretKey;
 
-
+    /**
+     * Constructor that initializes the JwtProvider with the paths to the access and refresh secret key files.
+     * It loads the secret keys from the specified file paths and throws an IOException if the files do not exist.
+     *
+     * @param accessPath the path to the access token secret key file.
+     * @param refreshPath the path to the refresh token secret key file.
+     * @throws IOException if the specified files are not found.
+     */
     public JwtProvider(
             @Value("${jwt.access.path}") String accessPath,
             @Value("${jwt.refresh.path}") String refreshPath
@@ -54,6 +68,13 @@ public class JwtProvider {
 
     }
 
+    /**
+     * Generates an access token for the given user.
+     * The token contains the user's email, full name, role, and the issue and expiration dates.
+     *
+     * @param user the user for whom the access token is generated.
+     * @return the generated JWT access token.
+     */
     public String generateAccessToken(@NonNull User user) {
 
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Minsk"));
@@ -71,6 +92,13 @@ public class JwtProvider {
                 .compact();
     }
 
+    /**
+     * Generates a refresh token for the given user.
+     * The token contains the user's email, role, and the expiration date set to 24 hours from the current time.
+     *
+     * @param user the user for whom the refresh token is generated.
+     * @return the generated JWT refresh token.
+     */
     public String generateRefreshToken(@NotNull User user){
 
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Minsk"));
@@ -85,6 +113,13 @@ public class JwtProvider {
                 .compact();
     }
 
+    /**
+     * Extracts the claims from a given JWT token using the provided secret key.
+     *
+     * @param token the JWT token to parse.
+     * @param secret the secret key used to validate the token.
+     * @return the claims contained in the JWT token.
+     */
     private Claims getClaims(@NonNull String token, @NonNull Key secret) {
         return Jwts.parserBuilder()
                 .setSigningKey(secret)
@@ -93,14 +128,34 @@ public class JwtProvider {
                 .getBody();
     }
 
+    /**
+     * Extracts the claims from the given access token.
+     *
+     * @param token the JWT access token to parse.
+     * @return the claims contained in the JWT access token.
+     */
     public Claims getAccessClaims(@NonNull String token) {
         return getClaims(token, accessSecretKey);
     }
 
+    /**
+     * Extracts the claims from the given refresh token.
+     *
+     * @param token the JWT refresh token to parse.
+     * @return the claims contained in the JWT refresh token.
+     */
     public Claims getRefreshClaims(@NonNull String token) {
         return getClaims(token, refreshSecretKey);
     }
 
+    /**
+     * Validates the given token using the provided secret key.
+     * If the token is expired, malformed, or has an invalid signature, an exception is thrown.
+     *
+     * @param token the JWT token to validate.
+     * @param secret the secret key used to validate the token.
+     * @return true if the token is valid, otherwise throws an exception.
+     */
     private boolean validateToken(@NonNull String token, @NonNull Key secret) {
         try {
             Jwts.parserBuilder()
@@ -126,10 +181,22 @@ public class JwtProvider {
         }
     }
 
+    /**
+     * Validates the given access token.
+     *
+     * @param accessToken the JWT access token to validate.
+     * @return true if the access token is valid, false otherwise.
+     */
     public boolean validateAccessToken(@NonNull String accessToken){
         return validateToken(accessToken, accessSecretKey);
     }
 
+    /**
+     * Validates the given refresh token.
+     *
+     * @param refreshToken the JWT refresh token to validate.
+     * @return true if the refresh token is valid, false otherwise.
+     */
     public boolean validateRefreshToken(@NonNull String refreshToken){
         return validateToken(refreshToken, refreshSecretKey);
     }

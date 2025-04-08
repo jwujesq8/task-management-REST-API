@@ -22,7 +22,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
-
+/**
+ * Class TaskController
+ *
+ * Controller for managing tasks.
+ * Provides endpoints for creating, updating, retrieving, and deleting tasks.
+ * The tasks can be created and managed only by users with appropriate roles.
+ */
 @RestController
 @RequestMapping("/task")
 @RequiredArgsConstructor
@@ -33,7 +39,13 @@ public class TaskController {
 
     private final TaskService taskService;
 
-
+    /**
+     * Endpoint to create a new task.
+     * Accessible only by users with the ADMIN role.
+     *
+     * @param taskNoIdDto The request body containing task details (excluding the ID).
+     * @return {@link TaskDto} containing the newly created task.
+     */
     @PostMapping("/new")
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
     @Operation(summary = "post a new task (only for admin)")
@@ -48,7 +60,13 @@ public class TaskController {
                 .body(taskService.addTask(taskNoIdDto));
     }
 
-
+    /**
+     * Endpoint to update an existing task.
+     * Accessible only by users with the ADMIN role.
+     *
+     * @param taskDto The request body containing the updated task details.
+     * @return {@link TaskDto} containing the updated task.
+     */
     @PutMapping
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
     @Operation(summary = "update/change task (only for admin)")
@@ -60,6 +78,15 @@ public class TaskController {
     public ResponseEntity<TaskDto> updateTask(@RequestBody @Valid @NotNull TaskDto taskDto) {
         return ResponseEntity.ok(taskService.updateTask(taskDto));
     }
+
+    /**
+     * Endpoint to update the status of an existing task.
+     * Accessible by users with the ADMIN role or the task executor.
+     *
+     * @param status The new status of the task.
+     * @param taskId The ID of the task whose status is to be updated.
+     * @return {@link TaskDto} containing the task with updated status.
+     */
     @PutMapping("/{taskId}/status")
     @PreAuthorize("isAuthenticated() && " +
             "(hasRole('ADMIN') || @taskPermissionChecker.isTaskExecutor(#taskId, authentication.principal))")
@@ -74,7 +101,12 @@ public class TaskController {
         return ResponseEntity.ok(taskService.updateTaskStatus(taskId, status.name()));
     }
 
-
+    /**
+     * Endpoint to delete a task.
+     * Accessible only by users with the ADMIN role.
+     *
+     * @param idDto The request body containing the task ID to be deleted.
+     */
     @DeleteMapping
     @PreAuthorize("isAuthenticated() && hasRole('ADMIN')")
     @Operation(summary = "delete task by task id (only for admin)")
@@ -87,7 +119,14 @@ public class TaskController {
         taskService.deleteTask(idDto);
     }
 
-
+    /**
+     * Endpoint to retrieve all tasks.
+     * Accessible by authenticated users.
+     *
+     * @param page The page number for pagination.
+     * @param size The number of tasks per page.
+     * @return A {@link Page<TaskDto>} containing all tasks.
+     */
     @GetMapping("/all")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "get all tasks (for admin and user)")
@@ -100,7 +139,15 @@ public class TaskController {
         return ResponseEntity.ok(taskService.findAll(PageRequest.of(page, size)));
     }
 
-
+    /**
+     * Endpoint to retrieve tasks created by a specific user (creator).
+     * Accessible by authenticated users.
+     *
+     * @param id The ID of the user who created the tasks.
+     * @param page The page number for pagination.
+     * @param size The number of tasks per page.
+     * @return A {@link Page<TaskDto>} containing tasks created by the specified user.
+     */
     @GetMapping("/all/creator/{id}")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "get tasks by creator id (for admin and user)")
@@ -114,7 +161,15 @@ public class TaskController {
         return ResponseEntity.ok(taskService.findAllByCreator(id, PageRequest.of(page, size)));
     }
 
-
+    /**
+     * Endpoint to retrieve tasks assigned to a specific user (executor).
+     * Accessible by authenticated users.
+     *
+     * @param id The ID of the user who is the executor of the tasks.
+     * @param page The page number for pagination.
+     * @param size The number of tasks per page.
+     * @return A {@link Page<TaskDto>} containing tasks assigned to the specified user.
+     */
     @GetMapping("/all/executor/{id}")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "get tasks by executor id (for admin and user)")

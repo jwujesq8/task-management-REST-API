@@ -6,11 +6,21 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Class JwtRequestDto
+ *
+ * Data Transfer Object (DTO) representing a JWT request.
+ * This DTO contains user login details used for authentication.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
 public class JwtRequestDto {
 
+    /**
+     * The user's email address, which must be a valid email and non-empty.
+     * The email length should be between 11 and 50 characters.
+     */
     @NotEmpty(message = "Email can't be empty or null")
     @Size(
             max = 50,
@@ -21,6 +31,9 @@ public class JwtRequestDto {
     @Schema(description = "user email", example = "iii@gmail.com", minLength = 11, maxLength = 50)
     private String email;
 
+    /**
+     * The user's password, which must be between 7 and 20 characters long and non-empty.
+     */
     @NotEmpty(message = "Password can't be empty or null")
     @Size(
             min = 7,

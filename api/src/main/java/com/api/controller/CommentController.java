@@ -18,6 +18,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
+/**
+ * Class CommentController
+ *
+ * Controller for managing comments related to tasks.
+ * Provides endpoints for posting new comments and retrieving comments by task ID.
+ */
 @RestController
 @RequestMapping("/comments")
 @AllArgsConstructor
@@ -26,6 +32,14 @@ public class CommentController {
 
     private final CommentService commentService;
 
+    /**
+     * Endpoint to add a new comment to a task.
+     * Accessible only by users with the ADMIN role or the task executor.
+     *
+     * @param taskId The ID of the task to add the comment to.
+     * @param commentNoIdDto The request body containing the comment details (excluding the ID).
+     * @return {@link CommentDto} containing the newly posted comment.
+     */
     @PostMapping("/task/{taskId}")
     @PreAuthorize("isAuthenticated() && " +
             "(hasRole('ADMIN') || @taskPermissionChecker.isTaskExecutor(#taskId, authentication.principal))")
@@ -39,7 +53,15 @@ public class CommentController {
         return ResponseEntity.ok(commentService.addComment(taskId, commentNoIdDto));
     }
 
-
+    /**
+     * Endpoint to retrieve all comments associated with a specific task.
+     * Accessible only by users with the ADMIN role or the task executor.
+     *
+     * @param taskId The ID of the task whose comments are to be retrieved.
+     * @param page The page number for pagination.
+     * @param size The number of comments per page.
+     * @return A {@link Page<CommentDto>} containing the comments for the specified task.
+     */
     @GetMapping("/task/{taskId}")
     @PreAuthorize("isAuthenticated() && " +
             "(hasRole('ADMIN') || @taskPermissionChecker.isTaskExecutor(#taskId, authentication.principal))")
