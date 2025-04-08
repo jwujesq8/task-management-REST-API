@@ -231,3 +231,4 @@ README.html
 .exercism
 
 api/src/main/resources/jwt
+api/src/main/resources/application.properties
