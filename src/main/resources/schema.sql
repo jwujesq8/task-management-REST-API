@@ -65,11 +65,11 @@ INSERT INTO task_management_system.users (id, full_name, email, "password", "rol
 ('892a0f4d-3615-43fd-b3d2-90171fac84df', 'Charlie Davis', 'charlie.davis@example.com', 'password654', 'USER');
 
 INSERT INTO task_management_system.tasks (id, title, description, status, priority, id_creator, id_executor) VALUES
-('0f55f5d5-62dd-4575-9fbc-ec54587b4c6b', 'Task 2', 'Description of Task 2', 'в процессе', 'средний', 'ecf72b35-4151-4439-a5a1-408d2ce330c5', 'a88589c6-0f3a-47fc-8a43-78f9f9bb78ff'),
-('92492d18-c388-4184-8785-cc1bb5f4ca09', 'Task 3', 'Description of Task 3', 'завершено', 'низкий', 'ecf72b35-4151-4439-a5a1-408d2ce330c5', '2658929f-d34c-4f4c-96be-1c5653297406'),
-('b7509aed-ecf6-4e10-bf02-8c39854cf0f3', 'Task 4', 'Description of Task 4', 'в ожидании', 'высокий', 'aa1fca78-b7a7-4235-8355-fe7937a3e4cd', '2658929f-d34c-4f4c-96be-1c5653297406'),
-('c35d78d6-6423-4d57-bb77-f26e5813aa15', 'Task 1', 'Description of Task 1', 'в ожидании', 'высокий', 'ecf72b35-4151-4439-a5a1-408d2ce330c5', 'a88589c6-0f3a-47fc-8a43-78f9f9bb78ff'),
-('3df93891-5afd-4c34-82d4-5e7b881da16c', 'Task 5', 'Description of Task 5', 'в процессе', 'средний', 'aa1fca78-b7a7-4235-8355-fe7937a3e4cd', '892a0f4d-3615-43fd-b3d2-90171fac84df');
+('0f55f5d5-62dd-4575-9fbc-ec54587b4c6b', 'Task 2', 'Description of Task 2', 'in progress', 'mid', 'ecf72b35-4151-4439-a5a1-408d2ce330c5', 'a88589c6-0f3a-47fc-8a43-78f9f9bb78ff'),
+('92492d18-c388-4184-8785-cc1bb5f4ca09', 'Task 3', 'Description of Task 3', 'completed', 'low', 'ecf72b35-4151-4439-a5a1-408d2ce330c5', '2658929f-d34c-4f4c-96be-1c5653297406'),
+('b7509aed-ecf6-4e10-bf02-8c39854cf0f3', 'Task 4', 'Description of Task 4', 'pending', 'high', 'aa1fca78-b7a7-4235-8355-fe7937a3e4cd', '2658929f-d34c-4f4c-96be-1c5653297406'),
+('c35d78d6-6423-4d57-bb77-f26e5813aa15', 'Task 1', 'Description of Task 1', 'pending', 'high', 'ecf72b35-4151-4439-a5a1-408d2ce330c5', 'a88589c6-0f3a-47fc-8a43-78f9f9bb78ff'),
+('3df93891-5afd-4c34-82d4-5e7b881da16c', 'Task 5', 'Description of Task 5', 'in progress', 'mid', 'aa1fca78-b7a7-4235-8355-fe7937a3e4cd', '892a0f4d-3615-43fd-b3d2-90171fac84df');
 
 INSERT INTO task_management_system.task_comment (id, description, id_author, id_task) VALUES
 ('06d469ba-2950-426b-96f4-85ca3256c769', 'This is the first comment.', 'a88589c6-0f3a-47fc-8a43-78f9f9bb78ff', '0f55f5d5-62dd-4575-9fbc-ec54587b4c6b'),

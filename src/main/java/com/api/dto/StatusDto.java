@@ -14,12 +14,12 @@ public record StatusDto(
 
         /**
          * The name of the task status.
-         * The status must be one of the predefined values: "в ожидании", "в процессе", or "завершено".
+         * The status must be one of the predefined values: "pending", "in progress", or "completed".
          */
         @NotNull(message = "Task status must have a name")
-        @Pattern(regexp = "^(в ожидании|в процессе|завершено)$",
-                message = "Statuses that are acceptable: в ожидании|в процессе|завершено")
-        @Schema(description = "Task status name: в ожидании|в процессе|завершено", example = "в ожидании")
+        @Pattern(regexp = "^(pending|in progress|completed)$",
+                message = "Statuses that are acceptable: pending|in progress|completed")
+        @Schema(description = "Task status name: pending|in progress|completed", example = "completed")
         String name
 ) {
 }

@@ -57,8 +57,8 @@ class TaskRepositoryIT {
         task = Task.builder()
                 .title("Test Task")
                 .description("Test Description")
-                .status("в ожидании")
-                .priority("средний")
+                .status("pending")
+                .priority("mid")
                 .creator(creator)
                 .executor(executor)
                 .build();

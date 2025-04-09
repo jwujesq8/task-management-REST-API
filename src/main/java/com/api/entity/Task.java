@@ -44,13 +44,13 @@ public class Task {
 
     /**
      * The status of the task.
-     * Possible statuses: "в ожидании" (pending), "в процессе" (in progress), or "завершено" (completed).
+     * Possible statuses: "pending", "in progress", or "completed".
      */
     private String status;
 
     /**
      * The priority of the task.
-     * Possible priorities: "высокий" (high), "средний" (medium), or "низкий" (low).
+     * Possible priorities: "high", "mid", or "low".
      */
     private String priority;
 

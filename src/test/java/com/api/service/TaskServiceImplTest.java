@@ -61,7 +61,7 @@ class TaskServiceImplTest {
         adminId = UUID.randomUUID();
         adminDto = new UserDto(adminId,"Name Surname", "admin@gmail.com", "password456", Role.ADMIN);
         admin = new User(adminId, "Name Surname", "admin@gmail.com", "password456", Role.ADMIN);
-        taskDto = new TaskDto(taskId, "title", "desc", "в процессе", "средний", adminDto, adminDto);
+        taskDto = new TaskDto(taskId, "title", "desc", "pending", "mid", adminDto, adminDto);
         taskNoIdDto = new TaskNoIdDto(taskDto.getTitle(), taskDto.getDescription(),
                 taskDto.getStatus(), taskDto.getPriority(), taskDto.getCreator(), taskDto.getExecutor());
         task = Task.builder()
@@ -77,12 +77,12 @@ class TaskServiceImplTest {
                 .id(taskId)
                 .title(taskDto.getTitle())
                 .description(taskDto.getDescription())
-                .status("завершено")
+                .status("completed")
                 .priority(taskDto.getPriority())
                 .executor(admin)
                 .creator(admin)
                 .build();
-        updatedTaskDto = new TaskDto(taskId, "title", "desc", "завершено", "средний", adminDto, adminDto);
+        updatedTaskDto = new TaskDto(taskId, "title", "desc", "completed", "mid", adminDto, adminDto);
 
 
     }
@@ -135,9 +135,9 @@ class TaskServiceImplTest {
         when(taskRepository.save(task)).thenReturn(updatedTask);
         when(modelMapper.map(updatedTask, TaskDto.class)).thenReturn(updatedTaskDto);
 
-        TaskDto result = taskService.updateTaskStatus(task.getId(), "завершено");
+        TaskDto result = taskService.updateTaskStatus(task.getId(), "completed");
 
-        assertEquals("завершено", result.getStatus());
+        assertEquals("completed", result.getStatus());
         verify(taskRepository).save(any(Task.class));
     }
 
