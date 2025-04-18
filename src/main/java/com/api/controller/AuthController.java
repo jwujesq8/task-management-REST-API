@@ -49,6 +49,7 @@ public class AuthController {
     @PreAuthorize("!isAuthenticated()")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful request to log in", content = @Content(schema = @Schema(implementation = JwtResponseDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "Bad request (non existed user, wrong password)", content = @Content(schema = @Schema(implementation = ErrorMessageResponseDto.class), mediaType = "application/json")),
             @ApiResponse(responseCode = "403", description = "Unsuccessful log in",  content = @Content(mediaType = "none"))}
     )
     public JwtResponseDto login(@Parameter(description = "user login and password inside the request body", required = true)
