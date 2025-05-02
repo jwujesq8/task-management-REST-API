@@ -30,7 +30,7 @@ import java.util.UUID;
  * The tasks can be created and managed only by users with appropriate roles.
  */
 @RestController
-@RequestMapping("/task")
+@RequestMapping("/tasks")
 @RequiredArgsConstructor
 @Validated
 @Slf4j
@@ -87,7 +87,7 @@ public class TaskController {
      * @param taskId The ID of the task whose status is to be updated.
      * @return {@link TaskDto} containing the task with updated status.
      */
-    @PutMapping("/{taskId}/status")
+    @PatchMapping("/{taskId}/status")
     @PreAuthorize("isAuthenticated() && " +
             "(hasRole('ADMIN') || @taskPermissionChecker.isTaskExecutor(#taskId, authentication.principal))")
     @Operation(summary = "update/change task status (for admin and executor)")
