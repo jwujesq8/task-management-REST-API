@@ -4,6 +4,7 @@ import com.api.dto.*;
 import com.api.dto.error.ValidationErrorMessageResponseDto;
 import com.api.service.interfaces.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -131,7 +132,8 @@ public class TaskController {
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "get all tasks (for admin and user)")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Successful request to get tasks", content = @Content(schema = @Schema(implementation = TaskDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "Successful request to get tasks",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = TaskDto.class)))),
             @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated) or access denied",  content = @Content(mediaType = "none"))}
     )
     public ResponseEntity<Page<TaskDto>> getAllTasks(@RequestParam(defaultValue = "0") int page,

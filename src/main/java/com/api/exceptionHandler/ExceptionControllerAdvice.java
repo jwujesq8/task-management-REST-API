@@ -80,6 +80,24 @@ public class ExceptionControllerAdvice{
     }
 
     /**
+     * Handles ForbiddenException and returns an FORBIDDEN response with the error message.
+     *
+     * @param e The ForbiddenException to be handled.
+     * @return A ResponseEntity with a custom error message and an FORBIDDEN status.
+     * @throws JsonProcessingException if the error message cannot be processed.
+     */
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorMessageResponseDto> forbiddenExceptionHandler(ForbiddenException e) throws JsonProcessingException {
+
+        log.error("Exception: ForbiddenException. " +
+                "Exception message: " + e.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(getResponseBody(e.getMessage()));
+    }
+
+    /**
      * Handles OkException and returns an OK response with the error message.
      *
      * @param e The OkException to be handled.

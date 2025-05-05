@@ -1,6 +1,6 @@
 package com.api.config;
 
-import com.api.exception.BadRequestException;
+import com.api.exception.ForbiddenException;
 import com.api.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +27,10 @@ public class TaskPermissionChecker {
      * @param taskId The unique identifier of the task.
      * @param email The email of the user attempting to access the task.
      * @return true if the user is the executor of the task; false otherwise.
-     * @throws BadRequestException If the user is not the executor or an admin.
+     * @throws ForbiddenException If the user is not the executor or an admin.
      */
     public boolean isTaskExecutor(UUID taskId, String email) {
         if(taskRepository.existsByIdAndExecutorEmail(taskId, email)) return true;
-        else throw new BadRequestException("Only executor and admin have access");
+        else throw new ForbiddenException("Only executor and admin have access");
     }
 }
