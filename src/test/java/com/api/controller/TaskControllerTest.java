@@ -2,15 +2,17 @@ package com.api.controller;
 
 import com.api.config.Role;
 import com.api.dto.TaskDto;
+import com.api.dto.TaskNoIdDto;
 import com.api.dto.UserDto;
+import com.api.dto.error.ErrorMessageResponseDto;
 import com.api.dto.jwt.JwtRequestDto;
 import com.api.dto.jwt.JwtResponseDto;
 import com.api.dto.jwt.RefreshJwtRequestDto;
 import com.api.repository.TaskRepository;
+import com.api.repository.UserRepository;
 import com.api.service.AuthServiceImpl;
 import com.api.service.interfaces.TaskService;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,16 +22,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.core.task.TaskRejectedException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.reset;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -38,16 +41,19 @@ class TaskControllerTest {
 
     @LocalServerPort
     private int port;
+
     @Autowired
-    private TaskService taskService;
+    private UserRepository userRepository; // real users from the DB to check role permission
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private TestRestTemplate restTemplate;
+
     @MockBean
-    private AuthServiceImpl authService;
+    private TaskService taskService;
     @MockBean
     private TaskRepository taskRepository;
+
     private UUID taskId;
     private UUID adminId;
     private UUID userId;
@@ -61,26 +67,16 @@ class TaskControllerTest {
 
     @BeforeEach
     void setUp(){
-        adminId = UUID.randomUUID();
-        adminDto = UserDto.builder()
-                .id(adminId)
-                .fullName("Test Admin")
-                .email("admin@gmail.com")
-                .password("admin-123")
-                .role(Role.ADMIN)
-                .build();
-        userId = UUID.randomUUID();
-        userDto = UserDto.builder()
-                .id(userId)
-                .fullName("Test User")
-                .email("user@gmail.com")
-                .password("user-123")
-                .role(Role.USER)
-                .build();
+        adminId = UUID.fromString("ecf72b35-4151-4439-a5a1-408d2ce330c5");
+        adminDto = modelMapper.map(userRepository.findById(adminId), UserDto.class);
+
+        userId = UUID.fromString("a88589c6-0f3a-47fc-8a43-78f9f9bb78ff");
+        userDto = modelMapper.map(userRepository.findById(userId), UserDto.class);
+
         taskId = UUID.randomUUID();
         taskDto = TaskDto.builder()
                 .id(taskId)
-                .title("Task title")
+                .title("Test task title")
                 .description("Task description")
                 .priority("mid")
                 .status("in progress")
@@ -96,32 +92,70 @@ class TaskControllerTest {
 //        authService.getRefreshTokensStorage().clear();
 //    }
 
-    HttpEntity<RefreshJwtRequestDto> getRequestEntity(JwtResponseDto jwtResponseDto){
+    HttpHeaders getHeadersWithBearerAuth(String token){
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(jwtResponseDto.getAccessToken());
-        return new HttpEntity<>(RefreshJwtRequestDto.builder()
-                .refreshJwtRequest(jwtResponseDto.getRefreshToken())
-                .build(), headers);
+        headers.setBearerAuth(token);
+        return headers;
+    }
+
+    HttpEntity<Object> getHttpEntity(Object body, String token){
+        return new HttpEntity<>(body, getHeadersWithBearerAuth(token));
+    }
+
+    ResponseEntity<JwtResponseDto> login(String email, String password){
+        return restTemplate.postForEntity(
+                baseUrl() + "/auth/login",
+                JwtRequestDto.builder()
+                        .email(email)
+                        .password(password)
+                        .build(),
+                JwtResponseDto.class);
     }
 
 
     @Nested
     class addTask{
         @Test
-        void success(){
+        void adminTryToAddTask_success(){
+            ResponseEntity<JwtResponseDto> jwtResponseEntity = login(adminDto.getEmail(), adminDto.getPassword());
+            when(taskService.addTask(any(TaskNoIdDto.class))).thenReturn(taskDto);
 
-        }
-        @Test
-        void addAlreadyExistingTask_shouldReturn400(){
+            ResponseEntity<TaskDto> taskResponseEntity = restTemplate.postForEntity(
+                    baseUrl() + "/tasks/new",
+                    getHttpEntity(
+                            modelMapper.map(taskDto, TaskNoIdDto.class),
+                            jwtResponseEntity.getBody().getAccessToken()),
+                    TaskDto.class);
 
+            assertEquals(HttpStatus.CREATED, taskResponseEntity.getStatusCode());
+            assertNotNull(taskResponseEntity.getBody());
+            assertNotNull(taskResponseEntity.getBody().getId());
+            assertEquals(taskResponseEntity.getBody().getCreator().getId(), adminDto.getId());
         }
         @Test
         void notAdminTryToAddTask_shouldReturn403(){
+            ResponseEntity<JwtResponseDto> jwtResponseEntity = login(userDto.getEmail(), userDto.getPassword());
+            when(taskService.addTask(any(TaskNoIdDto.class))).thenReturn(taskDto);
 
+            ResponseEntity<TaskDto> taskResponseEntity = restTemplate.postForEntity(
+                    baseUrl() + "/tasks/new",
+                    getHttpEntity(
+                            modelMapper.map(taskDto, TaskNoIdDto.class),
+                            jwtResponseEntity.getBody().getAccessToken()),
+                    TaskDto.class);
+
+            assertEquals(HttpStatus.FORBIDDEN, taskResponseEntity.getStatusCode());
         }
         @Test
         void nonAuthenticatedUserTryToAddTask_shouldReturn403(){
+            when(taskService.addTask(any(TaskNoIdDto.class))).thenReturn(taskDto);
 
+            ResponseEntity<TaskDto> taskResponseEntity = restTemplate.postForEntity(
+                    baseUrl() + "/tasks/new",
+                    modelMapper.map(taskDto, TaskNoIdDto.class),
+                    TaskDto.class);
+
+            assertEquals(HttpStatus.FORBIDDEN, taskResponseEntity.getStatusCode());
         }
     }
 
