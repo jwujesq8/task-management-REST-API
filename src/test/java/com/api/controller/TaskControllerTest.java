@@ -1,12 +1,8 @@
 package com.api.controller;
 
-import com.api.config.Role;
 import com.api.dto.*;
-import com.api.dto.error.ErrorMessageResponseDto;
 import com.api.dto.jwt.JwtRequestDto;
 import com.api.dto.jwt.JwtResponseDto;
-import com.api.dto.jwt.RefreshJwtRequestDto;
-import com.api.repository.TaskRepository;
 import com.api.repository.UserRepository;
 import com.api.service.AuthServiceImpl;
 import com.api.service.interfaces.TaskService;
@@ -16,16 +12,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
@@ -34,6 +28,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,6 +62,12 @@ class TaskControllerTest {
     private UserDto userDto;
     private UserDto adminDto;
     private UserDto nonExecutorDto;
+
+    record InvalidDtoCase(String name, Object dto) {
+        @Override
+        public String toString() {
+            return name;
+        }}
 
     String baseUrl() {
         return "http://localhost:" + port;
@@ -126,6 +127,71 @@ class TaskControllerTest {
 
     @Nested
     class addTask{
+
+        private static Stream<Arguments> invalidPostTaskDtos() {
+            return Stream.of(
+                    Arguments.of(new InvalidDtoCase(
+                            "title - null | creator - null | executor - null",
+                            TaskNoIdDto.builder()
+                                    .title(null)
+                                    .description("description")
+                                    .status("completed")
+                                    .priority("mid")
+                                    .creator(null)
+                                    .executor(null)
+                                    .build()
+                            )),
+                    Arguments.of(new InvalidDtoCase(
+                            "title - empty | creator - null | executor - null",
+                            TaskNoIdDto.builder()
+                                    .title("")
+                                    .description("description")
+                                    .status("completed")
+                                    .priority("mid")
+                                    .creator(null)
+                                    .executor(null)
+                                    .build()
+                    )),
+                    Arguments.of(new InvalidDtoCase(
+                            "status - out of patter (pending|in progress|completed) | creator - null | executor - null",
+                            TaskNoIdDto.builder()
+                                    .title("title")
+                                    .description("description")
+                                    .status("out of pattern")
+                                    .priority("mid")
+                                    .creator(null)
+                                    .executor(null)
+                                    .build()
+                    )),
+                    Arguments.of(new InvalidDtoCase(
+                            "priority - out of patter (high|mid|low)| creator - null | executor - null",
+                            TaskNoIdDto.builder()
+                                    .title("title")
+                                    .description("description")
+                                    .status("completed")
+                                    .priority("out of pattern")
+                                    .creator(null)
+                                    .executor(null)
+                                    .build()
+                    ))
+            );
+        }
+        @ParameterizedTest(name = "{0}")
+        @MethodSource("invalidPostTaskDtos")
+        void invalidDto_shouldReturn400(InvalidDtoCase invalidDto){
+            ResponseEntity<JwtResponseDto> jwtResponseEntity = login(adminDto.getEmail(), adminDto.getPassword());
+            when(taskService.addTask(any(TaskNoIdDto.class))).thenReturn(taskDto);
+
+            ResponseEntity<TaskDto> taskResponseEntity = restTemplate.postForEntity(
+                    baseUrl() + "/tasks/new",
+                    getHttpEntity(
+                            invalidDto.dto(),
+                            jwtResponseEntity.getBody().getAccessToken()),
+                    TaskDto.class);
+
+            assertEquals(HttpStatus.BAD_REQUEST, taskResponseEntity.getStatusCode());
+        }
+
         @Test
         void admin_success(){
             ResponseEntity<JwtResponseDto> jwtResponseEntity = login(adminDto.getEmail(), adminDto.getPassword());
@@ -169,6 +235,87 @@ class TaskControllerTest {
 
     @Nested
     class updateTask{
+
+        private static Stream<Arguments> invalidPutTaskDtos() {
+            return Stream.of(
+                    Arguments.of(new InvalidDtoCase(
+                            "id - null | creator - null | executor - null",
+                            TaskDto.builder()
+                                    .id(null)
+                                    .title("title")
+                                    .description("description")
+                                    .status("completed")
+                                    .priority("mid")
+                                    .creator(null)
+                                    .executor(null)
+                                    .build()
+                    )),
+                    Arguments.of(new InvalidDtoCase(
+                            "title - null | creator - null | executor - null",
+                            TaskDto.builder()
+                                    .id(UUID.randomUUID())
+                                    .title(null)
+                                    .description("description")
+                                    .status("completed")
+                                    .priority("mid")
+                                    .creator(null)
+                                    .executor(null)
+                                    .build()
+                    )),
+                    Arguments.of(new InvalidDtoCase(
+                            "title - empty | creator - null | executor - null",
+                            TaskDto.builder()
+                                    .id(UUID.randomUUID())
+                                    .title("")
+                                    .description("description")
+                                    .status("completed")
+                                    .priority("mid")
+                                    .creator(null)
+                                    .executor(null)
+                                    .build()
+                    )),
+                    Arguments.of(new InvalidDtoCase(
+                            "status - out of patter (pending|in progress|completed) | creator - null | executor - null",
+                            TaskDto.builder()
+                                    .id(UUID.randomUUID())
+                                    .title("title")
+                                    .description("description")
+                                    .status("out of pattern")
+                                    .priority("mid")
+                                    .creator(null)
+                                    .executor(null)
+                                    .build()
+                    )),
+                    Arguments.of(new InvalidDtoCase(
+                            "priority - out of patter (high|mid|low)| creator - null | executor - null",
+                            TaskDto.builder()
+                                    .id(UUID.randomUUID())
+                                    .title("title")
+                                    .description("description")
+                                    .status("completed")
+                                    .priority("out of pattern")
+                                    .creator(null)
+                                    .executor(null)
+                                    .build()
+                    ))
+            );
+        }
+        @ParameterizedTest(name = "{0}")
+        @MethodSource("invalidPutTaskDtos")
+        void invalidDto_shouldReturn400(InvalidDtoCase invalidDto){
+            ResponseEntity<JwtResponseDto> jwtResponseEntity = login(adminDto.getEmail(), adminDto.getPassword());
+            when(taskService.updateTask(any(TaskDto.class))).thenReturn(taskDto);
+
+            ResponseEntity<TaskDto> taskResponseEntity = restTemplate.exchange(
+                    baseUrl() + "/tasks",
+                    HttpMethod.PUT,
+                    getHttpEntity(
+                            invalidDto.dto(),
+                            jwtResponseEntity.getBody().getAccessToken()),
+                    TaskDto.class);
+
+            assertEquals(HttpStatus.BAD_REQUEST, taskResponseEntity.getStatusCode());
+        }
         @Test
         void admin_success(){
             ResponseEntity<JwtResponseDto> jwtResponseEntity = login(adminDto.getEmail(), adminDto.getPassword());
@@ -187,9 +334,6 @@ class TaskControllerTest {
             assertNotNull(taskResponseEntity.getBody().getId());
             assertEquals(taskResponseEntity.getBody().getCreator().getId(), adminDto.getId());
         }
-        // todo: parameterized
-        @Test
-        void nonValidDto_shouldReturn400(){}
         @Test
         void notAdmin_shouldReturn403(){
             ResponseEntity<JwtResponseDto> jwtResponseEntity = login(userDto.getEmail(), userDto.getPassword());
@@ -218,6 +362,31 @@ class TaskControllerTest {
 
     @Nested
     class updateTaskStatus{
+
+        private static Stream<Arguments> invalidTaskStatusDtos() {
+            return Stream.of(
+                    Arguments.of(new InvalidDtoCase(
+                            "name - null", new StatusDto(null))),
+                    Arguments.of(new InvalidDtoCase(
+                            "name - empty", new StatusDto(""))),
+                    Arguments.of(new InvalidDtoCase(
+                            "name - out of pattern (pending|in progress|completed)", new StatusDto("out of pattern")))
+            );
+        }
+        @ParameterizedTest(name = "{0}")
+        @MethodSource("invalidTaskStatusDtos")
+        void invalidTaskStatusDto_shouldReturn400(InvalidDtoCase invalidDto){
+            ResponseEntity<JwtResponseDto> jwtResponseEntity = login(adminDto.getEmail(), adminDto.getPassword());
+
+            webTestClient.patch()
+                    .uri("/tasks/{taskId}/status", taskId)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtResponseEntity.getBody().getAccessToken())
+                    .bodyValue(invalidDto.dto())
+                    .exchange()
+                    .expectStatus().isBadRequest();
+
+        }
+
         @Test
         void admin_success(){
             ResponseEntity<JwtResponseDto> jwtResponseEntity = login(adminDto.getEmail(), adminDto.getPassword());
@@ -236,9 +405,6 @@ class TaskControllerTest {
                         assertEquals(taskDto.getId(), response.getId());
                     });
         }
-        // todo: parameterized
-        @Test
-        void nonValidTaskStatusDto_shouldReturn400(){}
         @Test
         void notAdminOrNotExecutor_shouldReturn403(){
             ResponseEntity<JwtResponseDto> jwtResponseEntity = login(nonExecutorDto.getEmail(), nonExecutorDto.getPassword());
