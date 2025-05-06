@@ -12,6 +12,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -111,6 +115,22 @@ class CommentControllerTest {
 
     @Nested
     class addComment {
+
+        record InvalidDtoCase(String name, CommentNoIdDto dto) {
+            @Override
+            public String toString() {
+                return name;
+        }}
+
+        private static Stream<Arguments> invalidDtos() {
+            return Stream.of(
+                    Arguments.of(new InvalidDtoCase(
+                            "text - null | author - null", new CommentNoIdDto(null, null))),
+                    Arguments.of(new InvalidDtoCase(
+                            "text - empty | author - null", new CommentNoIdDto("", null)))
+            );
+        }
+
         @Test
         void admin_success(){
             ResponseEntity<JwtResponseDto> jwtResponseEntity = login(adminDto.getEmail(), adminDto.getPassword());
@@ -176,10 +196,21 @@ class CommentControllerTest {
             assertEquals(HttpStatus.FORBIDDEN, commentResponseEntity.getStatusCode());
 
         }
-        @Test
-            // TODO: parameterized
-        void invalidDto_shouldReturn400(){
+        @ParameterizedTest(name = "{0}")
+        @MethodSource("invalidDtos")
+        void invalidDto_shouldReturn400(InvalidDtoCase invalidDto){
+            ResponseEntity<JwtResponseDto> jwtResponseEntity = login(adminDto.getEmail(), adminDto.getPassword());
+            when(commentService.addComment(any(UUID.class), any(CommentNoIdDto.class))).thenReturn(commentDto);
 
+            ResponseEntity<CommentDto> commentResponseEntity = restTemplate.postForEntity(
+                    baseUrl() + "/comments/task/{taskId}",
+                    getHttpEntity(
+                            invalidDto.dto(),
+                            jwtResponseEntity.getBody().getAccessToken()),
+                    CommentDto.class,
+                    taskId);
+
+            assertEquals(HttpStatus.BAD_REQUEST, commentResponseEntity.getStatusCode());
         }
     }
 
@@ -252,11 +283,5 @@ class CommentControllerTest {
 
             assertEquals(HttpStatus.FORBIDDEN, commentResponseEntity.getStatusCode());
         }
-        @Test
-            // TODO: parameterized
-        void invalidDto_shouldReturn400(){
-
-        }
-
     }
 }
