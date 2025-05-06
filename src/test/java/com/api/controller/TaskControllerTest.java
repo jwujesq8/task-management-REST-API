@@ -210,7 +210,7 @@ class TaskControllerTest {
             assertEquals(taskResponseEntity.getBody().getCreator().getId(), adminDto.getId());
         }
         @Test
-        void notAdmin_shouldReturn403(){
+        void nonAdmin_shouldReturn403(){
             ResponseEntity<JwtResponseDto> jwtResponseEntity = login(userDto.getEmail(), userDto.getPassword());
 
             ResponseEntity<TaskDto> taskResponseEntity = restTemplate.postForEntity(
@@ -223,7 +223,7 @@ class TaskControllerTest {
             assertEquals(HttpStatus.FORBIDDEN, taskResponseEntity.getStatusCode());
         }
         @Test
-        void nonAuthenticatedUser_shouldReturn403(){
+        void unauthenticatedUser_shouldReturn403(){
             ResponseEntity<TaskDto> taskResponseEntity = restTemplate.postForEntity(
                     baseUrl() + "/tasks/new",
                     modelMapper.map(taskDto, TaskNoIdDto.class),
@@ -335,7 +335,7 @@ class TaskControllerTest {
             assertEquals(taskResponseEntity.getBody().getCreator().getId(), adminDto.getId());
         }
         @Test
-        void notAdmin_shouldReturn403(){
+        void nonAdmin_shouldReturn403(){
             ResponseEntity<JwtResponseDto> jwtResponseEntity = login(userDto.getEmail(), userDto.getPassword());
 
             ResponseEntity<TaskDto> taskResponseEntity = restTemplate.exchange(
@@ -349,7 +349,7 @@ class TaskControllerTest {
             assertEquals(HttpStatus.FORBIDDEN, taskResponseEntity.getStatusCode());
         }
         @Test
-        void nonAuthenticatedUser_shouldReturn403(){
+        void unauthenticatedUser_shouldReturn403(){
             ResponseEntity<TaskDto> taskResponseEntity = restTemplate.exchange(
                     baseUrl() + "/tasks",
                     HttpMethod.PUT,
@@ -406,7 +406,7 @@ class TaskControllerTest {
                     });
         }
         @Test
-        void notAdminOrNotExecutor_shouldReturn403(){
+        void nonAdminOrNonExecutor_shouldReturn403(){
             ResponseEntity<JwtResponseDto> jwtResponseEntity = login(nonExecutorDto.getEmail(), nonExecutorDto.getPassword());
             taskDto.setStatus("completed");
 
@@ -438,7 +438,7 @@ class TaskControllerTest {
             assertEquals(HttpStatus.OK, taskResponseEntity.getStatusCode());
         }
         @Test
-        void notAdmin_shouldReturn403(){
+        void nonAdmin_shouldReturn403(){
             ResponseEntity<JwtResponseDto> jwtResponseEntity = login(userDto.getEmail(), userDto.getPassword());
 
             ResponseEntity<Void> taskResponseEntity = restTemplate.exchange(
@@ -472,7 +472,7 @@ class TaskControllerTest {
             assertNotNull(taskResponseEntity.getBody());
         }
         @Test
-        void nonAuthenticatedUser_shouldReturn403(){
+        void unauthenticatedUser_shouldReturn403(){
             ResponseEntity<TaskDto> taskResponseEntity = restTemplate.exchange(
                     baseUrl() + "/tasks/all",
                     HttpMethod.GET,
@@ -505,7 +505,7 @@ class TaskControllerTest {
             assertNotNull(taskResponseEntity.getBody());
         }
         @Test
-        void nonAuthenticatedUser_shouldReturn403(){
+        void unauthenticatedUser_shouldReturn403(){
             ResponseEntity<TaskDto> taskResponseEntity = restTemplate.exchange(
                     baseUrl() + "/tasks/all/creator/{id}",
                     HttpMethod.GET,
@@ -539,7 +539,7 @@ class TaskControllerTest {
             assertNotNull(taskResponseEntity.getBody());
         }
         @Test
-        void nonAuthenticatedUser_shouldReturn403(){
+        void unauthenticatedUser_shouldReturn403(){
             ResponseEntity<TaskDto> taskResponseEntity = restTemplate.exchange(
                     baseUrl() + "/tasks/all/executor/{id}",
                     HttpMethod.GET,

@@ -106,7 +106,7 @@ class AuthControllerTest {
         }
 
         @Test
-        void nonExistedUser_shouldThrowBadRequest() {
+        void nonexistedUser_shouldThrowBadRequest() {
             JwtRequestDto jwtRequestDto = JwtRequestDto.builder()
                     .email("nonUser@gmail.com")
                     .password("non_123password")
@@ -161,7 +161,7 @@ class AuthControllerTest {
         }
 
         @Test
-        void nonValidRefreshToken_shouldReturnStatus403() {
+        void unvalidRefreshToken_shouldReturnStatus403() {
             JwtRequestDto jwtRequestDto = JwtRequestDto.builder()
                     .email("user@gmail.com")
                     .password("123_password")
