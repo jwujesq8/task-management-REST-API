@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -45,12 +46,14 @@ public class CommentController {
             "(hasRole('ADMIN') || @taskPermissionChecker.isTaskExecutor(#taskId, authentication.principal))")
     @Operation(summary = "post a new comment to a task by task id (only for admin and executor)")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "New comment is posted", content = @Content(schema = @Schema(implementation = CommentDto.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "201", description = "New comment is posted", content = @Content(schema = @Schema(implementation = CommentDto.class), mediaType = "application/json")),
             @ApiResponse(responseCode = "403", description = "Forbidden (non authenticated)",  content = @Content(mediaType = "none"))}
     )
     public ResponseEntity<CommentDto> addComment(@PathVariable UUID taskId,
                                                  @Valid @RequestBody CommentNoIdDto commentNoIdDto) {
-        return ResponseEntity.ok(commentService.addComment(taskId, commentNoIdDto));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(commentService.addComment(taskId, commentNoIdDto));
     }
 
     /**
