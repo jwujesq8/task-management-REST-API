@@ -3,11 +3,12 @@ package com.api.service;
 import com.api.dto.IdDto;
 import com.api.dto.TaskDto;
 import com.api.dto.TaskNoIdDto;
-import com.api.entity.Comment;
 import com.api.entity.Task;
 import com.api.exception.BadRequestException;
 import com.api.repository.TaskRepository;
+import com.api.service.executor.interfaces.InternalTaskExecutor;
 import com.api.service.interfaces.TaskService;
+import com.api.service.validation.TaskValidator;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -29,6 +29,8 @@ import java.util.UUID;
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
+    private final TaskValidator taskValidator;
+    private final InternalTaskExecutor internalTaskExecutor;
     private final ModelMapper modelMapper;
 
     /**
@@ -53,13 +55,10 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     @Override
     public TaskDto updateTask(TaskDto taskDto) {
-        Task taskOld = taskRepository.findById(taskDto.getId()).orElseThrow(
-                () -> new BadRequestException("Provided task doesn't exist"));
-        List<Comment> comments = taskOld.getComments();
-        Task task = modelMapper.map(taskDto, Task.class);
-        task.setComments(comments);
-        taskRepository.save(task);
-        return modelMapper.map(task, TaskDto.class);
+        Task taskExisting = taskValidator.findByIdOrThrowBadRequest(taskDto.getId());
+        Task newTask = modelMapper.map(taskDto, Task.class);
+        Task updatedTask = taskRepository.save(internalTaskExecutor.updateTask(taskExisting, newTask));
+        return modelMapper.map(updatedTask, TaskDto.class);
     }
 
     /**
@@ -72,13 +71,11 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public TaskDto updateTaskStatus(UUID taskId, String newStatus) {
-        Task taskDB = taskRepository.findById(taskId)
-                .orElseThrow(() -> new BadRequestException("Provided task doesn't exist"));
-        if (taskDB.getStatus().equals(newStatus)) {
-            throw new BadRequestException("The new status must be different from the current status");
-        }
-        taskDB.setStatus(newStatus);
-        return modelMapper.map(taskRepository.save(taskDB), TaskDto.class);
+        Task task = taskValidator.findByIdOrThrowBadRequest(taskId);
+        return modelMapper.map(
+                taskRepository.save(internalTaskExecutor.updateTaskStatus(task, newStatus)),
+                TaskDto.class
+        );
     }
 
     /**
@@ -88,6 +85,7 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public void deleteTask(IdDto idDto) {
+        taskValidator.findByIdOrThrowBadRequest(idDto.id());
         taskRepository.deleteById(idDto.id());
     }
 
@@ -99,7 +97,8 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public Page<TaskDto> findAll(Pageable pageable) {
-        return taskRepository.findAll(pageable).map(task -> modelMapper.map(task, TaskDto.class));
+        return taskRepository.findAll(pageable)
+                .map(task -> modelMapper.map(task, TaskDto.class));
     }
 
     /**
@@ -109,6 +108,7 @@ public class TaskServiceImpl implements TaskService {
      * @param pageable The pagination information (e.g., page number, size).
      * @return A {@link Page} of {@link TaskDto} representing the tasks created by the specified user.
      */
+    @Override
     public Page<TaskDto> findAllByCreator(UUID idCreator, Pageable pageable) {
         return taskRepository.findAllByCreatorId(idCreator, pageable)
                 .map(task -> modelMapper.map(task, TaskDto.class));
@@ -121,6 +121,7 @@ public class TaskServiceImpl implements TaskService {
      * @param pageable The pagination information (e.g., page number, size).
      * @return A {@link Page} of {@link TaskDto} representing the tasks assigned to the specified executor.
      */
+    @Override
     public Page<TaskDto> findAllByExecutor(UUID idExecutor, Pageable pageable) {
         return taskRepository.findAllByExecutorId(idExecutor, pageable)
                 .map(task -> modelMapper.map(task, TaskDto.class));
