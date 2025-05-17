@@ -1,4 +1,4 @@
-package com.api.config;
+package com.api.config.enums;
 
 /**
  * Class Role

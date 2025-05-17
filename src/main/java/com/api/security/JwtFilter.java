@@ -1,6 +1,6 @@
-package com.api.config.JWT;
+package com.api.security;
 
-import com.api.config.Role;
+import com.api.config.enums.Role;
 import com.api.service.AuthServiceImpl;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;

@@ -1,10 +1,9 @@
 package com.api.repository;
 
 
-import com.api.config.Role;
+import com.api.config.enums.Role;
 import com.api.entity.Task;
 import com.api.entity.User;
-import jakarta.validation.constraints.AssertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest

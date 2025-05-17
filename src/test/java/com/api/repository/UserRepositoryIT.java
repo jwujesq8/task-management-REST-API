@@ -1,14 +1,12 @@
 package com.api.repository;
 
-import com.api.config.Role;
+import com.api.config.enums.Role;
 import com.api.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-
-import javax.swing.text.html.Option;
 
 import java.util.Optional;
 

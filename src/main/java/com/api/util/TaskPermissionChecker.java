@@ -1,9 +1,8 @@
-package com.api.config;
+package com.api.util;
 
 import com.api.exception.ForbiddenException;
 import com.api.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;

@@ -1,6 +1,6 @@
 package com.api.controller;
 
-import com.api.config.Role;
+import com.api.config.enums.Role;
 import com.api.dto.UserDto;
 import com.api.dto.jwt.JwtRequestDto;
 import com.api.dto.jwt.JwtResponseDto;

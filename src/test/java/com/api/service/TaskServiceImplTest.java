@@ -1,6 +1,6 @@
 package com.api.service;
 
-import com.api.config.Role;
+import com.api.config.enums.Role;
 import com.api.dto.IdDto;
 import com.api.dto.TaskDto;
 import com.api.dto.TaskNoIdDto;
@@ -8,9 +8,7 @@ import com.api.dto.UserDto;
 import com.api.entity.Task;
 import com.api.entity.User;
 import com.api.exception.BadRequestException;
-import com.api.repository.CommentRepository;
 import com.api.repository.TaskRepository;
-import com.api.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

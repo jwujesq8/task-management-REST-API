@@ -1,6 +1,6 @@
-package com.api.config.JWT;
+package com.api.security;
 
-import com.api.config.Role;
+import com.api.config.enums.Role;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.Authentication;

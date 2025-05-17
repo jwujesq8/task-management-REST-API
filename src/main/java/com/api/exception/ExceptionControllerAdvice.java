@@ -1,9 +1,8 @@
-package com.api.exceptionHandler;
+package com.api.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.api.dto.error.ErrorMessageResponseDto;
 import com.api.dto.error.ValidationErrorMessageResponseDto;
-import com.api.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

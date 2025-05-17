@@ -1,4 +1,4 @@
-package com.api.config.JWT;
+package com.api.security;
 
 import com.api.entity.User;
 import com.api.exception.AuthException;
@@ -15,9 +15,6 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.Key;
 import java.util.Calendar;
 import java.util.Date;

@@ -1,5 +1,7 @@
-package com.api.config.JWT;
+package com.api.config;
 
+import com.api.security.JwtAuthenticationEntryPoint;
+import com.api.security.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

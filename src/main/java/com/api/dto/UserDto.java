@@ -1,6 +1,6 @@
 package com.api.dto;
 
-import com.api.config.Role;
+import com.api.config.enums.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

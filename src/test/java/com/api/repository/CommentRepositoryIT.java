@@ -1,6 +1,6 @@
 package com.api.repository;
 
-import com.api.config.Role;
+import com.api.config.enums.Role;
 import com.api.entity.Comment;
 import com.api.entity.Task;
 import com.api.entity.User;

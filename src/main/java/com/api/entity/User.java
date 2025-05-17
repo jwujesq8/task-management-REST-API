@@ -1,6 +1,6 @@
 package com.api.entity;
 
-import com.api.config.Role;
+import com.api.config.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
