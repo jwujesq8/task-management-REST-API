@@ -70,6 +70,7 @@ public class TaskServiceImpl implements TaskService {
      * @throws BadRequestException If the task does not exist or if the new status is the same as the current status.
      */
     @Override
+    @Transactional
     public TaskDto updateTaskStatus(UUID taskId, String newStatus) {
         Task task = taskValidator.findByIdOrThrowBadRequest(taskId);
         return modelMapper.map(
