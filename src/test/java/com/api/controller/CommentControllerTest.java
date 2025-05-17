@@ -5,7 +5,7 @@ import com.api.dto.jwt.JwtRequestDto;
 import com.api.dto.jwt.JwtResponseDto;
 import com.api.repository.TaskRepository;
 import com.api.repository.UserRepository;
-import com.api.service.AuthServiceImpl;
+import com.api.service.auth.AuthServiceImpl;
 import com.api.service.interfaces.CommentService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;

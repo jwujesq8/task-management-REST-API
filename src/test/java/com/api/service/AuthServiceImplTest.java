@@ -8,6 +8,7 @@ import com.api.entity.User;
 import com.api.exception.AuthException;
 import com.api.exception.BadRequestException;
 import com.api.exception.OkException;
+import com.api.service.auth.AuthServiceImpl;
 import com.api.service.interfaces.UserService;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
