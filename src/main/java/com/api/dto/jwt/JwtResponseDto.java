@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Class JwtResponseDto
@@ -15,6 +16,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @Builder
+@Setter
 public class JwtResponseDto {
 
     /**

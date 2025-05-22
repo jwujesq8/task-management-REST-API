@@ -21,6 +21,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.ResourceAccessException;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Transactional
 class AuthControllerTest {
 
     @LocalServerPort
@@ -37,14 +39,11 @@ class AuthControllerTest {
     @MockBean
     private UserRepository userRepository;
     @Autowired
-    private ModelMapper modelMapper;
-    @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
     private AuthServiceImpl authService;
     private User userDB;
     private UUID userId;
-    private UserDto userDtoDB;
 
     String baseUrl() {
         return "http://localhost:" + port;
@@ -58,10 +57,10 @@ class AuthControllerTest {
                 .build(), headers);
     }
 
-    ResponseEntity<JwtResponseDto> login(JwtRequestDto jwtRequestDto){
+    ResponseEntity<JwtResponseDto> login(String email, String password){
         return restTemplate.postForEntity(
                 baseUrl() + "/auth/login",
-                jwtRequestDto,
+                JwtRequestDto.builder().email(email).password(password).build(),
                 JwtResponseDto.class);
     }
 
@@ -82,7 +81,7 @@ class AuthControllerTest {
     void tearDown() {
         reset(userRepository);
         SecurityContextHolder.clearContext();
-        authService.getRefreshTokensStorage().clear();
+        authService.getTokenStore().clear();
     }
 
     @Nested
@@ -94,10 +93,12 @@ class AuthControllerTest {
                     .email("user@gmail.com")
                     .password("123_password")
                     .build();
+
             ResponseEntity<JwtResponseDto> jwtResponseDto = restTemplate.postForEntity(
                     baseUrl() + "/auth/login",
                     jwtRequestDto,
                     JwtResponseDto.class);
+
             assertEquals(HttpStatus.OK, jwtResponseDto.getStatusCode());
             assertNotNull(jwtResponseDto.getBody());
             assertNotNull(jwtResponseDto.getBody().getAccessToken());
@@ -111,20 +112,23 @@ class AuthControllerTest {
                     .email("nonUser@gmail.com")
                     .password("non_123password")
                     .build();
+
             ResponseEntity<JwtResponseDto> jwtResponseDto = restTemplate.postForEntity(
                     baseUrl() + "/auth/login",
                     jwtRequestDto,
                     JwtResponseDto.class);
+
             assertEquals(HttpStatus.BAD_REQUEST, jwtResponseDto.getStatusCode());
             assertNull(jwtResponseDto.getBody().getAccessToken());
         }
 
         @Test
-        void wrongPassword_shouldThrowBadRequest() {
+        void wrongPassword_shouldThrowException() {
             JwtRequestDto jwtRequestDto = JwtRequestDto.builder()
                     .email("user@gmail.com")
                     .password("wrong_password")
                     .build();
+
             assertThrows(ResourceAccessException.class,() -> restTemplate.postForEntity(
                     baseUrl() + "/auth/login",
                     jwtRequestDto,
@@ -138,21 +142,16 @@ class AuthControllerTest {
 
         @Test
         void success() {
-            JwtRequestDto jwtRequestDto = JwtRequestDto.builder()
-                    .email("user@gmail.com")
-                    .password("123_password")
-                    .build();
-            ResponseEntity<JwtResponseDto> accessAndRefreshToken = restTemplate.postForEntity(
-                    baseUrl() + "/auth/login",
-                    jwtRequestDto,
-                    JwtResponseDto.class);
+            ResponseEntity<JwtResponseDto> jwtResponseDtoResponseEntity = login("user@gmail.com", "123_password");
             RefreshJwtRequestDto refreshJwtRequestDto = RefreshJwtRequestDto.builder()
-                    .refreshJwtRequest(accessAndRefreshToken.getBody().getRefreshToken())
+                    .refreshJwtRequest(jwtResponseDtoResponseEntity.getBody().getRefreshToken())
                     .build();
+
             ResponseEntity<JwtResponseDto> newAccessTokenResponse = restTemplate.postForEntity(
                     baseUrl() + "/auth/newAccessToken",
                     refreshJwtRequestDto,
                     JwtResponseDto.class);
+
             assertEquals(HttpStatus.OK, newAccessTokenResponse.getStatusCode());
             assertNotNull(newAccessTokenResponse.getBody());
             assertNotNull(newAccessTokenResponse.getBody().getAccessToken());
@@ -161,20 +160,17 @@ class AuthControllerTest {
         }
 
         @Test
-        void unvalidRefreshToken_shouldReturnStatus403() {
-            JwtRequestDto jwtRequestDto = JwtRequestDto.builder()
-                    .email("user@gmail.com")
-                    .password("123_password")
-                    .build();
-            ResponseEntity<JwtResponseDto> newAccessTokenResponse = restTemplate.postForEntity(
+        void invalidRefreshToken_shouldThrowException() {
+            ResponseEntity<JwtResponseDto> jwtResponseDtoResponseEntity = login("user@gmail.com", "123_password");
+            jwtResponseDtoResponseEntity.getBody().setRefreshToken(
+                    "12"+jwtResponseDtoResponseEntity.getBody().getRefreshToken().substring(2));
+
+            assertThrows(ResourceAccessException.class, () -> restTemplate.postForEntity(
                     baseUrl() + "/auth/newAccessToken",
-                    "wrong.refresh.token",
-                    JwtResponseDto.class);
-            assertEquals(HttpStatus.FORBIDDEN, newAccessTokenResponse.getStatusCode());
-            assertNull(newAccessTokenResponse.getBody());
+                    getRequestEntity(jwtResponseDtoResponseEntity.getBody()), // to set Bearer Auth header
+                    JwtResponseDto.class));
+
         }
-
-
     }
 
     @Nested
@@ -182,16 +178,12 @@ class AuthControllerTest {
 
         @Test
         void success() {
-            JwtRequestDto jwtRequestDto = JwtRequestDto.builder()
-                    .email("user@gmail.com")
-                    .password("123_password")
-                    .build();
-            ResponseEntity<JwtResponseDto> accessAndRefreshToken = login(jwtRequestDto);
-            assertNotNull(accessAndRefreshToken);
+            ResponseEntity<JwtResponseDto> responseDtoResponseEntity = login("user@gmail.com","123_password");
+            assertNotNull(responseDtoResponseEntity);
 
             ResponseEntity<JwtResponseDto> refreshResponse = restTemplate.postForEntity(
                     baseUrl() + "/auth/refreshToken",
-                    getRequestEntity(accessAndRefreshToken.getBody()), // to set Bearer Auth header
+                    getRequestEntity(responseDtoResponseEntity.getBody()), // to set Bearer Auth header
                     JwtResponseDto.class);
 
             assertEquals(HttpStatus.OK, refreshResponse.getStatusCode());
@@ -203,23 +195,19 @@ class AuthControllerTest {
         }
 
         @Test
-        void withoutRefreshToken_shouldReturnStatus400() {
-            JwtRequestDto jwtRequestDto = JwtRequestDto.builder()
-                    .email("user@gmail.com")
-                    .password("123_password")
-                    .build();
-            ResponseEntity<JwtResponseDto> accessAndRefreshToken = login(jwtRequestDto);
-            assertNotNull(accessAndRefreshToken);
+        void withoutRefreshToken_shouldReturn400() {
+            ResponseEntity<JwtResponseDto> responseDtoResponseEntity = login("user@gmail.com","123_password");
+            assertNotNull(responseDtoResponseEntity);
 
             assertEquals(HttpStatus.BAD_REQUEST,
                     restTemplate.postForEntity(
-                    baseUrl() + "/auth/refreshToken",
-                    getRequestEntity(
-                            JwtResponseDto.builder()
-                                    .accessToken(accessAndRefreshToken.getBody().getAccessToken())
-                                    .refreshToken(null)
-                                    .build()),
-                    JwtResponseDto.class).getStatusCode());
+                            baseUrl() + "/auth/refreshToken",
+                            getRequestEntity( // to set Bearer Auth header
+                                    JwtResponseDto.builder()
+                                            .accessToken(responseDtoResponseEntity.getBody().getAccessToken())
+                                            .refreshToken(null)
+                                            .build()),
+                            JwtResponseDto.class).getStatusCode());
         }
     }
 
@@ -228,23 +216,17 @@ class AuthControllerTest {
 
         @Test
         void success() {
-            JwtRequestDto jwtRequestDto = JwtRequestDto.builder()
-                    .email("user@gmail.com")
-                    .password("123_password")
-                    .build();
-            ResponseEntity<JwtResponseDto> accessAndRefreshToken = login(jwtRequestDto);
-            assertNotNull(accessAndRefreshToken);
+            ResponseEntity<JwtResponseDto> responseDtoResponseEntity = login("user@gmail.com","123_password");
+            assertNotNull(responseDtoResponseEntity);
 
             ResponseEntity<Void> response = restTemplate.exchange(
                     baseUrl() + "/auth/logout",
                     HttpMethod.DELETE,
-                    getRequestEntity(accessAndRefreshToken.getBody()),
+                    getRequestEntity(responseDtoResponseEntity.getBody()), // to set Bearer Auth header
                     Void.class
             );
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
-
-
     }
 }

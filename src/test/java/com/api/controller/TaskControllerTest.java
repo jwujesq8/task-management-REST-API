@@ -122,7 +122,7 @@ class TaskControllerTest {
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
-        authService.getRefreshTokensStorage().clear();
+        authService.getTokenStore().clear();
     }
 
     @Nested

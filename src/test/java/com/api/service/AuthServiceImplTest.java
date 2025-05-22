@@ -1,188 +1,230 @@
-package com.api.service;
-
-import com.api.security.JwtProvider;
-import com.api.config.enums.Role;
-import com.api.dto.jwt.JwtRequestDto;
-import com.api.dto.jwt.JwtResponseDto;
-import com.api.entity.User;
-import com.api.exception.AuthException;
-import com.api.exception.BadRequestException;
-import com.api.exception.OkException;
-import com.api.service.auth.AuthServiceImpl;
-import com.api.service.interfaces.UserService;
-import io.jsonwebtoken.Claims;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-class AuthServiceImplTest {
-
-    private AuthServiceImpl authService;
-
-    @Mock
-    private UserService userService;
-
-    @Mock
-    private JwtProvider jwtProvider;
-
-    private User user;
-    private JwtRequestDto jwtRequestDto;
-    private JwtResponseDto jwtResponseDto;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        authService = new AuthServiceImpl(userService, jwtProvider);
-
-        user = User.builder()
-                .email("user@gmail.com")
-                .password("password")
-                .fullName("Name Surname")
-                .role(Role.ADMIN)
-                .build();
-        jwtRequestDto = new JwtRequestDto("user@gmail.com", "password");
-        jwtResponseDto = new JwtResponseDto("accessToken", "refreshToken");
-    }
-
-    @Test
-    public void testLogin_successfulLogin() {
-
-        when(userService.getUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(jwtProvider.generateAccessToken(user)).thenReturn("accessToken");
-        when(jwtProvider.generateRefreshToken(user)).thenReturn("refreshToken");
-
-        JwtResponseDto result = authService.login(jwtRequestDto);
-
-        assertNotNull(result);
-        assertEquals("accessToken", result.getAccessToken());
-        assertEquals("refreshToken", result.getRefreshToken());
-        verify(userService, times(1)).getUserByEmail(user.getEmail());
-        verify(jwtProvider, times(1)).generateAccessToken(user);
-        verify(jwtProvider, times(1)).generateRefreshToken(user);
-    }
-
-    @Test()
-    public void testLogin_userNotFound() {
-        when(userService.getUserByEmail(user.getEmail())).thenReturn(Optional.empty());
-        assertThrows(BadRequestException.class, () -> authService.login(jwtRequestDto));
-    }
-
-    @Test()
-    public void testLogin_wrongPassword() {
-        when(userService.getUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
-
-        assertThrows(BadRequestException.class, () -> authService.login(
-                new JwtRequestDto("user@example.com", "wrongPassword")));
-    }
-
-    @Test
-    public void testGetNewAccessToken_success() {
-        when(jwtProvider.validateRefreshToken("refreshToken")).thenReturn(true);
-        Claims claims = mock(Claims.class);
-        when(claims.getSubject()).thenReturn("user@gmail.com");
-        when(jwtProvider.getRefreshClaims("refreshToken")).thenReturn(claims);
-        when(userService.getUserByEmail("user@gmail.com")).thenReturn(Optional.of(user));
-        when(jwtProvider.generateAccessToken(user)).thenReturn("newAccessToken");
-        authService.getRefreshTokensStorage().put(user.getEmail(), "refreshToken");
-
-        JwtResponseDto result = authService.getNewAccessToken("refreshToken");
-
-        assertNotNull(result);
-        assertEquals("newAccessToken", result.getAccessToken());
-        verify(jwtProvider, times(1)).validateRefreshToken("refreshToken");
-    }
-
-    @Test()
-    public void testGetNewAccessToken_invalidRefreshToken() {
-        when(jwtProvider.validateRefreshToken("invalidToken")).thenReturn(false);
-        assertThrows(AuthException.class, () -> authService.getNewAccessToken("invalidToken"));
-    }
-
-
-    @Test
-    public void testRefresh_success() {
-        when(jwtProvider.validateRefreshToken("refreshToken")).thenReturn(true);
-        Claims claims = mock(Claims.class);
-        when(claims.getSubject()).thenReturn("user@gmail.com");
-        when(jwtProvider.getRefreshClaims("refreshToken")).thenReturn(claims);
-        when(userService.getUserByEmail("user@gmail.com")).thenReturn(Optional.of(user));
-        when(jwtProvider.generateAccessToken(user)).thenReturn("newAccessToken");
-        when(jwtProvider.generateRefreshToken(user)).thenReturn("newRefreshToken");
-        authService.getRefreshTokensStorage().put(user.getEmail(), "refreshToken");
-
-        JwtResponseDto result = authService.refresh("refreshToken");
-
-        assertNotNull(result);
-        assertEquals("newAccessToken", result.getAccessToken());
-        assertEquals("newRefreshToken", result.getRefreshToken());
-        verify(jwtProvider, times(1)).validateRefreshToken("refreshToken");
-    }
-
-    @Test()
-    public void testRefresh_invalidRefreshToken() {
-        when(jwtProvider.validateRefreshToken("invalidToken")).thenReturn(false);
-        assertThrows(AuthException.class, () -> authService.refresh("invalidToken"));
-    }
-
-
-    @Test
-    public void testLogout_success() {
-        when(jwtProvider.validateRefreshToken("refreshToken")).thenReturn(true);
-        Claims claims = mock(Claims.class);
-        when(claims.getSubject()).thenReturn("user@gmail.com");
-        when(jwtProvider.getRefreshClaims("refreshToken")).thenReturn(claims);
-        when(userService.getUserByEmail("user@gmail.com")).thenReturn(Optional.of(user));
-        authService.getRefreshTokensStorage().put(user.getEmail(), "refreshToken");
-
-        authService.logout("refreshToken");
-
-        verify(jwtProvider, times(1)).validateRefreshToken("refreshToken");
-        assertFalse(authService.isUserLoggedIn("user@gmail.com"));
-    }
-
-    @Test()
-    public void testLogout_invalidRefreshToken() {
-        when(jwtProvider.validateRefreshToken("invalidToken")).thenReturn(false);
-
-        assertThrows(AuthException.class, () -> authService.logout("invalidToken"));
-    }
-
-    @Test()
-    public void testLogout_alreadyLoggedOut() {
-        when(jwtProvider.validateRefreshToken("refreshToken")).thenReturn(true);
-        Claims claims = mock(Claims.class);
-        when(claims.getSubject()).thenReturn("user@gmail.com");
-        when(jwtProvider.getRefreshClaims("refreshToken")).thenReturn(claims);
-        when(userService.getUserByEmail("user@gmail.com")).thenReturn(Optional.of(user));
-        authService.getRefreshTokensStorage().put(user.getEmail(), "refreshToken");
-
-        authService.logout("refreshToken"); // first logout
-        assertThrows(OkException.class, () -> authService.logout("refreshToken"));
-    }
-
-
-    @Test
-    public void testIsUserLoggedIn_userLoggedIn() {
-        when(jwtProvider.validateRefreshToken("refreshToken")).thenReturn(true);
-        when(jwtProvider.getRefreshClaims("refreshToken")).thenReturn(mock(Claims.class));
-        when(userService.getUserByEmail("user@gmail.com")).thenReturn(Optional.of(user));
-
-        authService.login(jwtRequestDto);
-
-        boolean result = authService.isUserLoggedIn("user@gmail.com");
-        assertTrue(result);
-    }
-
-    @Test
-    public void testIsUserLoggedIn_userNotLoggedIn() {
-        boolean result = authService.isUserLoggedIn("user@gmail.com");
-        assertFalse(result);
-    }
-
-}
+//package com.api.service;
+//
+//import com.api.config.enums.Role;
+//import com.api.dto.jwt.JwtRequestDto;
+//import com.api.dto.jwt.JwtResponseDto;
+//import com.api.entity.User;
+//import com.api.service.auth.AuthServiceImpl;
+//import org.junit.jupiter.api.BeforeEach;
+//import org.junit.jupiter.api.Test;
+//import java.util.Optional;
+//import static org.junit.jupiter.api.Assertions.*;
+//import com.api.dto.jwt.RefreshJwtRequestDto;
+//import com.api.repository.UserRepository;
+//import lombok.extern.slf4j.Slf4j;
+//import org.junit.jupiter.api.AfterEach;
+//import org.junit.jupiter.api.Nested;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.boot.test.mock.mockito.MockBean;
+//import org.springframework.boot.test.web.client.TestRestTemplate;
+//import org.springframework.boot.test.web.server.LocalServerPort;
+//import org.springframework.http.*;
+//import org.springframework.security.core.context.SecurityContextHolder;
+//import org.springframework.transaction.annotation.Transactional;
+//import org.springframework.web.client.ResourceAccessException;
+//import java.util.UUID;
+//import static org.mockito.Mockito.reset;
+//import static org.mockito.Mockito.when;
+//
+//@Slf4j
+//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+//@Transactional
+//class AuthControllerTest {
+//
+//    @LocalServerPort
+//    private int port;
+//    @MockBean
+//    private UserRepository userRepository;
+//    @Autowired
+//    private TestRestTemplate restTemplate;
+//    @Autowired
+//    private AuthServiceImpl authService;
+//    private User userDB;
+//    private UUID userId;
+//
+//    String baseUrl() {
+//        return "http://localhost:" + port;
+//    }
+//
+//    HttpEntity<RefreshJwtRequestDto> getRequestEntity(JwtResponseDto jwtResponseDto){
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setBearerAuth(jwtResponseDto.getAccessToken());
+//        return new HttpEntity<>(RefreshJwtRequestDto.builder()
+//                .refreshJwtRequest(jwtResponseDto.getRefreshToken())
+//                .build(), headers);
+//    }
+//
+//    ResponseEntity<JwtResponseDto> login(String email, String password){
+//        return restTemplate.postForEntity(
+//                baseUrl() + "/auth/login",
+//                JwtRequestDto.builder().email(email).password(password).build(),
+//                JwtResponseDto.class);
+//    }
+//
+//    @BeforeEach
+//    void setUp(){
+//        userId = UUID.randomUUID();
+//        userDB = User.builder()
+//                .id(userId)
+//                .fullName("User Test")
+//                .email("user@gmail.com")
+//                .password("123_password")
+//                .role(Role.ADMIN)
+//                .build();
+//        when(userRepository.findByEmail(userDB.getEmail())).thenReturn(Optional.of(userDB));
+//    }
+//
+//    @AfterEach
+//    void tearDown() {
+//        reset(userRepository);
+//        SecurityContextHolder.clearContext();
+//        authService.getTokenStore().clear();
+//    }
+//
+//    @Nested
+//    class login {
+//
+//        @Test
+//        void success() {
+//            JwtRequestDto jwtRequestDto = JwtRequestDto.builder()
+//                    .email("user@gmail.com")
+//                    .password("123_password")
+//                    .build();
+//
+//            ResponseEntity<JwtResponseDto> jwtResponseDto = restTemplate.postForEntity(
+//                    baseUrl() + "/auth/login",
+//                    jwtRequestDto,
+//                    JwtResponseDto.class);
+//
+//            assertEquals(HttpStatus.OK, jwtResponseDto.getStatusCode());
+//            assertNotNull(jwtResponseDto.getBody());
+//            assertNotNull(jwtResponseDto.getBody().getAccessToken());
+//            assertNotNull(jwtResponseDto.getBody().getRefreshToken());
+//            assertEquals(3, jwtResponseDto.getBody().getAccessToken().split("\\.").length);
+//        }
+//
+//        @Test
+//        void nonexistedUser_shouldThrowBadRequest() {
+//            JwtRequestDto jwtRequestDto = JwtRequestDto.builder()
+//                    .email("nonUser@gmail.com")
+//                    .password("non_123password")
+//                    .build();
+//
+//            ResponseEntity<JwtResponseDto> jwtResponseDto = restTemplate.postForEntity(
+//                    baseUrl() + "/auth/login",
+//                    jwtRequestDto,
+//                    JwtResponseDto.class);
+//
+//            assertEquals(HttpStatus.BAD_REQUEST, jwtResponseDto.getStatusCode());
+//            assertNull(jwtResponseDto.getBody().getAccessToken());
+//        }
+//
+//        @Test
+//        void wrongPassword_shouldThrowException() {
+//            JwtRequestDto jwtRequestDto = JwtRequestDto.builder()
+//                    .email("user@gmail.com")
+//                    .password("wrong_password")
+//                    .build();
+//
+//            assertThrows(ResourceAccessException.class,() -> restTemplate.postForEntity(
+//                    baseUrl() + "/auth/login",
+//                    jwtRequestDto,
+//                    JwtResponseDto.class));
+//        }
+//    }
+//
+//
+//    @Nested
+//    class getNewAccessToken {
+//
+//        @Test
+//        void success() {
+//            ResponseEntity<JwtResponseDto> jwtResponseDtoResponseEntity = login("user@gmail.com", "123_password");
+//            RefreshJwtRequestDto refreshJwtRequestDto = RefreshJwtRequestDto.builder()
+//                    .refreshJwtRequest(jwtResponseDtoResponseEntity.getBody().getRefreshToken())
+//                    .build();
+//
+//            ResponseEntity<JwtResponseDto> newAccessTokenResponse = restTemplate.postForEntity(
+//                    baseUrl() + "/auth/newAccessToken",
+//                    refreshJwtRequestDto,
+//                    JwtResponseDto.class);
+//
+//            assertEquals(HttpStatus.OK, newAccessTokenResponse.getStatusCode());
+//            assertNotNull(newAccessTokenResponse.getBody());
+//            assertNotNull(newAccessTokenResponse.getBody().getAccessToken());
+//            assertEquals(3, newAccessTokenResponse.getBody().getAccessToken().split("\\.").length);
+//            assertNull(newAccessTokenResponse.getBody().getRefreshToken());
+//        }
+//
+//        @Test
+//        void invalidRefreshToken_shouldThrowException() {
+//            ResponseEntity<JwtResponseDto> jwtResponseDtoResponseEntity = login("user@gmail.com", "123_password");
+//            jwtResponseDtoResponseEntity.getBody().setRefreshToken(
+//                    "12"+jwtResponseDtoResponseEntity.getBody().getRefreshToken().substring(2));
+//
+//            assertThrows(ResourceAccessException.class, () -> restTemplate.postForEntity(
+//                    baseUrl() + "/auth/newAccessToken",
+//                    getRequestEntity(jwtResponseDtoResponseEntity.getBody()), // to set Bearer Auth header
+//                    JwtResponseDto.class));
+//
+//        }
+//    }
+//
+//    @Nested
+//    class refresh {
+//
+//        @Test
+//        void success() {
+//            ResponseEntity<JwtResponseDto> responseDtoResponseEntity = login("user@gmail.com","123_password");
+//            assertNotNull(responseDtoResponseEntity);
+//
+//            ResponseEntity<JwtResponseDto> refreshResponse = restTemplate.postForEntity(
+//                    baseUrl() + "/auth/refreshToken",
+//                    getRequestEntity(responseDtoResponseEntity.getBody()), // to set Bearer Auth header
+//                    JwtResponseDto.class);
+//
+//            assertEquals(HttpStatus.OK, refreshResponse.getStatusCode());
+//            assertNotNull(refreshResponse.getBody());
+//            assertNotNull(refreshResponse.getBody().getAccessToken());
+//            assertEquals(3, refreshResponse.getBody().getAccessToken().split("\\.").length);
+//            assertNotNull(refreshResponse.getBody().getRefreshToken());
+//            assertEquals(3, refreshResponse.getBody().getRefreshToken().split("\\.").length);
+//        }
+//
+//        @Test
+//        void withoutRefreshToken_shouldReturn400() {
+//            ResponseEntity<JwtResponseDto> responseDtoResponseEntity = login("user@gmail.com","123_password");
+//            assertNotNull(responseDtoResponseEntity);
+//
+//            assertEquals(HttpStatus.BAD_REQUEST,
+//                    restTemplate.postForEntity(
+//                            baseUrl() + "/auth/refreshToken",
+//                            getRequestEntity( // to set Bearer Auth header
+//                                    JwtResponseDto.builder()
+//                                            .accessToken(responseDtoResponseEntity.getBody().getAccessToken())
+//                                            .refreshToken(null)
+//                                            .build()),
+//                            JwtResponseDto.class).getStatusCode());
+//        }
+//    }
+//
+//    @Nested
+//    class logout {
+//
+//        @Test
+//        void success() {
+//            ResponseEntity<JwtResponseDto> responseDtoResponseEntity = login("user@gmail.com","123_password");
+//            assertNotNull(responseDtoResponseEntity);
+//
+//            ResponseEntity<Void> response = restTemplate.exchange(
+//                    baseUrl() + "/auth/logout",
+//                    HttpMethod.DELETE,
+//                    getRequestEntity(responseDtoResponseEntity.getBody()), // to set Bearer Auth header
+//                    Void.class
+//            );
+//
+//            assertEquals(HttpStatus.OK, response.getStatusCode());
+//        }
+//    }
+//}

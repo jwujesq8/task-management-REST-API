@@ -31,6 +31,7 @@ import java.util.*;
 public class AuthServiceImpl {
 
     private final TokenService tokenService;
+    @Getter
     private final RefreshTokenStore tokenStore;
     private final UserValidator userValidator;
     private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
